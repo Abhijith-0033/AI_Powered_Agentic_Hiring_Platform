@@ -1,0 +1,151 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom base styles */
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-dark-900 text-dark-100 font-sans antialiased;
+    min-height: 100vh;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-dark-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-dark-600 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-dark-500;
+  }
+}
+
+/* Custom component styles */
+@layer components {
+  /* Glass effect card */
+  .glass-card {
+    @apply bg-dark-800/50 backdrop-blur-md border border-dark-700/50 rounded-xl;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-400 via-secondary-400 to-primary-400 bg-clip-text text-transparent;
+  }
+
+  /* Gradient background */
+  .gradient-bg {
+    @apply bg-gradient-to-br from-primary-600 via-secondary-600 to-primary-700;
+  }
+
+  /* Subtle gradient background */
+  .gradient-bg-subtle {
+    @apply bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900;
+  }
+
+  /* Hover scale effect */
+  .hover-scale {
+    @apply transition-transform duration-300 hover:scale-[1.02];
+  }
+
+  /* Hover glow effect */
+  .hover-glow {
+    @apply transition-shadow duration-300 hover:shadow-lg hover:shadow-primary-500/20;
+  }
+
+  /* Input focus ring */
+  .input-focus {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500;
+  }
+
+  /* Status badge styles */
+  .badge-success {
+    @apply bg-emerald-500/20 text-emerald-400 border border-emerald-500/30;
+  }
+
+  .badge-warning {
+    @apply bg-amber-500/20 text-amber-400 border border-amber-500/30;
+  }
+
+  .badge-error {
+    @apply bg-rose-500/20 text-rose-400 border border-rose-500/30;
+  }
+
+  .badge-info {
+    @apply bg-sky-500/20 text-sky-400 border border-sky-500/30;
+  }
+
+  /* Button styles */
+  .btn-primary {
+    @apply bg-gradient-to-r from-primary-500 to-secondary-500 text-white font-medium 
+           px-6 py-2.5 rounded-lg transition-all duration-300 
+           hover:from-primary-400 hover:to-secondary-400 
+           hover:shadow-lg hover:shadow-primary-500/30
+           active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-dark-700 text-dark-100 font-medium px-6 py-2.5 rounded-lg 
+           border border-dark-600 transition-all duration-300 
+           hover:bg-dark-600 hover:border-dark-500
+           active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-outline {
+    @apply bg-transparent text-primary-400 font-medium px-6 py-2.5 rounded-lg 
+           border border-primary-500/50 transition-all duration-300 
+           hover:bg-primary-500/10 hover:border-primary-400
+           active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent text-dark-300 font-medium px-6 py-2.5 rounded-lg 
+           transition-all duration-300 hover:bg-dark-700 hover:text-dark-100
+           active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+}
+
+/* Custom utility classes */
+@layer utilities {
+  /* Animation delays */
+  .animation-delay-100 {
+    animation-delay: 100ms;
+  }
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+  .animation-delay-500 {
+    animation-delay: 500ms;
+  }
+
+  /* Text shadow for headings */
+  .text-shadow {
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Gradient border */
+  .gradient-border {
+    position: relative;
+    background: linear-gradient(theme('colors.dark.800'), theme('colors.dark.800')) padding-box,
+                linear-gradient(135deg, theme('colors.primary.500'), theme('colors.secondary.500')) border-box;
+    border: 1px solid transparent;
+  }
+}
