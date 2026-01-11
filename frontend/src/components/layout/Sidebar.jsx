@@ -15,7 +15,8 @@ import {
     Users
 } from 'lucide-react';
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 /**
  * Sidebar component for dashboard navigation
@@ -26,7 +27,14 @@ import { Link, useLocation } from 'react-router-dom';
  */
 const Sidebar = ({ type = 'user' }) => {
     const location = useLocation();
+    const navigate = useNavigate();
+    const { logout, user } = useAuth();
     const [isCollapsed, setIsCollapsed] = useState(false);
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login', { replace: true });
+    };
 
     // User navigation items
     const userNavItems = [
@@ -138,11 +146,14 @@ const Sidebar = ({ type = 'user' }) => {
                     {!isCollapsed && <span className="font-medium text-sm">Settings</span>}
                 </button>
 
-                <button className={`
+                <button
+                    onClick={handleLogout}
+                    className={`
           flex items-center gap-3 px-3 py-2.5 rounded-lg w-full
           text-dark-400 hover:text-rose-400 hover:bg-rose-500/10
           transition-colors
-        `}>
+        `}
+                >
                     <LogOut className="w-5 h-5 flex-shrink-0" />
                     {!isCollapsed && <span className="font-medium text-sm">Logout</span>}
                 </button>

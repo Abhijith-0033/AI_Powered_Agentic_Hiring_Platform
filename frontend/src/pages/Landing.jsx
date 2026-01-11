@@ -106,12 +106,12 @@ const Landing = () => {
 
                         {/* CTA Buttons */}
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up animation-delay-200">
-                            <Link to="/user/dashboard">
+                            <Link to="/login">
                                 <Button size="lg" rightIcon={<ArrowRight className="w-5 h-5" />}>
                                     Find Jobs
                                 </Button>
                             </Link>
-                            <Link to="/provider/dashboard">
+                            <Link to="/login">
                                 <Button variant="outline" size="lg">
                                     Start Hiring
                                 </Button>
@@ -173,7 +173,7 @@ const Landing = () => {
                     </div>
 
                     <div className="text-center mt-12">
-                        <Link to="/user/dashboard">
+                        <Link to="/login">
                             <Button variant="primary" rightIcon={<ArrowRight className="w-4 h-4" />}>
                                 Explore Job Seeker Dashboard
                             </Button>
@@ -218,7 +218,7 @@ const Landing = () => {
                     </div>
 
                     <div className="text-center mt-12">
-                        <Link to="/provider/dashboard">
+                        <Link to="/login">
                             <Button variant="primary" rightIcon={<ArrowRight className="w-4 h-4" />}>
                                 Explore Recruiter Dashboard
                             </Button>
@@ -300,12 +300,12 @@ const Landing = () => {
                                 Join thousands of companies and job seekers who are already using HireAI to find their perfect match.
                             </p>
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                                <Link to="/user/dashboard">
+                                <Link to="/login">
                                     <Button variant="secondary" size="lg">
                                         Get Started Free
                                     </Button>
                                 </Link>
-                                <Link to="/provider/dashboard">
+                                <Link to="/login">
                                     <Button variant="ghost" size="lg" className="text-white hover:bg-white/10">
                                         Request Demo
                                     </Button>
