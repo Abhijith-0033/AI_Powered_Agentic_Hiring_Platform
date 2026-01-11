@@ -2,6 +2,11 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
+import jobsRoutes from './routes/jobs.js';
+import candidatesRoutes from './routes/candidates.js';
+import applicationsRoutes from './routes/applications.js';
+import dashboardRoutes from './routes/dashboard.js';
+import aiRoutes from './routes/ai.js';
 import pool from './config/db.js'; // Initialize PostgreSQL connection
 
 // Load environment variables
@@ -45,6 +50,11 @@ app.get('/health', (req, res) => {
 
 // Authentication routes
 app.use('/api/auth', authRoutes);
+app.use('/api/jobs', jobsRoutes);
+app.use('/api/candidates', candidatesRoutes);
+app.use('/api/applications', applicationsRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/ai', aiRoutes);
 
 // 404 handler
 app.use((req, res) => {

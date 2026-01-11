@@ -1,16 +1,18 @@
 import { MapPin, Search, SlidersHorizontal, Wifi, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DashboardLayout } from '../../components/layout';
 import { JobCard } from '../../components/shared';
 import { Badge, Button, Input, Select, Toggle } from '../../components/ui';
 import Card, { CardContent } from '../../components/ui/Card';
-import { jobs } from '../../mockData/jobs';
+import { getJobs } from '../../api/jobs';
 
 /**
  * Job Discovery page
  * Search and filter job listings
  */
 const JobDiscovery = () => {
+    const [jobs, setJobs] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [filters, setFilters] = useState({
         role: '',
@@ -19,6 +21,26 @@ const JobDiscovery = () => {
         remote: false,
     });
     const [showFilters, setShowFilters] = useState(false);
+
+    useEffect(() => {
+        const fetchJobs = async () => {
+            setLoading(true);
+            try {
+                // Fetch all open jobs first
+                // In a real app, we'd pass filters to the API
+                const result = await getJobs({ status: 'Open' });
+                if (result.success) {
+                    setJobs(result.data);
+                }
+            } catch (error) {
+                console.error('Error fetching jobs:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchJobs();
+    }, []);
 
     const roleOptions = [
         { value: '', label: 'All Roles' },
@@ -32,10 +54,10 @@ const JobDiscovery = () => {
 
     const experienceOptions = [
         { value: '', label: 'Any Experience' },
-        { value: '0-2', label: '0-2 years' },
-        { value: '3-5', label: '3-5 years' },
-        { value: '5+', label: '5+ years' },
-        { value: '10+', label: '10+ years' },
+        { value: 'entry', label: 'Entry Level' },
+        { value: 'mid', label: 'Mid Level' },
+        { value: 'senior', label: 'Senior Level' },
+        { value: 'lead', label: 'Lead/Staff' },
     ];
 
     const locationOptions = [
@@ -58,14 +80,37 @@ const JobDiscovery = () => {
         });
     };
 
-    // Filter jobs based on search and filters (UI only - mock filtering)
+    // Client-side filtering
     const filteredJobs = jobs.filter(job => {
-        if (searchQuery && !job.title.toLowerCase().includes(searchQuery.toLowerCase())) {
+        // Search Query
+        if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            const matchesTitle = job.job_title?.toLowerCase().includes(query);
+            const matchesDesc = job.job_description?.toLowerCase().includes(query);
+            const matchesSkills = job.required_skills?.toLowerCase().includes(query);
+
+            if (!matchesTitle && !matchesDesc && !matchesSkills) {
+                return false;
+            }
+        }
+
+        // Filters
+        if (filters.role && !job.job_title.toLowerCase().includes(filters.role)) {
             return false;
         }
-        if (filters.remote && !job.remote) {
+        if (filters.experience && !job.experience_level.toLowerCase().includes(filters.experience)) {
             return false;
         }
+        if (filters.location && !job.location?.toLowerCase().includes(filters.location)) {
+            return false;
+        }
+        if (filters.remote && job.location?.toLowerCase() !== 'remote') { // Assuming remote is stored in location or job_type
+            // If we had a specific boolean for remote, we'd check that. 
+            // For now, let's assume remote might be in location.
+            const isRemote = job.location?.toLowerCase().includes('remote') || job.job_type?.toLowerCase().includes('remote');
+            if (!isRemote) return false;
+        }
+
         return true;
     });
 
@@ -78,7 +123,7 @@ const JobDiscovery = () => {
                         Discover Your Next Opportunity
                     </h2>
                     <p className="text-dark-400">
-                        {filteredJobs.length} jobs matching your profile
+                        {loading ? 'Loading jobs...' : `${filteredJobs.length} jobs available`}
                     </p>
                 </div>
 
@@ -190,11 +235,13 @@ const JobDiscovery = () => {
                 )}
 
                 {/* Job Results */}
-                {filteredJobs.length > 0 ? (
+                {loading ? (
+                    <div className="text-center py-12 text-dark-400">Loading jobs...</div>
+                ) : filteredJobs.length > 0 ? (
                     <div className="grid gap-6">
                         {filteredJobs.map((job, index) => (
                             <div
-                                key={job.id}
+                                key={job.job_id}
                                 className="animate-fade-in"
                                 style={{ animationDelay: `${index * 50}ms` }}
                             >

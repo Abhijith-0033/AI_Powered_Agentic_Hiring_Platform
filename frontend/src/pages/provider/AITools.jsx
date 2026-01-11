@@ -1,3 +1,4 @@
+import React from 'react';
 import {
     BarChart3,
     CheckCircle,
@@ -74,39 +75,52 @@ const AITools = () => {
         },
     ];
 
-    const recentActions = [
-        {
-            id: 1,
-            action: 'Auto-Shortlisted Candidates',
-            target: 'Senior Frontend Developer',
-            count: 8,
-            timestamp: '2 hours ago',
-            status: 'completed',
-        },
-        {
-            id: 2,
-            action: 'Ranked Applicants',
-            target: 'Product Manager',
-            count: 12,
-            timestamp: '5 hours ago',
-            status: 'completed',
-        },
-        {
-            id: 3,
-            action: 'Generated Job Description',
-            target: 'DevOps Engineer',
-            timestamp: 'Yesterday',
-            status: 'completed',
-        },
-        {
-            id: 4,
-            action: 'Fraud Detection Scan',
-            target: 'All Applicants',
-            count: 45,
-            timestamp: 'Yesterday',
-            status: 'completed',
-        },
-    ];
+
+
+    const [jobs, setJobs] = React.useState([]);
+    const [selectedJob, setSelectedJob] = React.useState('');
+    const [loading, setLoading] = React.useState(false);
+    const [results, setResults] = React.useState(null);
+
+    React.useEffect(() => {
+        const fetchJobs = async () => {
+            try {
+                const response = await fetch('http://localhost:3000/api/jobs');
+                const data = await response.json();
+                if (data.success) {
+                    setJobs(data.data.map(job => ({ value: job.job_id, label: job.job_title })));
+                }
+            } catch (error) {
+                console.error('Failed to fetch jobs:', error);
+            }
+        };
+        fetchJobs();
+    }, []);
+
+    const handleRunTool = async (toolId) => {
+        if (toolId === 'auto-shortlist') {
+            if (!selectedJob) return;
+            setLoading(true);
+            try {
+                const response = await fetch('http://localhost:3000/api/ai/auto-shortlist', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ jobId: selectedJob })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    setResults(data.data);
+                    // For now, show a simple alert or update UI state
+                    console.log('Shortlist results:', data.data);
+                    alert(`Check console for results! Found ${data.data.length} matches.`);
+                }
+            } catch (error) {
+                console.error('Error running shortlist:', error);
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
 
     return (
         <DashboardLayout type="provider" title="AI Tools">
@@ -125,6 +139,8 @@ const AITools = () => {
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                     {aiTools.map((tool, index) => {
                         const Icon = tool.icon;
+                        const isAutoShortlist = tool.id === 'auto-shortlist';
+
                         return (
                             <Card
                                 key={tool.id}
@@ -164,8 +180,28 @@ const AITools = () => {
                                         <p className="text-xs text-dark-500 mb-4">{tool.stats}</p>
                                     )}
 
-                                    <Button size="sm" fullWidth>
-                                        Run Tool
+                                    {isAutoShortlist && (
+                                        <div className="mb-4">
+                                            <select
+                                                className="w-full bg-dark-800 border border-dark-700 rounded-md p-2 text-sm text-dark-200"
+                                                value={selectedJob}
+                                                onChange={(e) => setSelectedJob(e.target.value)}
+                                            >
+                                                <option value="">Select a Job to Shortlist</option>
+                                                {jobs.map(job => (
+                                                    <option key={job.value} value={job.value}>{job.label}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    )}
+
+                                    <Button
+                                        size="sm"
+                                        fullWidth
+                                        onClick={() => handleRunTool(tool.id)}
+                                        disabled={isAutoShortlist && !selectedJob || loading}
+                                    >
+                                        {loading && isAutoShortlist ? 'Processing...' : 'Run Tool'}
                                     </Button>
                                 </CardContent>
                             </Card>
@@ -173,44 +209,34 @@ const AITools = () => {
                     })}
                 </div>
 
-                {/* Recent AI Actions */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Recent AI Actions</CardTitle>
-                        <CardDescription>
-                            Track the history of AI-assisted actions
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            {recentActions.map((action) => (
-                                <div
-                                    key={action.id}
-                                    className="flex items-center justify-between p-4 bg-dark-700/30 rounded-lg border border-dark-700"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-emerald-500/20 rounded-lg">
-                                            <CheckCircle className="w-4 h-4 text-emerald-400" />
-                                        </div>
+                {/* Results Section (Temporary) */}
+                {results && (
+                    <Card className="mb-8">
+                        <CardHeader>
+                            <CardTitle>Shortlist Results</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                {results.map((result, i) => (
+                                    <div key={i} className="flex justify-between items-center p-3 bg-dark-800 rounded">
                                         <div>
-                                            <div className="flex items-center gap-2">
-                                                <p className="font-medium text-dark-100">{action.action}</p>
-                                                {action.count && (
-                                                    <Badge variant="primary" size="sm">{action.count} items</Badge>
-                                                )}
-                                            </div>
-                                            <p className="text-sm text-dark-400">{action.target}</p>
+                                            <p className="font-bold text-dark-100">{result.name}</p>
+                                            <p className="text-sm text-dark-400">{result.email}</p>
+                                            <p className="text-xs text-dark-500 mt-1">{result.analysis_data?.summary}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <Badge variant={result.score > 70 ? 'success' : 'warning'}>
+                                                Match: {result.score}%
+                                            </Badge>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-2 text-sm text-dark-500">
-                                        <Clock className="w-4 h-4" />
-                                        {action.timestamp}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+
             </div>
         </DashboardLayout>
     );

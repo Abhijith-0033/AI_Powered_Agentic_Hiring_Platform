@@ -1,24 +1,52 @@
 import { Calendar, ClipboardList, ExternalLink, Filter } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DashboardLayout } from '../../components/layout';
 import { Badge, Button, Card, CardContent, Select, Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableRow } from '../../components/ui';
-import { applications, getApplicationStats, statusConfig } from '../../mockData/applications';
+import { getUserApplications } from '../../api/applications';
 
 /**
  * Application Tracker page
  * Track job applications with status and history
  */
 const ApplicationTracker = () => {
+    const [applications, setApplications] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('all');
-    const stats = getApplicationStats();
+
+    useEffect(() => {
+        const fetchApplications = async () => {
+            try {
+                const result = await getUserApplications();
+                if (result.success) {
+                    setApplications(result.data);
+                }
+            } catch (error) {
+                console.error('Error fetching applications:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchApplications();
+    }, []);
+
+    // Calculate stats on the fly
+    const stats = {
+        total: applications.length,
+        applied: applications.filter(a => a.status === 'Applied').length,
+        reviewing: applications.filter(a => a.status === 'Shortlisted').length, // backend sends 'Shortlisted' maybe? Map accordingly.
+        interview: applications.filter(a => a.status === 'Interview').length,
+        offer: applications.filter(a => a.status === 'Offer').length,
+        rejected: applications.filter(a => a.status === 'Rejected').length
+    };
 
     const statusOptions = [
         { value: 'all', label: 'All Applications' },
-        { value: 'applied', label: 'Applied' },
-        { value: 'reviewing', label: 'Under Review' },
-        { value: 'interview', label: 'Interview' },
-        { value: 'offer', label: 'Offer' },
-        { value: 'rejected', label: 'Rejected' },
+        { value: 'Applied', label: 'Applied' },
+        { value: 'Shortlisted', label: 'Under Review' },
+        { value: 'Interview', label: 'Interview' },
+        { value: 'Offer', label: 'Offer' },
+        { value: 'Rejected', label: 'Rejected' },
     ];
 
     const filteredApplications = statusFilter === 'all'
@@ -26,8 +54,25 @@ const ApplicationTracker = () => {
         : applications.filter(app => app.status === statusFilter);
 
     const getBadgeVariant = (status) => {
-        return statusConfig[status]?.color || 'default';
+        switch (status) {
+            case 'Applied': return 'primary';
+            case 'Shortlisted': return 'info';
+            case 'Interview': return 'warning';
+            case 'Offer': return 'success';
+            case 'Rejected': return 'error';
+            default: return 'default';
+        }
     };
+
+    if (loading) {
+        return (
+            <DashboardLayout type="user" title="Application Tracker">
+                <div className="flex items-center justify-center h-64">
+                    <div className="text-dark-400">Loading applications...</div>
+                </div>
+            </DashboardLayout>
+        );
+    }
 
     return (
         <DashboardLayout type="user" title="Application Tracker">
@@ -128,7 +173,7 @@ const ApplicationTracker = () => {
                                         </TableCell>
                                         <TableCell>
                                             <Badge variant={getBadgeVariant(app.status)} dot>
-                                                {statusConfig[app.status]?.label || app.status}
+                                                {app.status}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>

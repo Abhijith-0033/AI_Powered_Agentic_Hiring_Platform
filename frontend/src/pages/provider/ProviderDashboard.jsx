@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import {
     ArrowRight,
     Briefcase,
@@ -11,14 +12,49 @@ import { DashboardLayout } from '../../components/layout';
 import { MetricCard } from '../../components/shared';
 import { Badge, Button } from '../../components/ui';
 import Card, { CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
-import { applicants } from '../../mockData/applicants';
-import { postedJobs, providerDashboardStats } from '../../mockData/companies';
 
 /**
  * Provider Dashboard page
  * Shows hiring metrics, posted jobs, and recent applicants
  */
 const ProviderDashboard = () => {
+    const [jobs, setJobs] = useState([]);
+    const [applicants, setApplicants] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [jobsRes, appsRes] = await Promise.all([
+                    fetch('http://localhost:3000/api/jobs'),
+                    fetch('http://localhost:3000/api/applications')
+                ]);
+
+                const jobsData = await jobsRes.json();
+                const appsData = await appsRes.json();
+
+                if (jobsData.success) setJobs(jobsData.data);
+                if (appsData.success) setApplicants(appsData.data);
+
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
+
+    // Calculate dynamic stats
+    const providerDashboardStats = {
+        jobsPosted: jobs.length,
+        totalApplicants: applicants.length,
+        shortlisted: applicants.filter(a => a.status === 'shortlisted').length,
+        pendingReview: applicants.filter(a => a.status === 'new' || a.status === 'reviewing').length,
+        interviewed: applicants.filter(a => a.status === 'interview').length,
+        hired: applicants.filter(a => a.status === 'hired').length
+    };
+
     return (
         <DashboardLayout type="provider" title="Dashboard">
             {/* Welcome Message */}
@@ -127,27 +163,27 @@ const ProviderDashboard = () => {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
-                            {postedJobs.slice(0, 4).map((job) => (
+                            {jobs.slice(0, 4).map((job) => (
                                 <div
                                     key={job.id}
                                     className="flex items-center justify-between p-4 bg-dark-700/30 rounded-lg border border-dark-700 hover:border-dark-600 transition-colors"
                                 >
                                     <div>
                                         <div className="flex items-center gap-2 mb-1">
-                                            <h4 className="font-medium text-dark-100">{job.title}</h4>
+                                            <h4 className="font-medium text-dark-100">{job.job_title}</h4>
                                             <Badge
-                                                variant={job.status === 'active' ? 'success' : 'warning'}
+                                                variant={job.status === 'Open' ? 'success' : 'warning'}
                                                 size="sm"
                                             >
                                                 {job.status}
                                             </Badge>
                                         </div>
                                         <p className="text-sm text-dark-400">
-                                            {job.department} • {job.location}
+                                            {job.experience_level} • {job.location || 'Remote'}
                                         </p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-lg font-semibold text-primary-400">{job.applicants}</p>
+                                        <p className="text-lg font-semibold text-primary-400">0</p>
                                         <p className="text-xs text-dark-500">applicants</p>
                                     </div>
                                 </div>

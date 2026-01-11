@@ -1,19 +1,38 @@
 import { Search, Users } from 'lucide-react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { DashboardLayout } from '../../components/layout';
 import { ApplicantCard } from '../../components/shared';
 import { Input, Select } from '../../components/ui';
 import Card, { CardContent } from '../../components/ui/Card';
-import { applicants } from '../../mockData/applicants';
-
 /**
  * Applicant Management page
  * View and manage job applicants
  */
 const ApplicantManagement = () => {
+    const [applicants, setApplicants] = useState([]);
+    const [loading, setLoading] = useState(true);
+
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [jobFilter, setJobFilter] = useState('all');
+
+    // Fetch applicants from API
+    React.useEffect(() => {
+        const fetchApplicants = async () => {
+            try {
+                const response = await fetch('http://localhost:3000/api/applications');
+                const data = await response.json();
+                if (data.success) {
+                    setApplicants(data.data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch applicants:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchApplicants();
+    }, []);
 
     const statusOptions = [
         { value: 'all', label: 'All Statuses' },
@@ -24,12 +43,11 @@ const ApplicantManagement = () => {
         { value: 'rejected', label: 'Rejected' },
     ];
 
+    // Get unique job titles for filter
+    const uniqueJobs = Array.from(new Set(applicants.map(a => a.appliedFor || 'General Pool')));
     const jobOptions = [
         { value: 'all', label: 'All Jobs' },
-        { value: 'Senior Frontend Developer', label: 'Senior Frontend Developer' },
-        { value: 'Product Manager', label: 'Product Manager' },
-        { value: 'DevOps Engineer', label: 'DevOps Engineer' },
-        { value: 'UX Designer', label: 'UX Designer' },
+        ...uniqueJobs.map(job => ({ value: job, label: job }))
     ];
 
     const filteredApplicants = applicants.filter(applicant => {
@@ -39,7 +57,7 @@ const ApplicantManagement = () => {
         if (statusFilter !== 'all' && applicant.status !== statusFilter) {
             return false;
         }
-        if (jobFilter !== 'all' && applicant.appliedFor !== jobFilter) {
+        if (jobFilter !== 'all' && (applicant.appliedFor || 'General Pool') !== jobFilter) {
             return false;
         }
         return true;
@@ -52,6 +70,16 @@ const ApplicantManagement = () => {
         interview: applicants.filter(a => a.status === 'interview').length,
         rejected: applicants.filter(a => a.status === 'rejected').length,
     };
+
+    if (loading) {
+        return (
+            <DashboardLayout type="provider" title="Applicants">
+                <div className="flex justify-center items-center h-64">
+                    <p className="text-dark-400">Loading applicants...</p>
+                </div>
+            </DashboardLayout>
+        );
+    }
 
     return (
         <DashboardLayout type="provider" title="Applicants">

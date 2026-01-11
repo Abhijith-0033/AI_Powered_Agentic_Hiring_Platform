@@ -23,7 +23,7 @@ const JobCard = ({
         location,
         type,
         salary,
-        skills,
+        skills = [],
         remote,
         posted,
         matchScore,

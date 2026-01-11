@@ -3,14 +3,28 @@ import { useState } from 'react';
 import { DashboardLayout } from '../../components/layout';
 import { Badge, Button, Input, Select, Textarea } from '../../components/ui';
 import Card, { CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card';
-import { currentCompany } from '../../mockData/companies';
+// Default empty company state since backend profile API doesn't exist yet
+const defaultCompany = {
+    name: "TechCorp Inc.",
+    logo: "https://ui-avatars.com/api/?name=TC&background=0D8ABC&color=fff",
+    website: "https://techcorp.com",
+    industry: "Technology",
+    size: "1000+",
+    location: "San Francisco, CA",
+    founded: 2010,
+    description: "Leading the way in AI innovation.",
+    culture: ["Innovation", "Collaboration", "Diversity"],
+    benefits: ["Remote Work", "Health Insurance", "Stock Options"],
+    openPositions: 0,
+    totalEmployees: 1200
+};
 
 /**
  * Company Profile page
  * Manage company information and branding
  */
 const CompanyProfile = () => {
-    const [company, setCompany] = useState(currentCompany);
+    const [company, setCompany] = useState(defaultCompany);
 
     const sizeOptions = [
         { value: '1-10', label: '1-10 employees' },

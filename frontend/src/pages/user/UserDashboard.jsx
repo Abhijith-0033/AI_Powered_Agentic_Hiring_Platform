@@ -6,18 +6,58 @@ import {
     Send,
     Target
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { DashboardLayout } from '../../components/layout';
 import { JobCard, MetricCard } from '../../components/shared';
-import Badge from '../../components/ui/Badge';
 import Card, { CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
-import { jobs } from '../../mockData/jobs';
-import { dashboardStats, userActivity } from '../../mockData/users';
+import Badge from '../../components/ui/Badge';
+import { getDashboardStats, getUserActivity } from '../../api/users';
+import { getJobs } from '../../api/jobs';
 
 /**
  * User Dashboard page
  * Shows overview metrics, activity timeline, and recommended jobs
  */
 const UserDashboard = () => {
+    const [stats, setStats] = useState({
+        applicationsSent: 0,
+        matchesFound: 0,
+        profileViews: 0,
+        interviewsScheduled: 0,
+        profileCompletion: 0
+    });
+    const [activity, setActivity] = useState([]);
+    const [jobs, setJobs] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [statsData, activityData, jobsData] = await Promise.all([
+                    getDashboardStats(),
+                    getUserActivity(),
+                    getJobs({ status: 'Open' }) // Fetch some jobs for recommendation
+                ]);
+
+                if (statsData.success) {
+                    setStats(statsData.data);
+                }
+                if (activityData.success && Array.isArray(activityData.data)) {
+                    setActivity(activityData.data);
+                }
+                if (jobsData.success && Array.isArray(jobsData.data)) {
+                    setJobs(jobsData.data);
+                }
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
     const getActivityIcon = (type) => {
         switch (type) {
             case 'application': return Send;
@@ -50,12 +90,22 @@ const UserDashboard = () => {
         return date.toLocaleDateString();
     };
 
+    if (loading) {
+        return (
+            <DashboardLayout type="user" title="Dashboard">
+                <div className="flex items-center justify-center h-64">
+                    <div className="text-dark-400">Loading dashboard...</div>
+                </div>
+            </DashboardLayout>
+        );
+    }
+
     return (
         <DashboardLayout type="user" title="Dashboard">
             {/* Welcome Message */}
             <div className="mb-8">
                 <h2 className="text-2xl font-bold text-dark-100 mb-2">
-                    Welcome back, Alex! 👋
+                    Welcome back! 👋
                 </h2>
                 <p className="text-dark-400">
                     Here's what's happening with your job search today.
@@ -66,33 +116,33 @@ const UserDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <MetricCard
                     title="Applications Sent"
-                    value={dashboardStats.applicationsSent}
-                    change="+3"
-                    trend="up"
+                    value={stats.applicationsSent}
+                    change="0"
+                    trend="neutral"
                     icon={Send}
                     color="primary"
                 />
                 <MetricCard
                     title="Matches Found"
-                    value={dashboardStats.matchesFound}
-                    change="+12"
-                    trend="up"
+                    value={stats.matchesFound}
+                    change="0"
+                    trend="neutral"
                     icon={Target}
                     color="success"
                 />
                 <MetricCard
                     title="Profile Views"
-                    value={dashboardStats.profileViews}
-                    change="+24"
-                    trend="up"
+                    value={stats.profileViews}
+                    change="0"
+                    trend="neutral"
                     icon={Eye}
                     color="secondary"
                 />
                 <MetricCard
                     title="Interviews"
-                    value={dashboardStats.interviewsScheduled}
-                    change="+1"
-                    trend="up"
+                    value={stats.interviewsScheduled}
+                    change="0"
+                    trend="neutral"
                     icon={Calendar}
                     color="warning"
                 />
@@ -107,13 +157,13 @@ const UserDashboard = () => {
                             <p className="text-sm text-dark-400">Complete your profile to get better matches</p>
                         </div>
                         <span className="text-2xl font-bold text-primary-400">
-                            {dashboardStats.profileCompletion}%
+                            {stats.profileCompletion}%
                         </span>
                     </div>
                     <div className="w-full h-3 bg-dark-700 rounded-full overflow-hidden">
                         <div
                             className="h-full rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 transition-all duration-500"
-                            style={{ width: `${dashboardStats.profileCompletion}%` }}
+                            style={{ width: `${stats.profileCompletion}%` }}
                         />
                     </div>
                 </CardContent>
@@ -126,38 +176,44 @@ const UserDashboard = () => {
                         <CardTitle>Recent Activity</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="space-y-4">
-                            {userActivity.slice(0, 5).map((activity, index) => {
-                                const Icon = getActivityIcon(activity.type);
-                                const color = getActivityColor(activity.type);
+                        {activity.length > 0 ? (
+                            <div className="space-y-4">
+                                {activity.map((item, index) => {
+                                    const Icon = getActivityIcon(item.type);
+                                    const color = getActivityColor(item.type);
 
-                                return (
-                                    <div
-                                        key={activity.id}
-                                        className="flex gap-3 animate-slide-in-right"
-                                        style={{ animationDelay: `${index * 50}ms` }}
-                                    >
-                                        <div className={`
-                      p-2 rounded-lg flex-shrink-0
-                      ${color === 'primary' ? 'bg-primary-500/20 text-primary-400' :
-                                                color === 'success' ? 'bg-emerald-500/20 text-emerald-400' :
-                                                    color === 'warning' ? 'bg-amber-500/20 text-amber-400' :
-                                                        'bg-sky-500/20 text-sky-400'}
-                    `}>
-                                            <Icon className="w-4 h-4" />
+                                    return (
+                                        <div
+                                            key={item.id}
+                                            className="flex gap-3 animate-slide-in-right"
+                                            style={{ animationDelay: `${index * 50}ms` }}
+                                        >
+                                            <div className={`
+                                                p-2 rounded-lg flex-shrink-0
+                                                ${color === 'primary' ? 'bg-primary-500/20 text-primary-400' :
+                                                    color === 'success' ? 'bg-emerald-500/20 text-emerald-400' :
+                                                        color === 'warning' ? 'bg-amber-500/20 text-amber-400' :
+                                                            'bg-sky-500/20 text-sky-400'}
+                                                `}>
+                                                <Icon className="w-4 h-4" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm text-dark-200 truncate">{item.title}</p>
+                                                <p className="text-xs text-dark-500">{item.company}</p>
+                                                <p className="text-xs text-dark-600 mt-1 flex items-center gap-1">
+                                                    <Clock className="w-3 h-3" />
+                                                    {formatTime(item.timestamp)}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm text-dark-200 truncate">{activity.title}</p>
-                                            <p className="text-xs text-dark-500">{activity.company}</p>
-                                            <p className="text-xs text-dark-600 mt-1 flex items-center gap-1">
-                                                <Clock className="w-3 h-3" />
-                                                {formatTime(activity.timestamp)}
-                                            </p>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div className="text-center py-8 text-dark-400 text-sm">
+                                No recent activity
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
 
@@ -166,13 +222,13 @@ const UserDashboard = () => {
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-semibold text-dark-100">Recommended Jobs</h3>
                         <Badge variant="primary" dot>
-                            {jobs.length} new matches
+                            {jobs.length} Available
                         </Badge>
                     </div>
                     <div className="space-y-4">
                         {jobs.slice(0, 3).map((job, index) => (
                             <div
-                                key={job.id}
+                                key={job.job_id}
                                 className="animate-slide-up"
                                 style={{ animationDelay: `${index * 100}ms` }}
                             >
