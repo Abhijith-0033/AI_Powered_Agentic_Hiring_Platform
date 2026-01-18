@@ -15,20 +15,21 @@ const { Pool } = pg;
  * - Parameterized queries to prevent SQL injection
  */
 
-// Validate DATABASE_URL exists
-if (!process.env.DATABASE_URL) {
+// Validate DATABASE_URL exists (Support both NEON_DATABASE_URL and DATABASE_URL)
+const connectionString = process.env.NEON_DATABASE_URL || process.env.DATABASE_URL;
+
+if (!connectionString) {
     throw new Error(
-        'DATABASE_URL is not defined in environment variables. ' +
-        'Please add it to your .env file in the format: ' +
-        'postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-REGION.pooler.supabase.com:5432/postgres'
+        'Database connection string is not defined. ' +
+        'Please set NEON_DATABASE_URL or DATABASE_URL in your .env file.'
     );
 }
 
 // Create connection pool
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString,
     ssl: {
-        rejectUnauthorized: false // Required for Supabase hosted PostgreSQL
+        rejectUnauthorized: false // Required for Neon / Supabase hosted PostgreSQL
     },
     max: 20, // Maximum pool size
     idleTimeoutMillis: 30000, // Close idle clients after 30 seconds

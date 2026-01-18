@@ -18,7 +18,7 @@ router.post('/auto-shortlist', async (req, res) => {
 
     try {
         // 1. Fetch Job Details
-        const jobResult = await pool.query('SELECT * FROM jobs WHERE id = $1', [jobId]);
+        const jobResult = await pool.query('SELECT * FROM job_postings WHERE job_id = $1', [jobId]);
         if (jobResult.rows.length === 0) {
             return res.status(404).json({ success: false, message: 'Job not found' });
         }
