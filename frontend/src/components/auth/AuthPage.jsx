@@ -52,7 +52,7 @@ const AuthPage = () => {
                     formData.intent
                 );
             } else {
-                userData = await login(formData.email, formData.password, formData.intent);
+                userData = await login(formData.email, formData.password);
             }
 
             // Redirect based on role
@@ -160,65 +160,67 @@ const AuthPage = () => {
                             />
                         </div>
 
-                        {/* Intent Field (Always show for combined flow) */}
-                        <div>
-                            <label className="block text-sm font-medium text-dark-300 mb-3">
-                                What are you looking for?
-                            </label>
-                            <div className="space-y-3">
-                                {/* Job Seeker Option */}
-                                <label className={`
+                        {/* Intent Field (Register only) */}
+                        {mode === 'register' && (
+                            <div>
+                                <label className="block text-sm font-medium text-dark-300 mb-3">
+                                    What are you looking for?
+                                </label>
+                                <div className="space-y-3">
+                                    {/* Job Seeker Option */}
+                                    <label className={`
                                     flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all
                                     ${formData.intent === 'job'
-                                        ? 'border-primary-500 bg-primary-500/10'
-                                        : 'border-dark-700 hover:border-dark-600 bg-dark-800/30'}
+                                            ? 'border-primary-500 bg-primary-500/10'
+                                            : 'border-dark-700 hover:border-dark-600 bg-dark-800/30'}
                                 `}>
-                                    <input
-                                        type="radio"
-                                        name="intent"
-                                        value="job"
-                                        checked={formData.intent === 'job'}
-                                        onChange={handleChange}
-                                        className="w-4 h-4 text-primary-500 focus:ring-primary-500"
-                                    />
-                                    <div className="flex items-center gap-3 flex-1">
-                                        <div className="p-2 rounded-lg bg-primary-500/20">
-                                            <Briefcase className="w-5 h-5 text-primary-400" />
+                                        <input
+                                            type="radio"
+                                            name="intent"
+                                            value="job"
+                                            checked={formData.intent === 'job'}
+                                            onChange={handleChange}
+                                            className="w-4 h-4 text-primary-500 focus:ring-primary-500"
+                                        />
+                                        <div className="flex items-center gap-3 flex-1">
+                                            <div className="p-2 rounded-lg bg-primary-500/20">
+                                                <Briefcase className="w-5 h-5 text-primary-400" />
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-dark-100">Looking for a Job</p>
+                                                <p className="text-xs text-dark-400">Find your dream career</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="font-medium text-dark-100">Looking for a Job</p>
-                                            <p className="text-xs text-dark-400">Find your dream career</p>
-                                        </div>
-                                    </div>
-                                </label>
+                                    </label>
 
-                                {/* Recruiter Option */}
-                                <label className={`
+                                    {/* Recruiter Option */}
+                                    <label className={`
                                     flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all
                                     ${formData.intent === 'employee'
-                                        ? 'border-secondary-500 bg-secondary-500/10'
-                                        : 'border-dark-700 hover:border-dark-600 bg-dark-800/30'}
+                                            ? 'border-secondary-500 bg-secondary-500/10'
+                                            : 'border-dark-700 hover:border-dark-600 bg-dark-800/30'}
                                 `}>
-                                    <input
-                                        type="radio"
-                                        name="intent"
-                                        value="employee"
-                                        checked={formData.intent === 'employee'}
-                                        onChange={handleChange}
-                                        className="w-4 h-4 text-secondary-500 focus:ring-secondary-500"
-                                    />
-                                    <div className="flex items-center gap-3 flex-1">
-                                        <div className="p-2 rounded-lg bg-secondary-500/20">
-                                            <UsersIcon className="w-5 h-5 text-secondary-400" />
+                                        <input
+                                            type="radio"
+                                            name="intent"
+                                            value="employee"
+                                            checked={formData.intent === 'employee'}
+                                            onChange={handleChange}
+                                            className="w-4 h-4 text-secondary-500 focus:ring-secondary-500"
+                                        />
+                                        <div className="flex items-center gap-3 flex-1">
+                                            <div className="p-2 rounded-lg bg-secondary-500/20">
+                                                <UsersIcon className="w-5 h-5 text-secondary-400" />
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-dark-100">Looking for an Employee</p>
+                                                <p className="text-xs text-dark-400">Hire top talent</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="font-medium text-dark-100">Looking for an Employee</p>
-                                            <p className="text-xs text-dark-400">Hire top talent</p>
-                                        </div>
-                                    </div>
-                                </label>
+                                    </label>
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* Submit Button */}
                         <Button

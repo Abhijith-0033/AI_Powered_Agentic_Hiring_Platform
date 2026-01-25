@@ -81,16 +81,17 @@ router.post('/register', async (req, res) => {
 
         // Insert new user (parameterized query prevents SQL injection)
         const insertQuery = `
-            INSERT INTO credentials (email, password_hash, role, is_verified)
-            VALUES ($1, $2, $3, $4)
-            RETURNING id, email, role, is_verified, created_at
+            INSERT INTO credentials (email, password_hash, role, is_verified, name)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING id, email, role, is_verified, name, created_at
         `;
 
         const { rows: insertedRows } = await query(insertQuery, [
             normalizedEmail,
             passwordHash,
             role,
-            false
+            false,
+            name
         ]);
 
         const user = insertedRows[0];
@@ -131,26 +132,25 @@ router.post('/register', async (req, res) => {
 
 /**
  * @route   POST /api/auth/login
- * @desc    Combined login/registration - Creates account if new, verifies if existing
+ * @desc    Login existing user - Validates credentials and returns user with role
  * @access  Public
- * @body    { email, password, lookingFor }
+ * @body    { email, password }
  * 
  * SECURITY IMPLEMENTATION:
  * - Direct PostgreSQL access (no Supabase REST API)
  * - Parameterized queries prevent SQL injection
  * - bcrypt password hashing
  * - Password hash never exposed in response
- * - First-time users: INSERT new credentials
- * - Returning users: Verify password, no INSERT
+ * - Returns user role for frontend routing
  */
 router.post('/login', async (req, res) => {
     try {
-        const { email, password, lookingFor } = req.body;
+        const { email, password } = req.body;
 
         // Validate required fields
         const requiredCheck = validateRequired(
-            { email, password, lookingFor },
-            ['email', 'password', 'lookingFor']
+            { email, password },
+            ['email', 'password']
         );
         if (!requiredCheck.valid) {
             return res.status(400).json({
@@ -167,23 +167,15 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // Validate lookingFor field
-        if (!['job', 'employee'].includes(lookingFor)) {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid lookingFor value. Must be "job" or "employee"'
-            });
-        }
-
         const normalizedEmail = email.toLowerCase();
 
         // Import PostgreSQL pool and bcrypt
         const { query } = await import('../config/db.js');
         const bcrypt = await import('bcryptjs');
 
-        // Step 1: Check if user exists (parameterized query)
+        // Check if user exists (parameterized query)
         const checkUserQuery = `
-            SELECT id, email, password_hash, role, is_verified, created_at
+            SELECT id, email, password_hash, role, is_verified, name, created_at
             FROM credentials
             WHERE email = $1
         `;
@@ -191,77 +183,40 @@ router.post('/login', async (req, res) => {
         const { rows } = await query(checkUserQuery, [normalizedEmail]);
         const existingUser = rows[0];
 
-        let user;
-        let isNewUser = false;
+        if (!existingUser) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid credentials'
+            });
+        }
 
-        if (existingUser) {
-            // Step 2A: User EXISTS - Verify password
-            const isPasswordValid = await bcrypt.default.compare(password, existingUser.password_hash);
+        // Verify password
+        const isPasswordValid = await bcrypt.default.compare(password, existingUser.password_hash);
 
-            if (!isPasswordValid) {
-                return res.status(401).json({
-                    success: false,
-                    message: 'Invalid credentials'
-                });
-            }
-
-            user = existingUser;
-        } else {
-            // Step 2B: User DOES NOT EXIST - Create new account
-
-            // Hash password with bcrypt (salt rounds: 10)
-            const passwordHash = await bcrypt.default.hash(password, 10);
-
-            // Map lookingFor to role
-            const role = lookingFor === 'job' ? 'job_seeker' : 'recruiter';
-
-            // Insert new credentials (parameterized query prevents SQL injection)
-            const insertQuery = `
-                INSERT INTO credentials (email, password_hash, role, is_verified)
-                VALUES ($1, $2, $3, $4)
-                RETURNING id, email, role, is_verified, created_at
-            `;
-
-            try {
-                const { rows: insertedRows } = await query(insertQuery, [
-                    normalizedEmail,
-                    passwordHash,
-                    role,
-                    false
-                ]);
-
-                user = insertedRows[0];
-                isNewUser = true;
-            } catch (insertError) {
-                // Handle duplicate email (race condition)
-                if (insertError.code === '23505') { // Unique constraint violation
-                    return res.status(400).json({
-                        success: false,
-                        message: 'Email already exists'
-                    });
-                }
-
-                throw insertError;
-            }
+        if (!isPasswordValid) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid credentials'
+            });
         }
 
         // Generate JWT token
         const token = jwt.sign(
             {
-                userId: user.id,
-                email: user.email,
-                role: user.role
+                userId: existingUser.id,
+                email: existingUser.email,
+                role: existingUser.role
             },
             process.env.JWT_SECRET,
             { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
         );
 
         // Remove password_hash from response (SECURITY: Never expose password hash)
-        const { password_hash, ...sanitizedUser } = user;
+        const { password_hash, ...sanitizedUser } = existingUser;
 
-        res.status(isNewUser ? 201 : 200).json({
+        res.status(200).json({
             success: true,
-            message: isNewUser ? 'Account created successfully' : 'Login successful',
+            message: 'Login successful',
             token,
             user: sanitizedUser
         });
@@ -286,7 +241,7 @@ router.get('/me', auth, async (req, res) => {
 
         // Query user from credentials table using ID from JWT
         const getUserQuery = `
-            SELECT id, email, role, is_verified, created_at
+            SELECT id, email, role, is_verified, name, created_at
             FROM credentials
             WHERE id = $1
         `;

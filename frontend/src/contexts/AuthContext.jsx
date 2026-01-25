@@ -56,15 +56,14 @@ export const AuthProvider = ({ children }) => {
     };
 
     /**
-     * Login user (combined with registration)
+     * Login user
      * @param {string} email 
      * @param {string} password 
-     * @param {string} lookingFor - "job" or "employee"
      */
-    const login = async (email, password, lookingFor) => {
+    const login = async (email, password) => {
         try {
             setError(null);
-            const data = await authAPI.login(email, password, lookingFor);
+            const data = await authAPI.login(email, password);
 
             // Store token
             localStorage.setItem('token', data.token);

@@ -18,6 +18,7 @@ async function setupSchema() {
 
         // Add columns individually
         const columns = [
+            'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS user_id UUID UNIQUE',
             'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS phone_number VARCHAR(20)',
             'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS location VARCHAR(150)',
             'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS github_url TEXT',
@@ -25,7 +26,20 @@ async function setupSchema() {
             'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS profile_description TEXT',
             'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS skills TEXT[]',
             'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS resume_url TEXT',
-            'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS experience_years INTEGER',
+            'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS resume_pdf TEXT',
+            'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS is_fresher BOOLEAN DEFAULT true',
+            'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS experience_years INTEGER DEFAULT 0',
+            'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS degree VARCHAR(150)',
+            'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS institution VARCHAR(200)',
+            'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS graduation_year INTEGER',
+            'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS gpa NUMERIC(4,2)',
+            'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS job_title VARCHAR(150)',
+            'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS company_name VARCHAR(150)',
+            'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS experience_location VARCHAR(150)',
+            'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS exp_start_date DATE',
+            'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS exp_end_date DATE',
+            'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS is_current BOOLEAN DEFAULT false',
+            'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS experience_description TEXT',
             'ALTER TABLE candidates ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()'
         ];
 
@@ -38,36 +52,8 @@ async function setupSchema() {
         }
         console.log('✅ Candidates table checked/updated');
 
-        // 2. Candidate Experience
-        console.log('🔹 Processing candidate_experience table...');
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS candidate_experience (
-                id BIGSERIAL PRIMARY KEY,
-                candidate_id UUID REFERENCES candidates(id) ON DELETE CASCADE,
-                job_title VARCHAR(150),
-                company_name VARCHAR(150),
-                location VARCHAR(150),
-                start_date DATE,
-                end_date DATE,
-                is_current BOOLEAN DEFAULT FALSE,
-                description TEXT
-            );
-        `);
-        console.log('✅ Candidate Experience table checked/created');
-
-        // 3. Candidate Education
-        console.log('🔹 Processing candidate_education table...');
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS candidate_education (
-                id BIGSERIAL PRIMARY KEY,
-                candidate_id UUID REFERENCES candidates(id) ON DELETE CASCADE,
-                degree VARCHAR(150),
-                institution VARCHAR(200),
-                graduation_year INTEGER,
-                gpa NUMERIC(3,2)
-            );
-        `);
-        console.log('✅ Candidate Education table checked/created');
+        // Note: candidate_experience and candidate_education tables removed.
+        // All education and experience data is now stored directly in the candidates table.
 
         console.log('🎉 Schema setup complete!');
         process.exit(0);

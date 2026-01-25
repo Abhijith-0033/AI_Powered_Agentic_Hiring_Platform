@@ -7,6 +7,7 @@ import candidatesRoutes from './routes/candidates.js';
 import applicationsRoutes from './routes/applications.js';
 import dashboardRoutes from './routes/dashboard.js';
 import aiRoutes from './routes/ai.js';
+import resumeRoutes from './routes/resumes.js';
 import pool from './config/db.js'; // Initialize PostgreSQL connection
 
 // Load environment variables
@@ -55,6 +56,7 @@ app.use('/api/candidates', candidatesRoutes);
 app.use('/api/applications', applicationsRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/candidate', resumeRoutes);
 
 // 404 handler
 app.use((req, res) => {

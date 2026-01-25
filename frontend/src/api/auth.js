@@ -31,19 +31,18 @@ export const authAPI = {
     },
 
     /**
-     * Login existing user or create new account (combined flow)
+     * Login existing user
      * @param {string} email - User's email
      * @param {string} password - User's password
-     * @param {string} lookingFor - "job" or "employee"
      * @returns {Promise<{token: string, user: object}>}
      */
-    login: async (email, password, lookingFor) => {
+    login: async (email, password) => {
         const response = await fetch(`${API_URL}/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ email, password, lookingFor })
+            body: JSON.stringify({ email, password })
         });
 
         const data = await response.json();
