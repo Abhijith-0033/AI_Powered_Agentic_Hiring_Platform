@@ -1,4 +1,4 @@
-import { Briefcase, Clock, DollarSign, MapPin, Wifi } from 'lucide-react';
+import { Briefcase, Clock, DollarSign, MapPin, Wifi, CheckCircle } from 'lucide-react';
 import Badge from '../ui/Badge';
 import Button from '../ui/Button';
 
@@ -13,22 +13,46 @@ import Button from '../ui/Button';
 const JobCard = ({
     job,
     onApply,
+    isApplied = false,
     showMatchScore = true,
     className = '',
 }) => {
     const {
-        title,
-        company,
-        companyLogo,
+        title, job_title,
+        company, company_name,
+        companyLogo, company_logo,
         location,
-        type,
-        salary,
-        skills = [],
+        type, job_type,
+        salary, salary_min, salary_max,
+        skills = [], required_skills,
         remote,
-        posted,
+        posted, created_at,
         matchScore,
         applicants,
     } = job;
+
+    // Normalize Data
+    const displayTitle = title || job_title;
+    const displayCompany = company || company_name;
+    const displayLogo = companyLogo || company_logo;
+    const displayType = type || job_type;
+    const displayPosted = posted || (created_at ? new Date(created_at).toLocaleDateString() : 'Recently');
+
+    // Parse skills if string
+    let displaySkills = skills;
+    if (required_skills && typeof required_skills === 'string') {
+        displaySkills = required_skills.split(',').map(s => s.trim());
+    } else if (required_skills && Array.isArray(required_skills)) {
+        displaySkills = required_skills;
+    }
+
+    // Format Salary
+    let displaySalary = salary;
+    if (!salary && salary_min && salary_max) {
+        displaySalary = `$${salary_min.toLocaleString()} - $${salary_max.toLocaleString()}`;
+    } else if (!salary) {
+        displaySalary = 'Competitive';
+    }
 
     return (
         <div
@@ -41,16 +65,23 @@ const JobCard = ({
         >
             {/* Header */}
             <div className="flex items-start gap-4 mb-4">
-                <img
-                    src={companyLogo}
-                    alt={company}
-                    className="w-12 h-12 rounded-lg object-cover"
-                />
+                {displayLogo ? (
+                    <img
+                        src={displayLogo}
+                        alt={displayCompany}
+                        className="w-12 h-12 rounded-lg object-cover"
+                    />
+                ) : (
+                    <div className="w-12 h-12 rounded-lg bg-primary-500/20 flex items-center justify-center text-primary-400 font-bold text-xl">
+                        {displayCompany?.charAt(0) || 'C'}
+                    </div>
+                )}
+
                 <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-semibold text-dark-100 truncate">
-                        {title}
+                        {displayTitle}
                     </h3>
-                    <p className="text-sm text-dark-400">{company}</p>
+                    <p className="text-sm text-dark-400">{displayCompany}</p>
                 </div>
 
                 {showMatchScore && matchScore && (
@@ -71,16 +102,16 @@ const JobCard = ({
             <div className="flex flex-wrap items-center gap-3 mb-4 text-sm text-dark-400">
                 <div className="flex items-center gap-1">
                     <MapPin className="w-4 h-4" />
-                    <span>{location}</span>
+                    <span>{location || 'Remote'}</span>
                 </div>
                 <div className="flex items-center gap-1">
                     <Briefcase className="w-4 h-4" />
-                    <span>{type}</span>
+                    <span>{displayType}</span>
                 </div>
-                {salary && (
+                {displaySalary && (
                     <div className="flex items-center gap-1">
                         <DollarSign className="w-4 h-4" />
-                        <span>{salary}</span>
+                        <span>{displaySalary}</span>
                     </div>
                 )}
                 {remote && (
@@ -93,14 +124,14 @@ const JobCard = ({
 
             {/* Skills */}
             <div className="flex flex-wrap gap-2 mb-4">
-                {skills.slice(0, 4).map((skill) => (
+                {displaySkills.slice(0, 4).map((skill) => (
                     <Badge key={skill} variant="default" size="sm">
                         {skill}
                     </Badge>
                 ))}
-                {skills.length > 4 && (
+                {displaySkills.length > 4 && (
                     <Badge variant="default" size="sm">
-                        +{skills.length - 4} more
+                        +{displaySkills.length - 4} more
                     </Badge>
                 )}
             </div>
@@ -110,14 +141,20 @@ const JobCard = ({
                 <div className="flex items-center gap-3 text-sm text-dark-500">
                     <div className="flex items-center gap-1">
                         <Clock className="w-4 h-4" />
-                        <span>{posted}</span>
+                        <span>{displayPosted}</span>
                     </div>
                     {applicants && (
                         <span>• {applicants} applicants</span>
                     )}
                 </div>
 
-                <Button size="sm" onClick={onApply}>
+                <Button
+                    size="sm"
+                    onClick={(e) => {
+                        console.log("Button clicked in JobCard");
+                        if (onApply) onApply(e);
+                    }}
+                >
                     Apply Now
                 </Button>
             </div>

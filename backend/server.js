@@ -8,6 +8,7 @@ import applicationsRoutes from './routes/applications.js';
 import dashboardRoutes from './routes/dashboard.js';
 import aiRoutes from './routes/ai.js';
 import resumeRoutes from './routes/resumes.js';
+import companiesRoutes from './routes/companies.js';
 import pool from './config/db.js'; // Initialize PostgreSQL connection
 
 // Load environment variables
@@ -53,10 +54,11 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobsRoutes);
 app.use('/api/candidates', candidatesRoutes);
-app.use('/api/applications', applicationsRoutes);
+app.use('/api', applicationsRoutes); // Flat structure for /api/jobs/:id/apply etc.
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/candidate', resumeRoutes);
+app.use('/api/companies', companiesRoutes);
 
 // 404 handler
 app.use((req, res) => {

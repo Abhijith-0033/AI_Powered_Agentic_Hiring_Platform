@@ -2,9 +2,11 @@ import { MapPin, Search, SlidersHorizontal, Wifi, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { DashboardLayout } from '../../components/layout';
 import { JobCard } from '../../components/shared';
+import JobApplyModal from '../../components/shared/JobApplyModal';
 import { Badge, Button, Input, Select, Toggle } from '../../components/ui';
 import Card, { CardContent } from '../../components/ui/Card';
 import { getJobs } from '../../api/jobs';
+import { getUserApplications } from '../../api/applications';
 
 /**
  * Job Discovery page
@@ -113,6 +115,29 @@ const JobDiscovery = () => {
 
         return true;
     });
+
+    const [selectedJob, setSelectedJob] = useState(null);
+    const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+    const [userApplications, setUserApplications] = useState([]);
+
+    useEffect(() => {
+        const fetchApplications = async () => {
+            try {
+                const res = await getUserApplications();
+                if (res.success) {
+                    setUserApplications(res.data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch user applications", err);
+            }
+        };
+        fetchApplications();
+    }, [isApplyModalOpen]); // Refetch when modal closes (application submitted)
+
+    const handleApplyClick = (job) => {
+        setSelectedJob(job);
+        setIsApplyModalOpen(true);
+    };
 
     return (
         <DashboardLayout type="user" title="Job Discovery">
@@ -245,7 +270,10 @@ const JobDiscovery = () => {
                                 className="animate-fade-in"
                                 style={{ animationDelay: `${index * 50}ms` }}
                             >
-                                <JobCard job={job} />
+                                <JobCard
+                                    job={job}
+                                    onApply={() => handleApplyClick(job)}
+                                />
                             </div>
                         ))}
                     </div>
@@ -264,6 +292,12 @@ const JobDiscovery = () => {
                     </Card>
                 )}
             </div>
+
+            <JobApplyModal
+                isOpen={isApplyModalOpen}
+                onClose={() => setIsApplyModalOpen(false)}
+                job={selectedJob}
+            />
         </DashboardLayout>
     );
 };

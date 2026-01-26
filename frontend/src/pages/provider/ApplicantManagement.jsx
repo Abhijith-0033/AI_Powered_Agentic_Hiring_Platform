@@ -2,8 +2,11 @@ import { Search, Users } from 'lucide-react';
 import React, { useState } from 'react';
 import { DashboardLayout } from '../../components/layout';
 import { ApplicantCard } from '../../components/shared';
+import ApplicantDetailsModal from '../../components/shared/ApplicantDetailsModal';
 import { Input, Select } from '../../components/ui';
 import Card, { CardContent } from '../../components/ui/Card';
+import { getAllRecruiterApplications, updateApplicationStatus } from '../../api/applications';
+
 /**
  * Applicant Management page
  * View and manage job applicants
@@ -16,23 +19,69 @@ const ApplicantManagement = () => {
     const [statusFilter, setStatusFilter] = useState('all');
     const [jobFilter, setJobFilter] = useState('all');
 
+    // Modal State
+    const [selectedApplicant, setSelectedApplicant] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     // Fetch applicants from API
-    React.useEffect(() => {
-        const fetchApplicants = async () => {
-            try {
-                const response = await fetch('http://localhost:3000/api/applications');
-                const data = await response.json();
-                if (data.success) {
-                    setApplicants(data.data);
-                }
-            } catch (error) {
-                console.error('Failed to fetch applicants:', error);
-            } finally {
-                setLoading(false);
+    const fetchApplicants = async () => {
+        try {
+            const result = await getAllRecruiterApplications();
+            if (result.success) {
+                // Map DB snake_case to Comp camelCase
+                const mapped = result.data.map(app => ({
+                    id: app.id,
+                    name: app.candidate_name,
+                    email: app.candidate_email,
+                    avatar: app.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(app.candidate_name)}`,
+                    title: 'Candidate', // Could be inferred from experience or resume
+                    location: 'Unknown', // Not currently queried, add to query later if needed
+                    experience: app.experience ? `${app.experience} years` : 'N/A',
+                    skills: app.skills ? (typeof app.skills === 'string' ? app.skills.split(',') : []) : [],
+                    appliedFor: app.job_title,
+                    appliedDate: new Date(app.applied_at).toLocaleDateString(),
+                    status: app.status || 'new',
+                    matchScore: Math.floor(Math.random() * 40) + 60, // Mock AI score for now
+                    source: 'Platform',
+                    // Keep raw data for modal
+                    ...app
+                }));
+                setApplicants(mapped);
             }
-        };
+        } catch (error) {
+            console.error('Failed to fetch applicants:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    React.useEffect(() => {
         fetchApplicants();
     }, []);
+
+    const handleUpdateStatus = async (appId, newStatus) => {
+        // Optimistic Update
+        const previousApps = [...applicants];
+        setApplicants(prev => prev.map(a => a.id === appId ? { ...a, status: newStatus } : a));
+
+        // Also update selectedApplicant if open
+        if (selectedApplicant && selectedApplicant.id === appId) {
+            setSelectedApplicant(prev => ({ ...prev, status: newStatus }));
+        }
+
+        try {
+            await updateApplicationStatus(appId, newStatus);
+        } catch (error) {
+            console.error("Failed to update status", error);
+            setApplicants(previousApps); // Revert
+            alert("Failed to update status");
+        }
+    };
+
+    const handleViewDetails = (app) => {
+        setSelectedApplicant(app);
+        setIsModalOpen(true);
+    };
 
     const statusOptions = [
         { value: 'all', label: 'All Statuses' },
@@ -54,7 +103,8 @@ const ApplicantManagement = () => {
         if (searchQuery && !applicant.name.toLowerCase().includes(searchQuery.toLowerCase())) {
             return false;
         }
-        if (statusFilter !== 'all' && applicant.status !== statusFilter) {
+        // Case insensitive status match
+        if (statusFilter !== 'all' && applicant.status.toLowerCase() !== statusFilter.toLowerCase()) {
             return false;
         }
         if (jobFilter !== 'all' && (applicant.appliedFor || 'General Pool') !== jobFilter) {
@@ -65,10 +115,10 @@ const ApplicantManagement = () => {
 
     const statusCounts = {
         all: applicants.length,
-        new: applicants.filter(a => a.status === 'new').length,
-        shortlisted: applicants.filter(a => a.status === 'shortlisted').length,
-        interview: applicants.filter(a => a.status === 'interview').length,
-        rejected: applicants.filter(a => a.status === 'rejected').length,
+        new: applicants.filter(a => (a.status || 'new').toLowerCase() === 'new' || (a.status || 'new').toLowerCase() === 'applied').length,
+        shortlisted: applicants.filter(a => (a.status || '').toLowerCase() === 'shortlisted').length,
+        interview: applicants.filter(a => (a.status || '').toLowerCase() === 'interview').length,
+        rejected: applicants.filter(a => (a.status || '').toLowerCase() === 'rejected').length,
     };
 
     if (loading) {
@@ -152,9 +202,9 @@ const ApplicantManagement = () => {
                             >
                                 <ApplicantCard
                                     applicant={applicant}
-                                    onViewResume={() => { }}
-                                    onShortlist={() => { }}
-                                    onReject={() => { }}
+                                    onViewResume={() => handleViewDetails(applicant)}
+                                    onShortlist={() => handleUpdateStatus(applicant.id, 'Shortlisted')}
+                                    onReject={() => handleUpdateStatus(applicant.id, 'Rejected')}
                                 />
                             </div>
                         ))}
@@ -171,6 +221,13 @@ const ApplicantManagement = () => {
                     </Card>
                 )}
             </div>
+
+            <ApplicantDetailsModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                applicant={selectedApplicant}
+                onUpdateStatus={handleUpdateStatus}
+            />
         </DashboardLayout>
     );
 };

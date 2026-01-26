@@ -13,6 +13,7 @@ import {
     AIActions,
     ApplicationTracker,
     JobDiscovery,
+    JobsInIndia,
     Profile,
     ResumeTools,
     UserDashboard,
@@ -41,6 +42,7 @@ const AppRoutes = () => {
                     <Route path="profile" element={<Profile />} />
                     <Route path="resume-tools" element={<ResumeTools />} />
                     <Route path="jobs" element={<JobDiscovery />} />
+                    <Route path="jobs-india" element={<JobsInIndia />} />
                     <Route path="ai-actions" element={<AIActions />} />
                     <Route path="applications" element={<ApplicationTracker />} />
                 </Route>

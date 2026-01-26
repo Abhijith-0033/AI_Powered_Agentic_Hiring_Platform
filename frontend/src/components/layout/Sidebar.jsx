@@ -12,7 +12,8 @@ import {
     Settings,
     Sparkles,
     User,
-    Users
+    Users,
+    Globe
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -42,6 +43,7 @@ const Sidebar = ({ type = 'user' }) => {
         { icon: User, label: 'Profile', path: '/user/profile' },
         { icon: FileText, label: 'Resume Tools', path: '/user/resume-tools' },
         { icon: Search, label: 'Job Discovery', path: '/user/jobs' },
+        { icon: Globe, label: 'Jobs in India', path: '/user/jobs-india' },
         { icon: Bot, label: 'AI Actions', path: '/user/ai-actions' },
         { icon: ClipboardList, label: 'Applications', path: '/user/applications' },
     ];

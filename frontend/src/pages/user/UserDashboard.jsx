@@ -9,6 +9,7 @@ import {
 import { useEffect, useState } from 'react';
 import { DashboardLayout } from '../../components/layout';
 import { JobCard, MetricCard } from '../../components/shared';
+import JobApplyModal from '../../components/shared/JobApplyModal';
 import Card, { CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import { getDashboardStats, getUserActivity } from '../../api/users';
@@ -29,6 +30,9 @@ const UserDashboard = () => {
     const [activity, setActivity] = useState([]);
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const [selectedJob, setSelectedJob] = useState(null);
+    const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -232,12 +236,24 @@ const UserDashboard = () => {
                                 className="animate-slide-up"
                                 style={{ animationDelay: `${index * 100}ms` }}
                             >
-                                <JobCard job={job} />
+                                <JobCard
+                                    job={job}
+                                    onApply={() => {
+                                        setSelectedJob(job);
+                                        setIsApplyModalOpen(true);
+                                    }}
+                                />
                             </div>
                         ))}
                     </div>
                 </div>
             </div>
+
+            <JobApplyModal
+                isOpen={isApplyModalOpen}
+                onClose={() => setIsApplyModalOpen(false)}
+                job={selectedJob}
+            />
         </DashboardLayout>
     );
 };
