@@ -16,14 +16,22 @@ const JobApplyModal = ({ job, isOpen, onClose }) => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
 
+    // New State for Education & Skills
+    const [profile, setProfile] = useState(null);
+    const [selectedEducation, setSelectedEducation] = useState([]);
+    const [selectedSkills, setSelectedSkills] = useState([]);
+
     useEffect(() => {
         if (isOpen && job) {
             fetchJobDetails();
             fetchResumes();
+            fetchProfile(); // Fetch candidate profile
             setStep(1);
             setSuccess(false);
             setError('');
             setAnswers({});
+            setSelectedEducation([]);
+            setSelectedSkills([]);
         }
     }, [isOpen, job]);
 
@@ -58,6 +66,17 @@ const JobApplyModal = ({ job, isOpen, onClose }) => {
         }
     };
 
+    const fetchProfile = async () => {
+        try {
+            const res = await api.get('/candidates/profile');
+            if (res.data.success) {
+                setProfile(res.data.data);
+            }
+        } catch (err) {
+            console.error("Failed to fetch profile", err);
+        }
+    };
+
     const handleAnswerChange = (questionId, value) => {
         setAnswers(prev => ({
             ...prev,
@@ -87,13 +106,28 @@ const JobApplyModal = ({ job, isOpen, onClose }) => {
                 }
             }
 
+            // Validate Requirements
+            if (fullJob?.require_education && selectedEducation.length === 0) {
+                setError("Please select at least one education record.");
+                setSubmitting(false);
+                return;
+            }
+
+            if (fullJob?.require_skills && selectedSkills.length === 0) {
+                setError("Please select at least one skill.");
+                setSubmitting(false);
+                return;
+            }
+
             // Format Payload
             const payload = {
                 resume_id: selectedResume,
                 answers: Object.entries(answers).map(([qid, ans]) => ({
                     question_id: qid,
                     answer: ans.toString()
-                }))
+                })),
+                education: selectedEducation,
+                skills: selectedSkills
             };
 
             await applyToJob(fullJob.job_id, payload);
@@ -224,6 +258,40 @@ const JobApplyModal = ({ job, isOpen, onClose }) => {
                                 )}
                             </div>
 
+                            {/* Education Selection */}
+                            {fullJob?.require_education && (
+                                <SelectionList
+                                    title="Education Details (Required)"
+                                    items={profile?.education || []}
+                                    selected={selectedEducation}
+                                    onChange={setSelectedEducation}
+                                    emptyMsg="No education details found in your profile."
+                                    link="/profile"
+                                    renderItem={(edu) => (
+                                        <div>
+                                            <p className="font-medium text-dark-100">{edu.degree}</p>
+                                            <p className="text-sm text-dark-400">{edu.institution} ({edu.graduation_year})</p>
+                                            {edu.gpa && <p className="text-xs text-dark-500">GPA: {edu.gpa}</p>}
+                                        </div>
+                                    )}
+                                />
+                            )}
+
+                            {/* Skills Selection */}
+                            {fullJob?.require_skills && (
+                                <SelectionList
+                                    title="Relevant Skills (Required)"
+                                    items={profile?.skills || []}
+                                    selected={selectedSkills}
+                                    onChange={setSelectedSkills}
+                                    emptyMsg="No skills found in your profile."
+                                    link="/profile"
+                                    renderItem={(skill) => (
+                                        <p className="font-medium text-dark-100">{skill}</p>
+                                    )}
+                                />
+                            )}
+
                             {/* Screening Questions */}
                             {fullJob?.questions?.length > 0 && (
                                 <div>
@@ -305,5 +373,53 @@ const JobApplyModal = ({ job, isOpen, onClose }) => {
         </div>
     );
 };
+
+// Add Helper Components or inline logic for selection
+const SelectionList = ({ title, items, selected, onChange, renderItem, emptyMsg, link }) => (
+    <div>
+        <h3 className="text-lg font-semibold text-white mb-4">{title}</h3>
+        {items.length === 0 ? (
+            <div className="text-center p-6 border border-dashed border-dark-600 rounded-lg">
+                <p className="text-dark-400 mb-3">{emptyMsg}</p>
+                {link && (
+                    <Button size="sm" variant="outline" onClick={() => window.open(link, '_blank')}>
+                        Update Profile
+                    </Button>
+                )}
+            </div>
+        ) : (
+            <div className="space-y-2">
+                {items.map(item => {
+                    const isSelected = selected.some(s => JSON.stringify(s) === JSON.stringify(item));
+                    return (
+                        <div
+                            key={JSON.stringify(item)}
+                            className={`
+                                p-3 rounded-lg border cursor-pointer transition-all flex items-start gap-3
+                                ${isSelected
+                                    ? 'bg-primary-500/10 border-primary-500'
+                                    : 'bg-dark-700/30 border-dark-600 hover:border-dark-500'}
+                            `}
+                            onClick={() => {
+                                if (isSelected) {
+                                    onChange(selected.filter(s => JSON.stringify(s) !== JSON.stringify(item)));
+                                } else {
+                                    onChange([...selected, item]);
+                                }
+                            }}
+                        >
+                            <div className={`mt-1 w-5 h-5 rounded border flex items-center justify-center ${isSelected ? 'bg-primary-500 border-primary-500' : 'border-dark-500'}`}>
+                                {isSelected && <CheckCircle className="w-3.5 h-3.5 text-white" />}
+                            </div>
+                            <div className="flex-1">
+                                {renderItem(item)}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        )}
+    </div>
+);
 
 export default JobApplyModal;

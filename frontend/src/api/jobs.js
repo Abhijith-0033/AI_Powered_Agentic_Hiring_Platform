@@ -24,7 +24,12 @@ export const getJobById = async (id) => {
     return response.data;
 };
 // Get External Jobs (Adzuna - India)
-export const getJobsInIndia = async () => {
-    const response = await axios.get('/jobs/india');
+export const getJobsInIndia = async (params = {}) => {
+    // Filter out empty values to avoid sending ?role=&location=
+    const cleanParams = Object.fromEntries(
+        Object.entries(params).filter(([_, value]) => value !== '' && value !== null && value !== undefined)
+    );
+    const queryParams = new URLSearchParams(cleanParams).toString();
+    const response = await axios.get(`/jobs/india${queryParams ? `?${queryParams}` : ''}`);
     return response.data;
 };

@@ -41,6 +41,7 @@ router.get('/stats', auth, async (req, res) => {
         // Calculate Applications Sent
         const appsRes = await pool.query('SELECT COUNT(*) FROM job_applications WHERE candidate_id = $1', [candidate.id]);
         const appsCount = parseInt(appsRes.rows[0].count);
+        console.log(`[Dashboard] User ${email} (Candidate ID: ${candidate.id}) - Applications found: ${appsCount}`);
 
         res.json({
             success: true,

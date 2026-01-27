@@ -12,13 +12,23 @@ const ApplicationTracker = () => {
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('all');
+    const [summary, setSummary] = useState({
+        total: 0,
+        applied: 0,
+        reviewing: 0,
+        interview: 0,
+        rejected: 0
+    });
 
     useEffect(() => {
         const fetchApplications = async () => {
             try {
                 const result = await getUserApplications();
                 if (result.success) {
-                    setApplications(result.data);
+                    setApplications(result.applications || []);
+                    if (result.summary) {
+                        setSummary(result.summary);
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching applications:', error);
@@ -30,38 +40,30 @@ const ApplicationTracker = () => {
         fetchApplications();
     }, []);
 
-    // Calculate stats on the fly
-    const stats = {
-        total: applications.length,
-        applied: applications.filter(a => a.status === 'Applied').length,
-        reviewing: applications.filter(a => a.status === 'Shortlisted').length, // backend sends 'Shortlisted' maybe? Map accordingly.
-        interview: applications.filter(a => a.status === 'Interview').length,
-        offer: applications.filter(a => a.status === 'Offer').length,
-        rejected: applications.filter(a => a.status === 'Rejected').length
-    };
-
     const statusOptions = [
         { value: 'all', label: 'All Applications' },
-        { value: 'Applied', label: 'Applied' },
-        { value: 'Shortlisted', label: 'Under Review' },
-        { value: 'Interview', label: 'Interview' },
-        { value: 'Offer', label: 'Offer' },
-        { value: 'Rejected', label: 'Rejected' },
+        { value: 'applied', label: 'Applied' }, // strict lower case matching from API
+        { value: 'reviewing', label: 'Under Review' }, // API maps Shortlisted -> reviewing
+        { value: 'interview', label: 'Interview' }, // API maps Interview/Offer -> interview
+        { value: 'rejected', label: 'Rejected' },
     ];
 
     const filteredApplications = statusFilter === 'all'
         ? applications
-        : applications.filter(app => app.status === statusFilter);
+        : applications.filter(app => {
+            // Map frontend filter values to possible API status values
+            if (statusFilter === 'reviewing') return ['Shortlisted', 'reviewing'].includes(app.status);
+            if (statusFilter === 'interview') return ['Interview', 'interview', 'Offer', 'offer'].includes(app.status);
+            return app.status.toLowerCase() === statusFilter.toLowerCase();
+        });
 
     const getBadgeVariant = (status) => {
-        switch (status) {
-            case 'Applied': return 'primary';
-            case 'Shortlisted': return 'info';
-            case 'Interview': return 'warning';
-            case 'Offer': return 'success';
-            case 'Rejected': return 'error';
-            default: return 'default';
-        }
+        const s = status.toLowerCase();
+        if (s === 'applied') return 'primary';
+        if (s === 'shortlisted' || s === 'reviewing') return 'info';
+        if (s === 'interview' || s === 'offer') return 'warning';
+        if (s === 'rejected') return 'error';
+        return 'default';
     };
 
     if (loading) {
@@ -91,31 +93,31 @@ const ApplicationTracker = () => {
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
                     <Card padding="sm" className="text-center">
                         <CardContent>
-                            <p className="text-2xl font-bold text-dark-100">{stats.total}</p>
+                            <p className="text-2xl font-bold text-dark-100">{summary.total}</p>
                             <p className="text-xs text-dark-500">Total</p>
                         </CardContent>
                     </Card>
                     <Card padding="sm" className="text-center border-sky-500/30">
                         <CardContent>
-                            <p className="text-2xl font-bold text-sky-400">{stats.applied}</p>
+                            <p className="text-2xl font-bold text-sky-400">{summary.applied}</p>
                             <p className="text-xs text-dark-500">Applied</p>
                         </CardContent>
                     </Card>
                     <Card padding="sm" className="text-center border-amber-500/30">
                         <CardContent>
-                            <p className="text-2xl font-bold text-amber-400">{stats.reviewing}</p>
+                            <p className="text-2xl font-bold text-amber-400">{summary.reviewing}</p>
                             <p className="text-xs text-dark-500">Reviewing</p>
                         </CardContent>
                     </Card>
                     <Card padding="sm" className="text-center border-emerald-500/30">
                         <CardContent>
-                            <p className="text-2xl font-bold text-emerald-400">{stats.interview + stats.offer}</p>
+                            <p className="text-2xl font-bold text-emerald-400">{summary.interview}</p>
                             <p className="text-xs text-dark-500">Interview/Offer</p>
                         </CardContent>
                     </Card>
                     <Card padding="sm" className="text-center border-rose-500/30">
                         <CardContent>
-                            <p className="text-2xl font-bold text-rose-400">{stats.rejected}</p>
+                            <p className="text-2xl font-bold text-rose-400">{summary.rejected}</p>
                             <p className="text-xs text-dark-500">Rejected</p>
                         </CardContent>
                     </Card>
@@ -154,20 +156,26 @@ const ApplicationTracker = () => {
                             {filteredApplications.length > 0 ? (
                                 filteredApplications.map((app, index) => (
                                     <TableRow
-                                        key={app.id}
+                                        key={app.application_id}
                                         className="animate-fade-in"
                                         style={{ animationDelay: `${index * 30}ms` }}
                                     >
                                         <TableCell>
                                             <div className="flex items-center gap-3">
-                                                <img
-                                                    src={app.companyLogo}
-                                                    alt={app.company}
-                                                    className="w-10 h-10 rounded-lg"
-                                                />
+                                                {app.company_logo ? (
+                                                    <img
+                                                        src={app.company_logo}
+                                                        alt={app.company_name}
+                                                        className="w-10 h-10 rounded-lg"
+                                                    />
+                                                ) : (
+                                                    <div className="w-10 h-10 rounded-lg bg-dark-700 flex items-center justify-center text-xs text-dark-400">
+                                                        {app.company_name?.charAt(0) || 'C'}
+                                                    </div>
+                                                )}
                                                 <div>
-                                                    <p className="font-medium text-dark-100">{app.jobTitle}</p>
-                                                    <p className="text-sm text-dark-400">{app.company}</p>
+                                                    <p className="font-medium text-dark-100">{app.job_title}</p>
+                                                    <p className="text-sm text-dark-400">{app.company_name}</p>
                                                 </div>
                                             </div>
                                         </TableCell>
@@ -179,11 +187,13 @@ const ApplicationTracker = () => {
                                         <TableCell>
                                             <div className="flex items-center gap-1 text-dark-400">
                                                 <Calendar className="w-4 h-4" />
-                                                <span>{app.appliedDate}</span>
+                                                <span>{new Date(app.applied_at).toLocaleDateString()}</span>
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <span className="text-dark-400">{app.lastUpdate}</span>
+                                            <span className="text-dark-400">
+                                                {app.last_update ? new Date(app.last_update).toLocaleDateString() : '-'}
+                                            </span>
                                         </TableCell>
                                         <TableCell>
                                             <Button variant="ghost" size="sm" leftIcon={<ExternalLink className="w-4 h-4" />}>

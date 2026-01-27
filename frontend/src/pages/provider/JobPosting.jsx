@@ -23,7 +23,9 @@ const JobPosting = () => {
         salary_max: '',
         job_description: '',
         required_skills: '',
-        remote: false
+        remote: false,
+        require_education: false,
+        require_skills: false
     });
 
     // Dynamic Requirements State
@@ -38,7 +40,7 @@ const JobPosting = () => {
 
     const fetchJobs = async () => {
         try {
-            const response = await api.get('/jobs');
+            const response = await api.get('/jobs/recruiter');
             if (response.data.success) {
                 setJobs(response.data.data);
             }
@@ -146,7 +148,9 @@ const JobPosting = () => {
             salary_max: job.salary_max,
             job_description: job.job_description,
             required_skills: job.required_skills,
-            remote: job.location?.toLowerCase() === 'remote' // logic can be improved
+            remote: job.location?.toLowerCase() === 'remote',
+            require_education: job.require_education || false,
+            require_skills: job.require_skills || false
         });
 
         // We need to fetch requirements and questions for THIS job because the list only has basic info
@@ -178,7 +182,8 @@ const JobPosting = () => {
         setFormData({
             job_title: '', department: '', job_type: 'Full-time', experience_level: '',
             location: '', salary_min: '', salary_max: '', job_description: '',
-            required_skills: '', remote: false
+            required_skills: '', remote: false,
+            require_education: false, require_skills: false
         });
         setRequirements([{ requirement_text: '', is_mandatory: true }]);
         setQuestions([{ question_text: '', question_type: 'text', options: [], is_required: true }]);
@@ -334,6 +339,38 @@ const JobPosting = () => {
                                     value={formData.required_skills}
                                     onChange={(e) => setFormData({ ...formData, required_skills: e.target.value })}
                                 />
+                            </CardContent>
+                        </Card>
+
+                        {/* Additional Applicant Information */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Additional Applicant Information</CardTitle>
+                                <CardDescription>Select information to require from applicants</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="flex items-center justify-between p-4 bg-dark-800/50 rounded-lg border border-dark-700">
+                                    <div>
+                                        <h4 className="text-white font-medium">Require Education Details</h4>
+                                        <p className="text-sm text-dark-400">Ask applicants to share their education history</p>
+                                    </div>
+                                    <Toggle
+                                        label=""
+                                        checked={formData.require_education}
+                                        onChange={(checked) => setFormData({ ...formData, require_education: checked })}
+                                    />
+                                </div>
+                                <div className="flex items-center justify-between p-4 bg-dark-800/50 rounded-lg border border-dark-700">
+                                    <div>
+                                        <h4 className="text-white font-medium">Require Skills Selection</h4>
+                                        <p className="text-sm text-dark-400">Ask applicants to select relevant skills from their profile</p>
+                                    </div>
+                                    <Toggle
+                                        label=""
+                                        checked={formData.require_skills}
+                                        onChange={(checked) => setFormData({ ...formData, require_skills: checked })}
+                                    />
+                                </div>
                             </CardContent>
                         </Card>
 

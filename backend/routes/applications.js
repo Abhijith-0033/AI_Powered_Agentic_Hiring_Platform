@@ -16,7 +16,7 @@ router.post('/jobs/:id/apply', auth, roleGuard('job_seeker'), async (req, res) =
     try {
         const userId = req.user.userId;
         const jobId = req.params.id;
-        const { resume_id, answers } = req.body;
+        const { resume_id, answers, education, skills } = req.body;
 
         if (!resume_id) {
             return res.status(400).json({ success: false, message: 'Resume is required' });
@@ -44,20 +44,26 @@ router.post('/jobs/:id/apply', auth, roleGuard('job_seeker'), async (req, res) =
 
         // 3. Get Job & Company Info
         const jobRes = await client.query(
-            'SELECT company_id, status FROM job_postings WHERE job_id = $1',
+            'SELECT company_id, status, require_education, require_skills FROM job_postings WHERE job_id = $1',
             [jobId]
         );
         if (jobRes.rows.length === 0) {
             return res.status(404).json({ success: false, message: 'Job not found' });
         }
-        const { company_id, status } = jobRes.rows[0];
+        const { company_id, status, require_education, require_skills } = jobRes.rows[0];
 
         if (status !== 'Open') {
             return res.status(400).json({ success: false, message: 'This job is no longer accepting applications' });
         }
 
-        // 4. Validate Questions/Answers (Optional but recommended)
-        // For now trusting client on structure, but verifying mandatory could be added here.
+        // 4. Validate Requirements
+        if (require_education && (!education || education.length === 0)) {
+            return res.status(400).json({ success: false, message: 'Education details are required for this job' });
+        }
+
+        if (require_skills && (!skills || skills.length === 0)) {
+            return res.status(400).json({ success: false, message: 'Skills are required for this job' });
+        }
 
         await client.query('BEGIN');
 
@@ -86,6 +92,28 @@ router.post('/jobs/:id/apply', auth, roleGuard('job_seeker'), async (req, res) =
             }
         }
 
+        // 7. Insert Education
+        if (education && education.length > 0) {
+            const eduQuery = `
+                INSERT INTO job_application_education (application_id, degree, institution, graduation_year, gpa)
+                VALUES ($1, $2, $3, $4, $5)
+            `;
+            for (const edu of education) {
+                await client.query(eduQuery, [applicationId, edu.degree, edu.institution, edu.graduation_year, edu.gpa]);
+            }
+        }
+
+        // 8. Insert Skills
+        if (skills && skills.length > 0) {
+            const skillQuery = `
+                INSERT INTO job_application_skills (application_id, skill)
+                VALUES ($1, $2)
+            `;
+            for (const skill of skills) {
+                await client.query(skillQuery, [applicationId, skill]);
+            }
+        }
+
         await client.query('COMMIT');
 
         res.status(201).json({
@@ -103,6 +131,82 @@ router.post('/jobs/:id/apply', auth, roleGuard('job_seeker'), async (req, res) =
         res.status(500).json({ success: false, message: 'Server error' });
     } finally {
         client.release();
+    }
+});
+
+/**
+ * GET /api/applications/my-applications
+ * Get all applications for the logged-in job seeker
+ * Auth: Job Seeker
+ * STRICT IMPLEMENTATION PER USER REQUEST
+ */
+router.get('/applications/my-applications', auth, roleGuard('job_seeker'), async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        console.log(`[Job Seeker Apps] Request for User ID: ${userId}`);
+
+        // 1. Resolve Candidate ID from User ID (Credentials)
+        const candidateRes = await pool.query(
+            'SELECT id, name FROM candidates WHERE user_id = $1',
+            [userId]
+        );
+
+        if (candidateRes.rows.length === 0) {
+            console.log(`[Job Seeker Apps] No candidate profile found for User ID: ${userId}`);
+            return res.status(404).json({ success: false, message: 'Candidate profile not found' });
+        }
+
+        const candidateId = candidateRes.rows[0].id;
+        console.log(`[Job Seeker Apps] Found Candidate ID: ${candidateId} (${candidateRes.rows[0].name})`);
+
+        // 2. Fetch Applications using User's Required Query
+        const query = `
+            SELECT 
+                ja.id AS application_id,
+                ja.status,
+                ja.applied_at,
+                ja.applied_at as last_update,
+                jp.job_title,
+                jp.location,
+                c.name AS company_name,
+                c.logo AS company_logo
+            FROM job_applications ja
+            JOIN job_postings jp ON ja.job_id = jp.job_id
+            JOIN companies c ON ja.company_id = c.id
+            JOIN candidates cd ON ja.candidate_id = cd.id
+            WHERE cd.user_id = $1
+            ORDER BY ja.applied_at DESC
+        `;
+
+        const { rows } = await pool.query(query, [userId]);
+        console.log(`[Job Seeker Apps] Found ${rows.length} applications for Candidate ID: ${candidateId}`);
+
+        // 3. Construct Summary Counts
+        const summary = {
+            total: rows.length,
+            applied: rows.filter(a => a.status === 'Applied' || a.status === 'applied').length,
+            reviewing: rows.filter(a => a.status === 'Shortlisted' || a.status === 'reviewing').length,
+            interview: rows.filter(a => ['Interview', 'interview', 'Offer', 'offer'].includes(a.status)).length,
+            rejected: rows.filter(a => a.status === 'Rejected' || a.status === 'rejected').length
+        };
+
+        // 4. Process Logo and Return Response
+        const applications = rows.map(app => {
+            if (app.company_logo) {
+                app.company_logo = `data:image/jpeg;base64,${app.company_logo.toString('base64')}`;
+            }
+            return app;
+        });
+
+        res.json({
+            success: true,
+            summary,
+            applications
+        });
+
+    } catch (error) {
+        console.error('Error fetching my applications:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
     }
 });
 
@@ -135,17 +239,24 @@ router.get('/recruiter/jobs/:id/applications', auth, roleGuard('recruiter'), asy
                 ja.id, ja.status, ja.applied_at, ja.resume_id, ja.resume_name,
                 c.name as candidate_name, c.email as candidate_email, c.experience_years,
                 c.id as candidate_id,
-                json_agg(
-                    json_build_object(
-                        'question', jq.question_text,
-                        'answer', jaa.answer,
-                        'type', jq.question_type
-                    )
-                ) as answers
+                json_agg(DISTINCT jsonb_build_object(
+                    'question', jq.question_text,
+                    'answer', jaa.answer,
+                    'type', jq.question_type
+                )) FILTER (WHERE jaa.id IS NOT NULL) as answers,
+                json_agg(DISTINCT jsonb_build_object(
+                    'degree', jae.degree,
+                    'institution', jae.institution,
+                    'graduation_year', jae.graduation_year,
+                    'gpa', jae.gpa
+                )) FILTER (WHERE jae.id IS NOT NULL) as education,
+                json_agg(DISTINCT jas.skill) FILTER (WHERE jas.id IS NOT NULL) as skills
             FROM job_applications ja
             JOIN candidates c ON ja.candidate_id = c.id
             LEFT JOIN job_application_answers jaa ON ja.id = jaa.application_id
             LEFT JOIN job_questions jq ON jaa.question_id = jq.id
+            LEFT JOIN job_application_education jae ON ja.id = jae.application_id
+            LEFT JOIN job_application_skills jas ON ja.id = jas.application_id
             WHERE ja.job_id = $1
             GROUP BY ja.id, c.id
             ORDER BY ja.applied_at DESC

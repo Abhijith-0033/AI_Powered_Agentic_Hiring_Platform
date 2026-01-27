@@ -110,6 +110,41 @@ const ApplicantDetailsModal = ({ applicant, isOpen, onClose, onUpdateStatus }) =
                             </div>
                         </div>
                     )}
+
+                    {/* Education Details */}
+                    {applicant.education && applicant.education.length > 0 && (
+                        <div>
+                            <h3 className="text-lg font-semibold text-white mb-4">Education</h3>
+                            <div className="space-y-4">
+                                {applicant.education.map((edu, idx) => (
+                                    <div key={idx} className="p-4 bg-dark-700/20 rounded-lg border border-dark-700">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <p className="text-white font-medium">{edu.degree}</p>
+                                                <p className="text-sm text-dark-400">{edu.institution}</p>
+                                            </div>
+                                            <Badge variant="secondary">{edu.graduation_year}</Badge>
+                                        </div>
+                                        {edu.gpa && <p className="text-sm text-dark-500 mt-2">GPA: {edu.gpa}</p>}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Skills */}
+                    {applicant.skills && applicant.skills.length > 0 && (
+                        <div>
+                            <h3 className="text-lg font-semibold text-white mb-4">Skills</h3>
+                            <div className="flex flex-wrap gap-2">
+                                {applicant.skills.map((skill, idx) => (
+                                    <Badge key={idx} variant="outline" className="bg-dark-700/30">
+                                        {skill}
+                                    </Badge>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
