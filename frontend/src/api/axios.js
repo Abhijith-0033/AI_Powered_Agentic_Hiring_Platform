@@ -2,8 +2,8 @@ import axios from 'axios';
 
 // Create axios instance with base URL
 const instance = axios.create({
-    baseURL: 'http://localhost:3000/api', // Adjustment based on backend port (assuming 5000 or 3000, need to check)
-    withCredentials: true // Important for cookies/sessions if used, or headers
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+    withCredentials: true
 });
 
 // Add a request interceptor to add the auth token to every request

@@ -18,6 +18,7 @@ import Card, { CardContent, CardDescription, CardHeader, CardTitle } from '../..
  * Auto-shortlist, rank candidates, generate JD
  */
 const AITools = () => {
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
     const aiTools = [
         {
             id: 'auto-shortlist',
@@ -85,7 +86,7 @@ const AITools = () => {
     React.useEffect(() => {
         const fetchJobs = async () => {
             try {
-                const response = await fetch('http://localhost:3000/api/jobs');
+                const response = await fetch(`${API_BASE_URL}/jobs`);
                 const data = await response.json();
                 if (data.success) {
                     setJobs(data.data.map(job => ({ value: job.job_id, label: job.job_title })));
@@ -102,7 +103,7 @@ const AITools = () => {
             if (!selectedJob) return;
             setLoading(true);
             try {
-                const response = await fetch('http://localhost:3000/api/ai/auto-shortlist', {
+                const response = await fetch(`${API_BASE_URL}/ai/auto-shortlist`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ jobId: selectedJob })

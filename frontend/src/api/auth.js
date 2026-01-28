@@ -1,4 +1,5 @@
-const API_URL = 'http://localhost:3000/api/auth';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_URL = `${BASE_URL}/auth`;
 
 /**
  * Authentication API Client
