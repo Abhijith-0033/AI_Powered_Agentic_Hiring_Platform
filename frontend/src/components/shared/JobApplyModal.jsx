@@ -148,17 +148,17 @@ const JobApplyModal = ({ job, isOpen, onClose }) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-            <div className="bg-dark-800 border border-dark-700 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col shadow-2xl">
+            <div className="bg-white border border-neutral-200 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col shadow-2xl">
 
                 {/* Header */}
-                <div className="flex justify-between items-center p-6 border-b border-dark-700 bg-dark-800 sticky top-0 z-10">
+                <div className="flex justify-between items-center p-6 border-b border-neutral-200 bg-white sticky top-0 z-10">
                     <div>
-                        <h2 className="text-xl font-bold text-dark-100">
+                        <h2 className="text-xl font-bold text-neutral-900">
                             {success ? 'Application Submitted!' : `Apply for ${job?.job_title || job?.title}`}
                         </h2>
-                        <p className="text-sm text-dark-400">{job?.company_name || job?.company}</p>
+                        <p className="text-sm text-neutral-500">{job?.company_name || job?.company}</p>
                     </div>
-                    <button onClick={onClose} className="text-dark-400 hover:text-white transition-colors">
+                    <button onClick={onClose} className="text-neutral-500 hover:text-neutral-900 transition-colors">
                         <X className="w-6 h-6" />
                     </button>
                 </div>
@@ -166,20 +166,20 @@ const JobApplyModal = ({ job, isOpen, onClose }) => {
                 {/* Content */}
                 <div className="p-6 space-y-6 flex-1 overflow-y-auto">
                     {loading ? (
-                        <div className="text-center py-12 text-dark-400">Loading details...</div>
+                        <div className="text-center py-12 text-neutral-500">Loading details...</div>
                     ) : success ? (
                         <div className="text-center py-12">
                             <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
-                            <h3 className="text-xl font-bold text-white mb-2">Applied Successfully!</h3>
-                            <p className="text-dark-400">The recruiter will review your application shortly.</p>
+                            <h3 className="text-xl font-bold text-neutral-900 mb-2">Applied Successfully!</h3>
+                            <p className="text-neutral-500">The recruiter will review your application shortly.</p>
                         </div>
                     ) : step === 1 ? (
                         // STEP 1: Job Details & Requirements
                         <div className="space-y-6">
                             {/* Description */}
                             <div>
-                                <h3 className="text-lg font-semibold text-white mb-2">About the Role</h3>
-                                <p className="text-dark-300 leading-relaxed whitespace-pre-line">
+                                <h3 className="text-lg font-semibold text-neutral-900 mb-2">About the Role</h3>
+                                <p className="text-neutral-600 leading-relaxed whitespace-pre-line">
                                     {fullJob?.job_description}
                                 </p>
                             </div>
@@ -187,14 +187,14 @@ const JobApplyModal = ({ job, isOpen, onClose }) => {
                             {/* Requirements */}
                             {fullJob?.requirements?.length > 0 && (
                                 <div>
-                                    <h3 className="text-lg font-semibold text-white mb-3">Requirements</h3>
+                                    <h3 className="text-lg font-semibold text-neutral-900 mb-3">Requirements</h3>
                                     <ul className="space-y-2">
                                         {fullJob.requirements.map(req => (
-                                            <li key={req.id} className="flex items-start gap-2 text-dark-300">
-                                                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary-500 shrink-0" />
-                                                <span className={req.is_mandatory ? "font-medium text-white" : ""}>
+                                            <li key={req.id} className="flex items-start gap-2 text-neutral-600">
+                                                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary-600 shrink-0" />
+                                                <span className={req.is_mandatory ? "font-medium text-neutral-900" : ""}>
                                                     {req.requirement_text}
-                                                    {req.is_mandatory && <span className="text-red-400 ml-1">*</span>}
+                                                    {req.is_mandatory && <span className="text-red-500 ml-1">*</span>}
                                                 </span>
                                             </li>
                                         ))}
@@ -212,7 +212,7 @@ const JobApplyModal = ({ job, isOpen, onClose }) => {
                         // STEP 2: Application Form
                         <div className="space-y-8">
                             {error && (
-                                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-3 text-red-400">
+                                <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-600">
                                     <AlertCircle className="w-5 h-5" />
                                     {error}
                                 </div>
@@ -220,10 +220,10 @@ const JobApplyModal = ({ job, isOpen, onClose }) => {
 
                             {/* Resume Selection */}
                             <div>
-                                <h3 className="text-lg font-semibold text-white mb-4">Select Resume</h3>
+                                <h3 className="text-lg font-semibold text-neutral-900 mb-4">Select Resume</h3>
                                 {resumes.length === 0 ? (
-                                    <div className="text-center p-6 border border-dashed border-dark-600 rounded-lg">
-                                        <p className="text-dark-400 mb-3">No resumes found.</p>
+                                    <div className="text-center p-6 border border-dashed border-neutral-300 rounded-lg">
+                                        <p className="text-neutral-500 mb-3">No resumes found.</p>
                                         <Button size="sm" variant="outline" onClick={() => window.open('/profile', '_blank')}>
                                             Upload in Profile
                                         </Button>
@@ -236,21 +236,21 @@ const JobApplyModal = ({ job, isOpen, onClose }) => {
                                                 className={`
                                                     relative p-4 rounded-lg border cursor-pointer transition-all
                                                     ${selectedResume === resume.id
-                                                        ? 'bg-primary-500/10 border-primary-500 ring-1 ring-primary-500'
-                                                        : 'bg-dark-700/30 border-dark-600 hover:border-dark-500'}
+                                                        ? 'bg-primary-50 border-primary-500 ring-1 ring-primary-500'
+                                                        : 'bg-neutral-50 border-neutral-200 hover:border-neutral-300'}
                                                 `}
                                                 onClick={() => setSelectedResume(resume.id)}
                                             >
                                                 <div className="flex items-center gap-3">
-                                                    <FileText className={`w-5 h-5 ${selectedResume === resume.id ? 'text-primary-400' : 'text-dark-400'}`} />
+                                                    <FileText className={`w-5 h-5 ${selectedResume === resume.id ? 'text-primary-600' : 'text-neutral-500'}`} />
                                                     <div className="flex-1">
-                                                        <p className="text-sm font-medium text-dark-100">{resume.resume_name}</p>
-                                                        <p className="text-xs text-dark-500">
+                                                        <p className="text-sm font-medium text-neutral-900">{resume.resume_name}</p>
+                                                        <p className="text-xs text-neutral-500">
                                                             {new Date(resume.created_at).toLocaleDateString()}
-                                                            {resume.is_default && <span className="ml-2 text-primary-400">(Default)</span>}
+                                                            {resume.is_default && <span className="ml-2 text-primary-600">(Default)</span>}
                                                         </p>
                                                     </div>
-                                                    {selectedResume === resume.id && <CheckCircle className="w-5 h-5 text-primary-500" />}
+                                                    {selectedResume === resume.id && <CheckCircle className="w-5 h-5 text-primary-600" />}
                                                 </div>
                                             </div>
                                         ))}
@@ -269,9 +269,9 @@ const JobApplyModal = ({ job, isOpen, onClose }) => {
                                     link="/profile"
                                     renderItem={(edu) => (
                                         <div>
-                                            <p className="font-medium text-dark-100">{edu.degree}</p>
-                                            <p className="text-sm text-dark-400">{edu.institution} ({edu.graduation_year})</p>
-                                            {edu.gpa && <p className="text-xs text-dark-500">GPA: {edu.gpa}</p>}
+                                            <p className="font-medium text-neutral-900">{edu.degree}</p>
+                                            <p className="text-sm text-neutral-500">{edu.institution} ({edu.graduation_year})</p>
+                                            {edu.gpa && <p className="text-xs text-neutral-400">GPA: {edu.gpa}</p>}
                                         </div>
                                     )}
                                 />
@@ -287,7 +287,7 @@ const JobApplyModal = ({ job, isOpen, onClose }) => {
                                     emptyMsg="No skills found in your profile."
                                     link="/profile"
                                     renderItem={(skill) => (
-                                        <p className="font-medium text-dark-100">{skill}</p>
+                                        <p className="font-medium text-neutral-900">{skill}</p>
                                     )}
                                 />
                             )}
@@ -295,13 +295,13 @@ const JobApplyModal = ({ job, isOpen, onClose }) => {
                             {/* Screening Questions */}
                             {fullJob?.questions?.length > 0 && (
                                 <div>
-                                    <h3 className="text-lg font-semibold text-white mb-4">Screening Questions</h3>
+                                    <h3 className="text-lg font-semibold text-neutral-900 mb-4">Screening Questions</h3>
                                     <div className="space-y-5">
                                         {fullJob.questions.map(q => (
                                             <div key={q.id}>
-                                                <label className="block text-sm font-medium text-dark-300 mb-1.5">
+                                                <label className="block text-sm font-medium text-neutral-700 mb-1.5">
                                                     {q.question_text}
-                                                    {q.is_required && <span className="text-red-400 ml-1">*</span>}
+                                                    {q.is_required && <span className="text-red-500 ml-1">*</span>}
                                                 </label>
 
                                                 {q.question_type === 'text' && (
@@ -329,9 +329,9 @@ const JobApplyModal = ({ job, isOpen, onClose }) => {
                                                                 name={`q_${q.id}`}
                                                                 checked={answers[q.id] === 'true'}
                                                                 onChange={() => handleAnswerChange(q.id, 'true')}
-                                                                className="text-primary-500 focus:ring-primary-500"
+                                                                className="text-primary-600 focus:ring-primary-600"
                                                             />
-                                                            <span className="text-dark-300">Yes</span>
+                                                            <span className="text-neutral-700">Yes</span>
                                                         </label>
                                                         <label className="flex items-center gap-2 cursor-pointer">
                                                             <input
@@ -339,9 +339,9 @@ const JobApplyModal = ({ job, isOpen, onClose }) => {
                                                                 name={`q_${q.id}`}
                                                                 checked={answers[q.id] === 'false'}
                                                                 onChange={() => handleAnswerChange(q.id, 'false')}
-                                                                className="text-primary-500 focus:ring-primary-500"
+                                                                className="text-primary-600 focus:ring-primary-600"
                                                             />
-                                                            <span className="text-dark-300">No</span>
+                                                            <span className="text-neutral-700">No</span>
                                                         </label>
                                                     </div>
                                                 )}
@@ -360,7 +360,7 @@ const JobApplyModal = ({ job, isOpen, onClose }) => {
                                 </div>
                             )}
 
-                            <div className="flex justify-between pt-4 border-t border-dark-700">
+                            <div className="flex justify-between pt-4 border-t border-neutral-200">
                                 <Button variant="ghost" onClick={() => setStep(1)}>Back</Button>
                                 <Button onClick={handleSubmit} disabled={submitting}>
                                     {submitting ? 'Submitting...' : 'Submit Application'}
@@ -377,10 +377,10 @@ const JobApplyModal = ({ job, isOpen, onClose }) => {
 // Add Helper Components or inline logic for selection
 const SelectionList = ({ title, items, selected, onChange, renderItem, emptyMsg, link }) => (
     <div>
-        <h3 className="text-lg font-semibold text-white mb-4">{title}</h3>
+        <h3 className="text-lg font-semibold text-neutral-900 mb-4">{title}</h3>
         {items.length === 0 ? (
-            <div className="text-center p-6 border border-dashed border-dark-600 rounded-lg">
-                <p className="text-dark-400 mb-3">{emptyMsg}</p>
+            <div className="text-center p-6 border border-dashed border-neutral-300 rounded-lg">
+                <p className="text-neutral-500 mb-3">{emptyMsg}</p>
                 {link && (
                     <Button size="sm" variant="outline" onClick={() => window.open(link, '_blank')}>
                         Update Profile
@@ -397,8 +397,8 @@ const SelectionList = ({ title, items, selected, onChange, renderItem, emptyMsg,
                             className={`
                                 p-3 rounded-lg border cursor-pointer transition-all flex items-start gap-3
                                 ${isSelected
-                                    ? 'bg-primary-500/10 border-primary-500'
-                                    : 'bg-dark-700/30 border-dark-600 hover:border-dark-500'}
+                                    ? 'bg-primary-50 border-primary-500'
+                                    : 'bg-neutral-50 border-neutral-200 hover:border-neutral-300'}
                             `}
                             onClick={() => {
                                 if (isSelected) {
@@ -408,7 +408,7 @@ const SelectionList = ({ title, items, selected, onChange, renderItem, emptyMsg,
                                 }
                             }}
                         >
-                            <div className={`mt-1 w-5 h-5 rounded border flex items-center justify-center ${isSelected ? 'bg-primary-500 border-primary-500' : 'border-dark-500'}`}>
+                            <div className={`mt-1 w-5 h-5 rounded border flex items-center justify-center ${isSelected ? 'bg-primary-600 border-primary-600' : 'border-neutral-300'}`}>
                                 {isSelected && <CheckCircle className="w-3.5 h-3.5 text-white" />}
                             </div>
                             <div className="flex-1">

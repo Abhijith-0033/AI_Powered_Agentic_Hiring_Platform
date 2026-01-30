@@ -43,25 +43,25 @@ const ApplicantDetailsModal = ({ applicant, isOpen, onClose, onUpdateStatus }) =
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-            <div className="bg-dark-800 border border-dark-700 rounded-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto flex flex-col shadow-2xl">
+            <div className="bg-white border border-neutral-200 rounded-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto flex flex-col shadow-2xl">
 
                 {/* Header */}
-                <div className="flex justify-between items-start p-6 border-b border-dark-700 bg-dark-800 sticky top-0 z-10">
+                <div className="flex justify-between items-start p-6 border-b border-neutral-200 bg-white sticky top-0 z-10">
                     <div>
-                        <h2 className="text-xl font-bold text-dark-100">{candidate_name}</h2>
-                        <p className="text-primary-400 font-medium">{job_title}</p>
-                        <p className="text-sm text-dark-400">{candidate_email}</p>
+                        <h2 className="text-xl font-bold text-neutral-900">{candidate_name}</h2>
+                        <p className="text-primary-600 font-medium">{job_title}</p>
+                        <p className="text-sm text-neutral-500">{candidate_email}</p>
                     </div>
-                    <button onClick={onClose} className="text-dark-400 hover:text-white transition-colors">
+                    <button onClick={onClose} className="text-neutral-500 hover:text-neutral-900 transition-colors">
                         <X className="w-6 h-6" />
                     </button>
                 </div>
 
                 <div className="p-6 space-y-8">
                     {/* Status & Actions */}
-                    <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-dark-700/30 rounded-lg border border-dark-700">
+                    <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-neutral-50 rounded-lg border border-neutral-200">
                         <div className="flex items-center gap-3">
-                            <span className="text-sm text-dark-400">Current Status:</span>
+                            <span className="text-sm text-neutral-500">Current Status:</span>
                             <Badge>{status}</Badge>
                         </div>
                         <div className="flex gap-2">
@@ -71,7 +71,7 @@ const ApplicantDetailsModal = ({ applicant, isOpen, onClose, onUpdateStatus }) =
                             <Button size="sm" variant="primary" onClick={() => onUpdateStatus(applicant.id, 'Offer')}>
                                 Offer
                             </Button>
-                            <Button size="sm" variant="ghost" className="text-red-400 hover:text-red-300" onClick={() => onUpdateStatus(applicant.id, 'Rejected')}>
+                            <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-600" onClick={() => onUpdateStatus(applicant.id, 'Rejected')}>
                                 Reject
                             </Button>
                         </div>
@@ -79,13 +79,13 @@ const ApplicantDetailsModal = ({ applicant, isOpen, onClose, onUpdateStatus }) =
 
                     {/* Resume */}
                     <div>
-                        <h3 className="text-lg font-semibold text-white mb-3">Resume</h3>
-                        <div className="flex items-center justify-between p-4 bg-dark-700/50 rounded-lg border border-dark-600">
+                        <h3 className="text-lg font-semibold text-neutral-900 mb-3">Resume</h3>
+                        <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-neutral-200 shadow-sm">
                             <div className="flex items-center gap-3">
-                                <FileText className="w-8 h-8 text-primary-400" />
+                                <FileText className="w-8 h-8 text-primary-600" />
                                 <div>
-                                    <p className="font-medium text-dark-200">{resume_name || 'Resume.pdf'}</p>
-                                    <p className="text-xs text-dark-500"> Attached with application</p>
+                                    <p className="font-medium text-neutral-900">{resume_name || 'Resume.pdf'}</p>
+                                    <p className="text-xs text-neutral-500"> Attached with application</p>
                                 </div>
                             </div>
                             <Button variant="secondary" size="sm" onClick={handleViewResume} disabled={viewingResume}>
@@ -97,12 +97,12 @@ const ApplicantDetailsModal = ({ applicant, isOpen, onClose, onUpdateStatus }) =
                     {/* Screening Questions */}
                     {answers && answers.length > 0 && (
                         <div>
-                            <h3 className="text-lg font-semibold text-white mb-4">Screening Questions</h3>
+                            <h3 className="text-lg font-semibold text-neutral-900 mb-4">Screening Questions</h3>
                             <div className="space-y-4">
                                 {answers.map((ans, idx) => (
-                                    <div key={idx} className="p-4 bg-dark-700/20 rounded-lg border border-dark-700">
-                                        <p className="text-sm text-dark-400 mb-2">{ans.question}</p>
-                                        <p className="text-white font-medium pl-2 border-l-2 border-primary-500">
+                                    <div key={idx} className="p-4 bg-neutral-50 rounded-lg border border-neutral-200">
+                                        <p className="text-sm text-neutral-500 mb-2">{ans.question}</p>
+                                        <p className="text-neutral-900 font-medium pl-2 border-l-2 border-primary-500">
                                             {ans.answer === 'true' ? 'Yes' : ans.answer === 'false' ? 'No' : ans.answer}
                                         </p>
                                     </div>
@@ -114,18 +114,18 @@ const ApplicantDetailsModal = ({ applicant, isOpen, onClose, onUpdateStatus }) =
                     {/* Education Details */}
                     {applicant.education && applicant.education.length > 0 && (
                         <div>
-                            <h3 className="text-lg font-semibold text-white mb-4">Education</h3>
+                            <h3 className="text-lg font-semibold text-neutral-900 mb-4">Education</h3>
                             <div className="space-y-4">
                                 {applicant.education.map((edu, idx) => (
-                                    <div key={idx} className="p-4 bg-dark-700/20 rounded-lg border border-dark-700">
+                                    <div key={idx} className="p-4 bg-neutral-50 rounded-lg border border-neutral-200">
                                         <div className="flex justify-between items-start">
                                             <div>
-                                                <p className="text-white font-medium">{edu.degree}</p>
-                                                <p className="text-sm text-dark-400">{edu.institution}</p>
+                                                <p className="text-neutral-900 font-medium">{edu.degree}</p>
+                                                <p className="text-sm text-neutral-500">{edu.institution}</p>
                                             </div>
                                             <Badge variant="secondary">{edu.graduation_year}</Badge>
                                         </div>
-                                        {edu.gpa && <p className="text-sm text-dark-500 mt-2">GPA: {edu.gpa}</p>}
+                                        {edu.gpa && <p className="text-sm text-neutral-500 mt-2">GPA: {edu.gpa}</p>}
                                     </div>
                                 ))}
                             </div>
@@ -135,10 +135,10 @@ const ApplicantDetailsModal = ({ applicant, isOpen, onClose, onUpdateStatus }) =
                     {/* Skills */}
                     {applicant.skills && applicant.skills.length > 0 && (
                         <div>
-                            <h3 className="text-lg font-semibold text-white mb-4">Skills</h3>
+                            <h3 className="text-lg font-semibold text-neutral-900 mb-4">Skills</h3>
                             <div className="flex flex-wrap gap-2">
                                 {applicant.skills.map((skill, idx) => (
-                                    <Badge key={idx} variant="outline" className="bg-dark-700/30">
+                                    <Badge key={idx} variant="outline" className="bg-white">
                                         {skill}
                                     </Badge>
                                 ))}

@@ -33,20 +33,20 @@ const Footer = () => {
     ];
 
     return (
-        <footer className="bg-dark-900 border-t border-dark-800">
+        <footer className="bg-white border-t border-neutral-200">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
                     {/* Brand */}
                     <div className="col-span-2">
                         <Link to="/" className="flex items-center gap-2 mb-4">
-                            <div className="p-2 rounded-lg bg-gradient-to-br from-primary-500 to-secondary-500">
+                            <div className="p-2 rounded-lg bg-gradient-to-br from-primary-600 to-indigo-600">
                                 <Sparkles className="w-5 h-5 text-white" />
                             </div>
-                            <span className="text-xl font-bold text-dark-100">
-                                Hire<span className="text-primary-400">AI</span>
+                            <span className="text-xl font-bold text-neutral-900">
+                                Hire<span className="text-primary-600">AI</span>
                             </span>
                         </Link>
-                        <p className="text-dark-400 text-sm mb-4 max-w-xs">
+                        <p className="text-neutral-500 text-sm mb-4 max-w-xs">
                             AI-powered hiring platform connecting talented job seekers with innovative companies.
                         </p>
                         <div className="flex items-center gap-3">
@@ -58,7 +58,7 @@ const Footer = () => {
                                         href={social.href}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="p-2 rounded-lg bg-dark-800 text-dark-400 hover:text-dark-100 hover:bg-dark-700 transition-colors"
+                                        className="p-2 rounded-lg bg-neutral-100 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-200 transition-colors"
                                         aria-label={social.label}
                                     >
                                         <Icon className="w-4 h-4" />
@@ -70,7 +70,7 @@ const Footer = () => {
 
                     {/* Product Links */}
                     <div>
-                        <h4 className="text-sm font-semibold text-dark-100 uppercase tracking-wider mb-4">
+                        <h4 className="text-sm font-semibold text-neutral-900 uppercase tracking-wider mb-4">
                             Product
                         </h4>
                         <ul className="space-y-2">
@@ -78,7 +78,7 @@ const Footer = () => {
                                 <li key={link.label}>
                                     <a
                                         href={link.href}
-                                        className="text-sm text-dark-400 hover:text-dark-100 transition-colors"
+                                        className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
                                     >
                                         {link.label}
                                     </a>
@@ -89,7 +89,7 @@ const Footer = () => {
 
                     {/* Company Links */}
                     <div>
-                        <h4 className="text-sm font-semibold text-dark-100 uppercase tracking-wider mb-4">
+                        <h4 className="text-sm font-semibold text-neutral-900 uppercase tracking-wider mb-4">
                             Company
                         </h4>
                         <ul className="space-y-2">
@@ -97,7 +97,7 @@ const Footer = () => {
                                 <li key={link.label}>
                                     <a
                                         href={link.href}
-                                        className="text-sm text-dark-400 hover:text-dark-100 transition-colors"
+                                        className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
                                     >
                                         {link.label}
                                     </a>
@@ -108,7 +108,7 @@ const Footer = () => {
 
                     {/* Resources Links */}
                     <div>
-                        <h4 className="text-sm font-semibold text-dark-100 uppercase tracking-wider mb-4">
+                        <h4 className="text-sm font-semibold text-neutral-900 uppercase tracking-wider mb-4">
                             Resources
                         </h4>
                         <ul className="space-y-2">
@@ -116,7 +116,7 @@ const Footer = () => {
                                 <li key={link.label}>
                                     <a
                                         href={link.href}
-                                        className="text-sm text-dark-400 hover:text-dark-100 transition-colors"
+                                        className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
                                     >
                                         {link.label}
                                     </a>
@@ -127,8 +127,8 @@ const Footer = () => {
                 </div>
 
                 {/* Copyright */}
-                <div className="mt-12 pt-8 border-t border-dark-800">
-                    <p className="text-center text-sm text-dark-500">
+                <div className="mt-12 pt-8 border-t border-neutral-200">
+                    <p className="text-center text-sm text-neutral-500">
                         © {new Date().getFullYear()} HireAI. All rights reserved.
                     </p>
                 </div>

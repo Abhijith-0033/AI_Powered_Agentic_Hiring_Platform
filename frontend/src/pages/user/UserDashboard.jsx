@@ -98,7 +98,7 @@ const UserDashboard = () => {
         return (
             <DashboardLayout type="user" title="Dashboard">
                 <div className="flex items-center justify-center h-64">
-                    <div className="text-dark-400">Loading dashboard...</div>
+                    <div className="text-neutral-500">Loading dashboard...</div>
                 </div>
             </DashboardLayout>
         );
@@ -108,10 +108,10 @@ const UserDashboard = () => {
         <DashboardLayout type="user" title="Dashboard">
             {/* Welcome Message */}
             <div className="mb-8">
-                <h2 className="text-2xl font-bold text-dark-100 mb-2">
+                <h2 className="text-2xl font-bold text-neutral-900 mb-2">
                     Welcome back! 👋
                 </h2>
-                <p className="text-dark-400">
+                <p className="text-neutral-500">
                     Here's what's happening with your job search today.
                 </p>
             </div>
@@ -157,16 +157,16 @@ const UserDashboard = () => {
                 <CardContent>
                     <div className="flex items-center justify-between mb-4">
                         <div>
-                            <h3 className="text-lg font-semibold text-dark-100">Profile Completion</h3>
-                            <p className="text-sm text-dark-400">Complete your profile to get better matches</p>
+                            <h3 className="text-lg font-semibold text-neutral-900">Profile Completion</h3>
+                            <p className="text-sm text-neutral-500">Complete your profile to get better matches</p>
                         </div>
-                        <span className="text-2xl font-bold text-primary-400">
+                        <span className="text-2xl font-bold text-primary-600">
                             {stats.profileCompletion}%
                         </span>
                     </div>
-                    <div className="w-full h-3 bg-dark-700 rounded-full overflow-hidden">
+                    <div className="w-full h-3 bg-neutral-100 rounded-full overflow-hidden">
                         <div
-                            className="h-full rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 transition-all duration-500"
+                            className="h-full rounded-full bg-gradient-to-r from-primary-500 to-primary-600 transition-all duration-500"
                             style={{ width: `${stats.profileCompletion}%` }}
                         />
                     </div>
@@ -189,22 +189,22 @@ const UserDashboard = () => {
                                     return (
                                         <div
                                             key={item.id}
-                                            className="flex gap-3 animate-slide-in-right"
+                                            className="flex gap-3 animate-slide-in-right group p-2 hover:bg-neutral-50 rounded-lg transition-colors border border-transparent hover:border-neutral-100"
                                             style={{ animationDelay: `${index * 50}ms` }}
                                         >
                                             <div className={`
                                                 p-2 rounded-lg flex-shrink-0
-                                                ${color === 'primary' ? 'bg-primary-500/20 text-primary-400' :
-                                                    color === 'success' ? 'bg-emerald-500/20 text-emerald-400' :
-                                                        color === 'warning' ? 'bg-amber-500/20 text-amber-400' :
-                                                            'bg-sky-500/20 text-sky-400'}
+                                                ${color === 'primary' ? 'bg-primary-50 text-primary-600' :
+                                                    color === 'success' ? 'bg-success-50 text-success-600' :
+                                                        color === 'warning' ? 'bg-warning-50 text-warning-600' :
+                                                            'bg-info-50 text-info-600'}
                                                 `}>
                                                 <Icon className="w-4 h-4" />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-sm text-dark-200 truncate">{item.title}</p>
-                                                <p className="text-xs text-dark-500">{item.company}</p>
-                                                <p className="text-xs text-dark-600 mt-1 flex items-center gap-1">
+                                                <p className="text-sm font-medium text-neutral-900 truncate">{item.title}</p>
+                                                <p className="text-xs text-neutral-500">{item.company}</p>
+                                                <p className="text-xs text-neutral-400 mt-1 flex items-center gap-1">
                                                     <Clock className="w-3 h-3" />
                                                     {formatTime(item.timestamp)}
                                                 </p>
@@ -214,7 +214,7 @@ const UserDashboard = () => {
                                 })}
                             </div>
                         ) : (
-                            <div className="text-center py-8 text-dark-400 text-sm">
+                            <div className="text-center py-8 text-neutral-400 text-sm">
                                 No recent activity
                             </div>
                         )}
@@ -224,7 +224,7 @@ const UserDashboard = () => {
                 {/* Recommended Jobs */}
                 <div className="lg:col-span-2">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-dark-100">Recommended Jobs</h3>
+                        <h3 className="text-lg font-semibold text-neutral-900">Recommended Jobs</h3>
                         <Badge variant="primary" dot>
                             {jobs.length} Available
                         </Badge>

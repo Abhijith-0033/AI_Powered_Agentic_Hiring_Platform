@@ -154,11 +154,6 @@ const JobPosting = () => {
         });
 
         // We need to fetch requirements and questions for THIS job because the list only has basic info
-        // Wait, fetchJobs returns essential info. Does it return reqs/questions?
-        // Checking backend route GET /api/jobs ... it usually returns list. 
-        // We might need to fetch details or assume list has them.
-
-        // Let's fetch the full details for accuracy
         try {
             const res = await api.get(`/jobs/${job.job_id}`);
             if (res.data.success) {
@@ -195,7 +190,7 @@ const JobPosting = () => {
             {!showForm ? (
                 <div className="space-y-6">
                     <div className="flex justify-between items-center">
-                        <h2 className="text-xl font-bold text-dark-100">Posted Jobs</h2>
+                        <h2 className="text-xl font-bold text-neutral-900">Posted Jobs</h2>
                         <Button leftIcon={<Plus className="w-4 h-4" />} onClick={handleAddNew}>
                             Post New Job
                         </Button>
@@ -203,18 +198,18 @@ const JobPosting = () => {
 
                     <div className="grid gap-4">
                         {jobs.map((job) => (
-                            <Card key={job.job_id} className="hover:border-dark-600 transition-colors">
+                            <Card key={job.job_id} className="hover:border-primary-200 hover:shadow-sm transition-all duration-200">
                                 <CardContent className="p-6">
                                     <div className="flex justify-between items-start">
                                         <div>
                                             <div className="flex items-center gap-3 mb-2">
-                                                <h3 className="text-lg font-semibold text-dark-100">{job.job_title}</h3>
+                                                <h3 className="text-lg font-semibold text-neutral-900">{job.job_title}</h3>
                                                 <Badge>{job.job_type}</Badge>
                                                 <Badge variant={job.status === 'Open' ? 'success' : 'warning'}>
                                                     {job.status}
                                                 </Badge>
                                             </div>
-                                            <div className="flex flex-wrap gap-4 text-sm text-dark-400">
+                                            <div className="flex flex-wrap gap-4 text-sm text-neutral-500">
                                                 <span className="flex items-center gap-1">
                                                     <Briefcase className="w-4 h-4" /> {job.department}
                                                 </span>
@@ -237,7 +232,7 @@ const JobPosting = () => {
                 <div className="max-w-4xl mx-auto">
                     <div className="flex items-center justify-between mb-6">
                         <Button variant="ghost" onClick={() => setShowForm(false)}>← Back to Jobs</Button>
-                        <h2 className="text-2xl font-bold text-dark-100">
+                        <h2 className="text-2xl font-bold text-neutral-900">
                             {editingJobId ? 'Edit Job Posting' : 'Create New Job Posting'}
                         </h2>
                     </div>
@@ -297,10 +292,10 @@ const JobPosting = () => {
                                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                                     />
                                     <div className="flex items-end mb-2">
-                                        <label className="flex items-center gap-2 cursor-pointer text-dark-300">
+                                        <label className="flex items-center gap-2 cursor-pointer text-neutral-600">
                                             <input
                                                 type="checkbox"
-                                                className="w-4 h-4 rounded border-dark-600 bg-dark-800 text-primary-500 focus:ring-primary-500/20"
+                                                className="w-4 h-4 rounded border-neutral-300 bg-white text-primary-600 focus:ring-primary-500"
                                                 checked={formData.remote}
                                                 onChange={(e) => setFormData({ ...formData, remote: e.target.checked })}
                                             />
@@ -349,10 +344,10 @@ const JobPosting = () => {
                                 <CardDescription>Select information to require from applicants</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="flex items-center justify-between p-4 bg-dark-800/50 rounded-lg border border-dark-700">
+                                <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg border border-neutral-200">
                                     <div>
-                                        <h4 className="text-white font-medium">Require Education Details</h4>
-                                        <p className="text-sm text-dark-400">Ask applicants to share their education history</p>
+                                        <h4 className="text-neutral-900 font-medium">Require Education Details</h4>
+                                        <p className="text-sm text-neutral-500">Ask applicants to share their education history</p>
                                     </div>
                                     <Toggle
                                         label=""
@@ -360,10 +355,10 @@ const JobPosting = () => {
                                         onChange={(checked) => setFormData({ ...formData, require_education: checked })}
                                     />
                                 </div>
-                                <div className="flex items-center justify-between p-4 bg-dark-800/50 rounded-lg border border-dark-700">
+                                <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg border border-neutral-200">
                                     <div>
-                                        <h4 className="text-white font-medium">Require Skills Selection</h4>
-                                        <p className="text-sm text-dark-400">Ask applicants to select relevant skills from their profile</p>
+                                        <h4 className="text-neutral-900 font-medium">Require Skills Selection</h4>
+                                        <p className="text-sm text-neutral-500">Ask applicants to select relevant skills from their profile</p>
                                     </div>
                                     <Toggle
                                         label=""
@@ -402,14 +397,14 @@ const JobPosting = () => {
                                                 type="checkbox"
                                                 checked={req.is_mandatory}
                                                 onChange={(e) => updateRequirement(idx, 'is_mandatory', e.target.checked)}
-                                                className="w-4 h-4 rounded border-dark-600 bg-dark-800 text-primary-500"
+                                                className="w-4 h-4 rounded border-neutral-300 bg-white text-primary-600 focus:ring-primary-500"
                                             />
-                                            <span className="text-sm text-dark-400">Mandatory</span>
+                                            <span className="text-sm text-neutral-500">Mandatory</span>
                                         </div>
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="text-red-400 hover:text-red-300 hover:bg-red-400/10 mt-1"
+                                            className="text-red-500 hover:text-red-600 hover:bg-red-50 mt-1"
                                             onClick={() => removeRequirement(idx)}
                                         >
                                             <Trash2 className="w-4 h-4" />
@@ -434,13 +429,13 @@ const JobPosting = () => {
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 {questions.map((q, idx) => (
-                                    <div key={idx} className="p-4 bg-dark-800/50 rounded-lg border border-dark-700 space-y-3">
+                                    <div key={idx} className="p-4 bg-neutral-50 rounded-lg border border-neutral-200 space-y-3">
                                         <div className="flex justify-between items-start mb-2">
-                                            <h4 className="text-sm font-medium text-dark-300">Question #${idx + 1}</h4>
+                                            <h4 className="text-sm font-medium text-neutral-600">Question #${idx + 1}</h4>
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                className="text-red-400 h-8 px-2"
+                                                className="text-red-500 hover:text-red-600 h-8 px-2"
                                                 onClick={() => removeQuestion(idx)}
                                             >
                                                 Remove
@@ -480,9 +475,9 @@ const JobPosting = () => {
                                                 type="checkbox"
                                                 checked={q.is_required}
                                                 onChange={(e) => updateQuestion(idx, 'is_required', e.target.checked)}
-                                                className="w-4 h-4 rounded border-dark-600 bg-dark-800 text-primary-500"
+                                                className="w-4 h-4 rounded border-neutral-300 bg-white text-primary-600 focus:ring-primary-500"
                                             />
-                                            <span className="text-sm text-dark-400">Required answer</span>
+                                            <span className="text-sm text-neutral-500">Required answer</span>
                                         </div>
                                     </div>
                                 ))}

@@ -57,8 +57,8 @@ const JobCard = ({
     return (
         <div
             className={`
-        bg-dark-800/50 border border-dark-700/50 rounded-xl p-6
-        hover:border-dark-600 hover:shadow-lg hover:shadow-dark-900/50
+        bg-white border border-neutral-200 rounded-xl p-6
+        hover:border-primary-200 hover:shadow-lg hover:shadow-primary-500/5
         transition-all duration-300 hover:scale-[1.01]
         ${className}
       `}
@@ -72,25 +72,25 @@ const JobCard = ({
                         className="w-12 h-12 rounded-lg object-cover"
                     />
                 ) : (
-                    <div className="w-12 h-12 rounded-lg bg-primary-500/20 flex items-center justify-center text-primary-400 font-bold text-xl">
+                    <div className="w-12 h-12 rounded-lg bg-primary-50 flex items-center justify-center text-primary-600 font-bold text-xl">
                         {displayCompany?.charAt(0) || 'C'}
                     </div>
                 )}
 
                 <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold text-dark-100 truncate">
+                    <h3 className="text-lg font-semibold text-neutral-900 truncate">
                         {displayTitle}
                     </h3>
-                    <p className="text-sm text-dark-400">{displayCompany}</p>
+                    <p className="text-sm text-neutral-500">{displayCompany}</p>
                 </div>
 
                 {showMatchScore && matchScore && (
                     <div className="flex-shrink-0">
                         <div className={`
               px-3 py-1 rounded-full text-sm font-semibold
-              ${matchScore >= 90 ? 'bg-emerald-500/20 text-emerald-400' :
-                                matchScore >= 75 ? 'bg-amber-500/20 text-amber-400' :
-                                    'bg-dark-600 text-dark-300'}
+              ${matchScore >= 90 ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                                matchScore >= 75 ? 'bg-amber-50 text-amber-600 border border-amber-100' :
+                                    'bg-neutral-100 text-neutral-600 border border-neutral-200'}
             `}>
                             {matchScore}% Match
                         </div>
@@ -99,7 +99,7 @@ const JobCard = ({
             </div>
 
             {/* Details */}
-            <div className="flex flex-wrap items-center gap-3 mb-4 text-sm text-dark-400">
+            <div className="flex flex-wrap items-center gap-3 mb-4 text-sm text-neutral-500">
                 <div className="flex items-center gap-1">
                     <MapPin className="w-4 h-4" />
                     <span>{location || 'Remote'}</span>
@@ -115,7 +115,7 @@ const JobCard = ({
                     </div>
                 )}
                 {remote && (
-                    <div className="flex items-center gap-1 text-emerald-400">
+                    <div className="flex items-center gap-1 text-emerald-600">
                         <Wifi className="w-4 h-4" />
                         <span>Remote</span>
                     </div>
@@ -137,8 +137,8 @@ const JobCard = ({
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between pt-4 border-t border-dark-700/50">
-                <div className="flex items-center gap-3 text-sm text-dark-500">
+            <div className="flex items-center justify-between pt-4 border-t border-neutral-100">
+                <div className="flex items-center gap-3 text-sm text-neutral-400">
                     <div className="flex items-center gap-1">
                         <Clock className="w-4 h-4" />
                         <span>{displayPosted}</span>

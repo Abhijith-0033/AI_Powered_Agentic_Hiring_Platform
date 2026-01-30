@@ -96,6 +96,7 @@ const Profile = () => {
                     // Check if resume exists (use resume_pdf BYTEA column)
                     if (profileData.resume_pdf) {
                         setHasResume(true);
+                        setProfile(prev => ({ ...prev, resumeUrl: 'Resume Uploaded' }));
                         console.log('[Profile] Resume exists in database');
                     } else {
                         setHasResume(false);
@@ -315,7 +316,7 @@ const Profile = () => {
                     <Card className="mb-6">
                         <CardContent>
                             <div className="text-center py-12">
-                                <p className="text-lg text-dark-300">Loading profile...</p>
+                                <p className="text-lg text-neutral-500">Loading profile...</p>
                             </div>
                         </CardContent>
                     </Card>
@@ -332,8 +333,8 @@ const Profile = () => {
                     <Card className="mb-6">
                         <CardContent>
                             <div className="text-center py-12">
-                                <p className="text-lg text-red-400 mb-4">Failed to load profile</p>
-                                <p className="text-sm text-dark-400">{error}</p>
+                                <p className="text-lg text-error-500 mb-4">Failed to load profile</p>
+                                <p className="text-sm text-neutral-500">{error}</p>
                                 <Button
                                     className="mt-4"
                                     onClick={() => window.location.reload()}
@@ -361,18 +362,18 @@ const Profile = () => {
                                 <img
                                     src={profile.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || 'User')}`}
                                     alt={profile.name}
-                                    className="w-24 h-24 rounded-xl object-cover"
+                                    className="w-24 h-24 rounded-xl object-cover shadow-sm border border-neutral-100"
                                 />
-                                <button className="absolute inset-0 flex items-center justify-center bg-dark-900/80 opacity-0 group-hover:opacity-100 rounded-xl transition-opacity">
-                                    <User className="w-6 h-6 text-dark-100" />
+                                <button className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 rounded-xl transition-opacity">
+                                    <User className="w-6 h-6 text-white" />
                                 </button>
                             </div>
 
                             {/* Basic Info */}
                             <div className="flex-1">
-                                <h2 className="text-2xl font-bold text-dark-100 mb-1">{profile.name || 'Your Name'}</h2>
-                                <p className="text-dark-400 mb-3">{profile.title || 'Job Title'}</p>
-                                <div className="flex flex-wrap gap-4 text-sm text-dark-400">
+                                <h2 className="text-2xl font-bold text-neutral-900 mb-1">{profile.name || 'Your Name'}</h2>
+                                <p className="text-neutral-500 mb-3">{profile.title || 'Job Title'}</p>
+                                <div className="flex flex-wrap gap-4 text-sm text-neutral-500">
                                     <span className="flex items-center gap-1">
                                         <MapPin className="w-4 h-4" />
                                         {profile.location || 'Location'}
@@ -385,11 +386,11 @@ const Profile = () => {
                             </div>
 
                             {/* Completion Score */}
-                            <div className="text-center p-4 bg-dark-700/50 rounded-xl">
-                                <div className="text-3xl font-bold text-primary-400 mb-1">
+                            <div className="text-center p-4 bg-neutral-100/50 rounded-xl">
+                                <div className="text-3xl font-bold text-primary-600 mb-1">
                                     {profile.profileCompletion}%
                                 </div>
-                                <p className="text-xs text-dark-400">Profile Complete</p>
+                                <p className="text-xs text-neutral-500">Profile Complete</p>
                             </div>
                         </div>
                     </CardContent>
@@ -442,13 +443,13 @@ const Profile = () => {
                             />
 
                             <div className="flex flex-col gap-2">
-                                <label className="text-sm font-medium text-dark-200">Experience Level</label>
+                                <label className="text-sm font-medium text-neutral-700">Experience Level</label>
                                 <div className="flex items-center gap-2 h-10">
                                     <Toggle
                                         checked={profile.isFresher}
                                         onChange={handleFresherToggle}
                                     />
-                                    <span className="text-dark-300">I am a Fresher</span>
+                                    <span className="text-neutral-600">I am a Fresher</span>
                                 </div>
                             </div>
 
@@ -551,7 +552,7 @@ const Profile = () => {
                                     }}
                                 />
                                 <div className="flex flex-col gap-2">
-                                    <label className="text-sm font-medium text-dark-200">Currently Working Here</label>
+                                    <label className="text-sm font-medium text-neutral-700">Currently Working Here</label>
                                     <div className="flex items-center gap-2 h-10">
                                         <Toggle
                                             checked={(profile.experience && profile.experience[0]?.current) || false}
@@ -562,7 +563,7 @@ const Profile = () => {
                                                 setProfile({ ...profile, experience: newExp });
                                             }}
                                         />
-                                        <span className="text-dark-300">Currently working here</span>
+                                        <span className="text-neutral-600">Currently working here</span>
                                     </div>
                                 </div>
                                 <Input
@@ -678,7 +679,7 @@ const Profile = () => {
                         {hasResume ? (
                             // Resume EXISTS - Show View/Delete/Replace actions
                             <div className="space-y-4">
-                                <div className="flex items-center gap-2 text-sm text-emerald-400">
+                                <div className="flex items-center gap-2 text-sm text-success-600">
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
@@ -733,7 +734,7 @@ const Profile = () => {
                                     onFileSelect={(file) => setResumeFile(file)}
                                 />
                                 {resumeFile && (
-                                    <p className="text-sm text-emerald-400 mt-3">
+                                    <p className="text-sm text-success-600 mt-3">
                                         {resumeFile.name} selected - Click "Save Profile" to upload
                                     </p>
                                 )}

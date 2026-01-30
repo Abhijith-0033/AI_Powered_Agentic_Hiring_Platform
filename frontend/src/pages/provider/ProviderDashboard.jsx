@@ -50,7 +50,7 @@ const ProviderDashboard = () => {
         return (
             <DashboardLayout type="provider" title="Dashboard">
                 <div className="flex justify-center items-center h-64">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
                 </div>
             </DashboardLayout>
         );
@@ -82,9 +82,9 @@ const ProviderDashboard = () => {
     return (
         <DashboardLayout type="provider" title="Dashboard">
             {/* 1. Header / Welcome Card */}
-            <div className="mb-8 relative overflow-hidden rounded-xl bg-gradient-to-r from-dark-800 to-dark-700 border border-dark-600 shadow-lg glow-border">
-                <div className="absolute top-0 right-0 p-8 opacity-10">
-                    <Building2 className="w-64 h-64 text-primary-500" />
+            <div className="mb-8 relative overflow-hidden rounded-xl bg-white border border-neutral-200 shadow-sm">
+                <div className="absolute top-0 right-0 p-8 opacity-5">
+                    <Building2 className="w-64 h-64 text-primary-600" />
                 </div>
 
                 <div className="relative z-10 p-8 flex flex-col md:flex-row items-start md:items-center gap-6">
@@ -92,35 +92,35 @@ const ProviderDashboard = () => {
                         <img
                             src={company.logo}
                             alt={company.name}
-                            className="w-24 h-24 rounded-2xl object-cover border-2 border-dark-500 shadow-xl"
+                            className="w-24 h-24 rounded-2xl object-cover border border-neutral-200 shadow-sm"
                         />
                     ) : (
-                        <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary-500/20 to-secondary-500/20 flex items-center justify-center border border-dark-500">
-                            <Building2 className="w-10 h-10 text-primary-400" />
+                        <div className="w-24 h-24 rounded-2xl bg-primary-50 flex items-center justify-center border border-primary-100">
+                            <Building2 className="w-10 h-10 text-primary-600" />
                         </div>
                     )}
 
                     <div className="flex-1">
-                        <h2 className="text-3xl font-bold text-white mb-3">
+                        <h2 className="text-3xl font-bold text-neutral-900 mb-3">
                             Welcome back, {company?.name || user?.name || 'Recruiter'}! 👋
                         </h2>
 
-                        <div className="flex flex-wrap items-center gap-6 text-dark-300">
-                            <div className="flex items-center gap-2 bg-dark-900/40 px-3 py-1.5 rounded-lg border border-dark-600/50">
-                                <Mail className="w-4 h-4 text-primary-400" />
+                        <div className="flex flex-wrap items-center gap-6 text-neutral-600">
+                            <div className="flex items-center gap-2 bg-neutral-100 px-3 py-1.5 rounded-lg border border-neutral-200">
+                                <Mail className="w-4 h-4 text-primary-600" />
                                 <span className="text-sm font-medium">{user?.email}</span>
                             </div>
 
                             {company?.location && (
-                                <div className="flex items-center gap-2 bg-dark-900/40 px-3 py-1.5 rounded-lg border border-dark-600/50">
-                                    <MapPin className="w-4 h-4 text-secondary-400" />
+                                <div className="flex items-center gap-2 bg-neutral-100 px-3 py-1.5 rounded-lg border border-neutral-200">
+                                    <MapPin className="w-4 h-4 text-neutral-500" />
                                     <span className="text-sm font-medium">{company.location}</span>
                                 </div>
                             )}
 
                             {company?.industry && (
-                                <div className="flex items-center gap-2 bg-dark-900/40 px-3 py-1.5 rounded-lg border border-dark-600/50">
-                                    <Briefcase className="w-4 h-4 text-emerald-400" />
+                                <div className="flex items-center gap-2 bg-neutral-100 px-3 py-1.5 rounded-lg border border-neutral-200">
+                                    <Briefcase className="w-4 h-4 text-neutral-500" />
                                     <span className="text-sm font-medium">{company.industry}</span>
                                 </div>
                             )}
@@ -129,7 +129,7 @@ const ProviderDashboard = () => {
 
                     {!company && (
                         <Link to="/provider/company-profile">
-                            <Button variant="primary" className="shadow-glow">Set Up Profile</Button>
+                            <Button variant="primary" className="shadow-lg shadow-primary-500/20">Set Up Profile</Button>
                         </Link>
                     )}
                 </div>
@@ -173,10 +173,10 @@ const ProviderDashboard = () => {
 
             {/* 4. Analytics Section */}
             <div className="grid lg:grid-cols-2 gap-8 mb-8">
-                <Card className="border-dark-700 bg-dark-800/50">
+                <Card className="border-neutral-200 bg-white shadow-sm">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <TrendingUp className="w-5 h-5 text-primary-400" />
+                        <CardTitle className="flex items-center gap-2 text-neutral-900">
+                            <TrendingUp className="w-5 h-5 text-primary-600" />
                             Application Trends
                         </CardTitle>
                     </CardHeader>
@@ -184,20 +184,20 @@ const ProviderDashboard = () => {
                         <div className="h-64 w-full">
                             <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={applicationTrendData}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                                    <XAxis dataKey="name" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-                                    <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+                                    <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                                    <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                                     <Tooltip
-                                        contentStyle={{ backgroundColor: '#1C1C24', border: '1px solid #333', borderRadius: '8px' }}
-                                        itemStyle={{ color: '#fff' }}
+                                        contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                        itemStyle={{ color: '#1e293b' }}
                                     />
                                     <Line
                                         type="monotone"
                                         dataKey="apps"
-                                        stroke="#8B5CF6"
+                                        stroke="#2563eb"
                                         strokeWidth={3}
-                                        dot={{ fill: '#8B5CF6', r: 4 }}
-                                        activeDot={{ r: 6, fill: '#fff' }}
+                                        dot={{ fill: '#2563eb', r: 4 }}
+                                        activeDot={{ r: 6, fill: '#fff', stroke: '#2563eb', strokeWidth: 2 }}
                                     />
                                 </LineChart>
                             </ResponsiveContainer>
@@ -205,10 +205,10 @@ const ProviderDashboard = () => {
                     </CardContent>
                 </Card>
 
-                <Card className="border-dark-700 bg-dark-800/50">
+                <Card className="border-neutral-200 bg-white shadow-sm">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Briefcase className="w-5 h-5 text-secondary-400" />
+                        <CardTitle className="flex items-center gap-2 text-neutral-900">
+                            <Briefcase className="w-5 h-5 text-primary-600" />
                             Job Posting Activity
                         </CardTitle>
                     </CardHeader>
@@ -216,15 +216,15 @@ const ProviderDashboard = () => {
                         <div className="h-64 w-full">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={jobsPostedData}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                                    <XAxis dataKey="name" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-                                    <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+                                    <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                                    <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                                     <Tooltip
-                                        cursor={{ fill: '#FFFFFF05' }}
-                                        contentStyle={{ backgroundColor: '#1C1C24', border: '1px solid #333', borderRadius: '8px' }}
-                                        itemStyle={{ color: '#fff' }}
+                                        cursor={{ fill: '#f1f5f9' }}
+                                        contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                        itemStyle={{ color: '#1e293b' }}
                                     />
-                                    <Bar dataKey="jobs" fill="#0EA5E9" radius={[4, 4, 0, 0]} barSize={40} />
+                                    <Bar dataKey="jobs" fill="#0ea5e9" radius={[4, 4, 0, 0]} barSize={40} />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
@@ -248,9 +248,9 @@ const ProviderDashboard = () => {
                     <CardContent>
                         <div className="space-y-4">
                             {!company && (
-                                <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg mb-4 text-center">
-                                    <p className="text-yellow-500 mb-2 font-medium">Company Profile Missing</p>
-                                    <p className="text-sm text-dark-300 mb-3">You need to set up your profile before your jobs can be properly indexed.</p>
+                                <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg mb-4 text-center">
+                                    <p className="text-amber-800 mb-2 font-medium">Company Profile Missing</p>
+                                    <p className="text-sm text-neutral-600 mb-3">You need to set up your profile before your jobs can be properly indexed.</p>
                                 </div>
                             )}
 
@@ -258,11 +258,11 @@ const ProviderDashboard = () => {
                                 recentJobs.map((job) => (
                                     <div
                                         key={job.job_id}
-                                        className="flex items-center justify-between p-4 bg-dark-700/30 rounded-lg border border-dark-700 hover:border-dark-600 transition-colors"
+                                        className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg border border-neutral-100 hover:border-primary-200 hover:bg-white transition-all duration-200"
                                     >
                                         <div>
                                             <div className="flex items-center gap-2 mb-1">
-                                                <h4 className="font-medium text-dark-100">{job.job_title}</h4>
+                                                <h4 className="font-medium text-neutral-900">{job.job_title}</h4>
                                                 <Badge
                                                     variant={job.status === 'Open' ? 'success' : 'warning'}
                                                     size="sm"
@@ -270,19 +270,19 @@ const ProviderDashboard = () => {
                                                     {job.status}
                                                 </Badge>
                                             </div>
-                                            <p className="text-sm text-dark-400">
+                                            <p className="text-sm text-neutral-500">
                                                 {job.experience_level} • {job.location || 'Remote'}
                                             </p>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-sm text-dark-300">Posted {new Date(job.created_at).toLocaleDateString()}</p>
-                                            <Link to={`/jobs/${job.job_id}`} className="text-primary-400 text-xs hover:underline">View Details</Link>
+                                            <p className="text-sm text-neutral-500">Posted {new Date(job.created_at).toLocaleDateString()}</p>
+                                            <Link to={`/jobs/${job.job_id}`} className="text-primary-600 text-xs hover:underline font-medium">View Details</Link>
                                         </div>
                                     </div>
                                 ))
                             ) : (
-                                <div className="text-center py-8 text-dark-400">
-                                    <Briefcase className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                                <div className="text-center py-8 text-neutral-500">
+                                    <Briefcase className="w-12 h-12 mx-auto mb-3 text-neutral-300" />
                                     <p>No active jobs found for {company?.name || 'your company'}.</p>
                                 </div>
                             )}

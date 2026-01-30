@@ -114,7 +114,7 @@ const JobsInIndia = () => {
     const filterForm = (
         <div className="space-y-6">
             <div>
-                <label className="text-sm font-semibold text-dark-200 block mb-2 font-sans uppercase tracking-tight opacity-70">Role</label>
+                <label className="text-sm font-semibold text-neutral-700 block mb-2 font-sans uppercase tracking-tight opacity-70">Role</label>
                 <Input
                     placeholder="Search by title..."
                     value={localFilters.role}
@@ -125,7 +125,7 @@ const JobsInIndia = () => {
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-dark-200 block mb-2 font-sans uppercase tracking-tight opacity-70">Location</label>
+                <label className="text-sm font-semibold text-neutral-700 block mb-2 font-sans uppercase tracking-tight opacity-70">Location</label>
                 <Input
                     placeholder="City or state..."
                     value={localFilters.location}
@@ -136,15 +136,15 @@ const JobsInIndia = () => {
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-dark-200 block mb-2 px-1 font-sans uppercase tracking-tight opacity-70">Job Type</label>
+                <label className="text-sm font-semibold text-neutral-700 block mb-2 px-1 font-sans uppercase tracking-tight opacity-70">Job Type</label>
                 <div className="space-y-1">
                     {jobTypes.map((type) => (
                         <button
                             key={type.value}
                             onClick={() => handleFilterChange({ type: type.value })}
                             className={`w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors font-sans ${localFilters.type === type.value
-                                ? 'bg-primary-500/20 text-primary-400 font-bold border border-primary-500/20'
-                                : 'text-dark-400 hover:bg-dark-800'
+                                ? 'bg-primary-50 text-primary-600 font-bold border border-primary-100'
+                                : 'text-neutral-600 hover:bg-neutral-100'
                                 }`}
                         >
                             {type.label}
@@ -154,15 +154,15 @@ const JobsInIndia = () => {
             </div>
 
             <div>
-                <label className="text-sm font-semibold text-dark-200 block mb-2 px-1 font-sans uppercase tracking-tight opacity-70">Experience</label>
+                <label className="text-sm font-semibold text-neutral-700 block mb-2 px-1 font-sans uppercase tracking-tight opacity-70">Experience</label>
                 <div className="space-y-1">
                     {experienceLevels.map((exp) => (
                         <button
                             key={exp.value}
                             onClick={() => handleFilterChange({ experience: exp.value })}
                             className={`w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors font-sans ${localFilters.experience === exp.value
-                                ? 'bg-primary-500/20 text-primary-400 font-bold border border-primary-500/20'
-                                : 'text-dark-400 hover:bg-dark-800'
+                                ? 'bg-primary-50 text-primary-600 font-bold border border-primary-100'
+                                : 'text-neutral-600 hover:bg-neutral-100'
                                 }`}
                         >
                             {exp.label}
@@ -188,12 +188,12 @@ const JobsInIndia = () => {
         <DashboardLayout type="user" title="Jobs in India">
             <div className="max-w-7xl mx-auto px-4 font-sans">
                 {/* Mobile Header & Filter Toggle */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 border-b border-dark-800 pb-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 border-b border-neutral-200 pb-8">
                     <div>
-                        <h2 className="text-3xl font-extrabold text-dark-100 tracking-tight">
+                        <h2 className="text-3xl font-extrabold text-neutral-900 tracking-tight">
                             Explore Career Opportunities
                         </h2>
-                        <p className="text-dark-400 text-sm mt-1 font-medium">
+                        <p className="text-neutral-500 text-sm mt-1 font-medium">
                             {loading ? 'Refreshing list...' : `${total} jobs found across India (Real-time tracking)`}
                         </p>
                     </div>
@@ -211,11 +211,11 @@ const JobsInIndia = () => {
                     {/* Desktop Sidebar Filters */}
                     <aside className="hidden lg:block">
                         <div className="sticky top-24">
-                            <Card className="bg-dark-900 border-dark-800 shadow-2xl">
+                            <Card className="bg-white border-neutral-200 shadow-xl">
                                 <CardContent className="p-6">
-                                    <div className="flex items-center gap-2 mb-6 pb-4 border-b border-dark-800">
-                                        <SlidersHorizontal className="w-5 h-5 text-primary-400" />
-                                        <h3 className="font-bold text-dark-100 uppercase tracking-widest text-[11px]">Server-Side Filters</h3>
+                                    <div className="flex items-center gap-2 mb-6 pb-4 border-b border-neutral-100">
+                                        <SlidersHorizontal className="w-5 h-5 text-primary-600" />
+                                        <h3 className="font-bold text-neutral-900 uppercase tracking-widest text-[11px]">Server-Side Filters</h3>
                                     </div>
                                     {filterForm}
                                 </CardContent>
@@ -233,11 +233,11 @@ const JobsInIndia = () => {
                                     <Badge
                                         key={key}
                                         variant="primary"
-                                        className="flex items-center gap-2 px-3 py-1.5 border-primary-500/40 bg-primary-500/10 text-primary-400 rounded-lg shadow-sm"
+                                        className="flex items-center gap-2 px-3 py-1.5 border-primary-100 bg-primary-50 text-primary-600 rounded-lg shadow-sm"
                                     >
                                         <span className="capitalize text-[10px] font-black uppercase tracking-tighter opacity-60 mr-1">{key}</span>
                                         <span className="text-xs font-bold tracking-wide">{value}</span>
-                                        <button onClick={() => handleFilterChange({ [key]: '' })} className="ml-1 p-0.5 hover:bg-primary-500/20 rounded-full transition-all">
+                                        <button onClick={() => handleFilterChange({ [key]: '' })} className="ml-1 p-0.5 hover:bg-primary-100 rounded-full transition-all">
                                             <X className="w-3.5 h-3.5" />
                                         </button>
                                     </Badge>
@@ -248,7 +248,7 @@ const JobsInIndia = () => {
                         {loading ? (
                             <div className="space-y-6">
                                 {[1, 2, 3, 4].map(i => (
-                                    <Card key={i} className="animate-pulse bg-dark-800/20 border-dark-800 h-44 rounded-xl" />
+                                    <Card key={i} className="animate-pulse bg-neutral-100 border-neutral-200 h-44 rounded-xl" />
                                 ))}
                             </div>
                         ) : jobs.length > 0 ? (
@@ -256,46 +256,46 @@ const JobsInIndia = () => {
                                 {jobs.map((job, index) => (
                                     <Card
                                         key={job.job_id || index}
-                                        className="group hover:border-primary-500/40 transition-all duration-300 bg-dark-900 shadow-md border-dark-800 rounded-xl overflow-hidden"
+                                        className="group hover:border-primary-200 transition-all duration-300 bg-white shadow-md border-neutral-200 rounded-xl overflow-hidden"
                                     >
                                         <CardContent className="p-8">
                                             <div className="flex flex-col md:flex-row justify-between md:items-start gap-8">
                                                 <div className="flex-1">
                                                     <div className="flex flex-wrap items-center gap-3 mb-4">
-                                                        <h3 className="text-2xl font-black text-dark-100 group-hover:text-primary-400 transition-colors tracking-tight leading-none">
+                                                        <h3 className="text-2xl font-black text-neutral-900 group-hover:text-primary-600 transition-colors tracking-tight leading-none">
                                                             {job.job_title}
                                                         </h3>
-                                                        <Badge variant="outline" className="text-[9px] font-black uppercase tracking-[0.2em] border-purple-500/30 bg-purple-500/10 text-purple-400 px-2.5 py-1">
+                                                        <Badge variant="outline" className="text-[9px] font-black uppercase tracking-[0.2em] border-purple-200 bg-purple-50 text-purple-600 px-2.5 py-1">
                                                             External Job
                                                         </Badge>
                                                     </div>
 
                                                     <div className="flex flex-wrap gap-y-4 gap-x-8 text-[14px] mb-6">
-                                                        <div className="flex items-center gap-2.5 text-dark-200">
-                                                            <Briefcase className="w-5 h-5 text-primary-500" />
-                                                            <span className="font-extrabold text-primary-400 tracking-wide uppercase">
+                                                        <div className="flex items-center gap-2.5 text-neutral-700">
+                                                            <Briefcase className="w-5 h-5 text-primary-600" />
+                                                            <span className="font-extrabold text-primary-600 tracking-wide uppercase">
                                                                 {job.external_company_name}
                                                             </span>
                                                         </div>
-                                                        <div className="flex items-center gap-2.5 text-dark-400 font-bold">
-                                                            <MapPin className="w-5 h-5 text-dark-600" />
+                                                        <div className="flex items-center gap-2.5 text-neutral-600 font-bold">
+                                                            <MapPin className="w-5 h-5 text-neutral-400" />
                                                             {job.location}
                                                         </div>
                                                         {job.job_type && (
-                                                            <div className="flex items-center gap-2.5 text-dark-400 font-bold">
-                                                                <Clock className="w-5 h-5 text-dark-600" />
+                                                            <div className="flex items-center gap-2.5 text-neutral-600 font-bold">
+                                                                <Clock className="w-5 h-5 text-neutral-400" />
                                                                 {job.job_type}
                                                             </div>
                                                         )}
                                                         {job.experience_level && (
-                                                            <div className="flex items-center gap-2.5 text-dark-400 font-bold">
-                                                                <GraduationCap className="w-5 h-5 text-dark-600" />
+                                                            <div className="flex items-center gap-2.5 text-neutral-600 font-bold">
+                                                                <GraduationCap className="w-5 h-5 text-neutral-400" />
                                                                 {job.experience_level}
                                                             </div>
                                                         )}
                                                     </div>
 
-                                                    <p className="text-dark-400 line-clamp-2 leading-relaxed mb-4 text-base font-medium opacity-80">
+                                                    <p className="text-neutral-500 line-clamp-2 leading-relaxed mb-4 text-base font-medium opacity-90">
                                                         {job.job_description}
                                                     </p>
                                                 </div>
@@ -304,7 +304,7 @@ const JobsInIndia = () => {
                                                         variant="primary"
                                                         size="lg"
                                                         onClick={() => handleApplyClick(job.source_url)}
-                                                        className="shadow-2xl shadow-primary-500/30 whitespace-nowrap font-black uppercase tracking-widest h-12 rounded-lg"
+                                                        className="shadow-xl shadow-primary-500/20 whitespace-nowrap font-black uppercase tracking-widest h-12 rounded-lg"
                                                     >
                                                         Apply on {job.source_name === 'jooble' ? 'Jooble' : 'Adzuna'}
                                                     </Button>
@@ -315,13 +315,13 @@ const JobsInIndia = () => {
                                 ))}
                             </div>
                         ) : (
-                            <Card className="bg-dark-900/40 border-dashed border-dark-700 rounded-3xl">
+                            <Card className="bg-neutral-50 border-dashed border-neutral-300 rounded-3xl">
                                 <CardContent className="py-32 text-center">
-                                    <div className="w-24 h-24 bg-dark-800 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner shadow-black">
-                                        <Search className="w-12 h-12 text-dark-500" />
+                                    <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-8 shadow-sm border border-neutral-100">
+                                        <Search className="w-12 h-12 text-neutral-400" />
                                     </div>
-                                    <h3 className="text-3xl font-black text-dark-100 mb-4 tracking-tight">No match found on the server</h3>
-                                    <p className="text-dark-400 max-w-sm mx-auto mb-10 font-bold leading-relaxed">
+                                    <h3 className="text-3xl font-black text-neutral-900 mb-4 tracking-tight">No match found on the server</h3>
+                                    <p className="text-neutral-500 max-w-sm mx-auto mb-10 font-bold leading-relaxed">
                                         The database returned zero records for your current filter combination.
                                         Try broadening your criteria.
                                     </p>
@@ -348,7 +348,7 @@ const JobsInIndia = () => {
                                 >
                                     Previous
                                 </Button>
-                                <div className="flex items-center justify-center px-8 h-12 bg-dark-800/80 rounded-xl font-black text-sm text-dark-100 min-w-[120px] shadow-sm">
+                                <div className="flex items-center justify-center px-8 h-12 bg-white rounded-xl font-black text-sm text-neutral-900 min-w-[120px] shadow-sm border border-neutral-200">
                                     PAGE {page}
                                 </div>
                                 <Button
@@ -373,21 +373,21 @@ const JobsInIndia = () => {
             {/* Mobile Filter Drawer */}
             {showMobileFilters && (
                 <div className="fixed inset-0 z-50 lg:hidden">
-                    <div className="absolute inset-0 bg-black/90 backdrop-blur-xl" onClick={() => setShowMobileFilters(false)} />
-                    <div className="absolute right-0 top-0 bottom-0 w-80 bg-dark-900 border-l border-dark-800 p-10 flex flex-col animate-slide-in-right shadow-2xl">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowMobileFilters(false)} />
+                    <div className="absolute right-0 top-0 bottom-0 w-80 bg-white border-l border-neutral-200 p-10 flex flex-col animate-slide-in-right shadow-2xl">
                         <div className="flex items-center justify-between mb-12">
                             <div>
-                                <h3 className="text-2xl font-black text-dark-100 tracking-tighter uppercase">Filters</h3>
-                                <p className="text-[10px] text-primary-500 mt-1 uppercase font-black tracking-[0.3em]">Hiring Platform</p>
+                                <h3 className="text-2xl font-black text-neutral-900 tracking-tighter uppercase">Filters</h3>
+                                <p className="text-[10px] text-primary-600 mt-1 uppercase font-black tracking-[0.3em]">Hiring Platform</p>
                             </div>
-                            <button onClick={() => setShowMobileFilters(false)} className="p-3 text-dark-400 hover:text-white transition-all bg-dark-800 rounded-xl shadow-lg">
+                            <button onClick={() => setShowMobileFilters(false)} className="p-3 text-neutral-500 hover:text-neutral-900 transition-all bg-neutral-100 rounded-xl shadow-sm">
                                 <X className="w-6 h-6" />
                             </button>
                         </div>
                         <div className="flex-1 overflow-y-auto pr-4 custom-scrollbar">
                             {filterForm}
                         </div>
-                        <Button className="mt-10 font-black h-14 shadow-2xl shadow-primary-500/30 rounded-xl uppercase tracking-widest text-sm" fullWidth onClick={() => setShowMobileFilters(false)}>
+                        <Button className="mt-10 font-black h-14 shadow-xl shadow-primary-500/20 rounded-xl uppercase tracking-widest text-sm" fullWidth onClick={() => setShowMobileFilters(false)}>
                             Apply Filters
                         </Button>
                     </div>

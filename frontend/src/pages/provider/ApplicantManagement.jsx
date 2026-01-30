@@ -125,7 +125,7 @@ const ApplicantManagement = () => {
         return (
             <DashboardLayout type="provider" title="Applicants">
                 <div className="flex justify-center items-center h-64">
-                    <p className="text-dark-400">Loading applicants...</p>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
                 </div>
             </DashboardLayout>
         );
@@ -136,10 +136,10 @@ const ApplicantManagement = () => {
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <h2 className="text-2xl font-bold text-dark-100 mb-2">
+                    <h2 className="text-2xl font-bold text-neutral-900 mb-2">
                         Applicant Management
                     </h2>
-                    <p className="text-dark-400">
+                    <p className="text-neutral-500">
                         Review and manage candidates for your open positions.
                     </p>
                 </div>
@@ -157,10 +157,10 @@ const ApplicantManagement = () => {
                             key={stat.id}
                             onClick={() => setStatusFilter(stat.id)}
                             className={`
-                px-4 py-2 rounded-lg font-medium text-sm transition-all
+                px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 border
                 ${stat.active
-                                    ? 'bg-primary-500/20 text-primary-400 border border-primary-500/50'
-                                    : 'bg-dark-800 text-dark-400 border border-dark-700 hover:border-dark-600'}
+                                    ? 'bg-primary-50 text-primary-600 border-primary-200 ring-2 ring-primary-100'
+                                    : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50'}
               `}
                         >
                             {stat.label} ({stat.value})
@@ -169,7 +169,7 @@ const ApplicantManagement = () => {
                 </div>
 
                 {/* Filters */}
-                <Card className="mb-6">
+                <Card className="mb-6 shadow-sm">
                     <CardContent className="flex flex-wrap items-center gap-4">
                         <div className="flex-1 min-w-[200px]">
                             <Input
@@ -185,7 +185,7 @@ const ApplicantManagement = () => {
                             onChange={(e) => setJobFilter(e.target.value)}
                             className="w-64"
                         />
-                        <p className="text-sm text-dark-400">
+                        <p className="text-sm text-neutral-500">
                             Showing {filteredApplicants.length} applicants
                         </p>
                     </CardContent>
@@ -214,9 +214,9 @@ const ApplicantManagement = () => {
                 ) : (
                     <Card>
                         <CardContent className="py-16 text-center">
-                            <Users className="w-16 h-16 text-dark-600 mx-auto mb-4" />
-                            <h3 className="text-xl font-semibold text-dark-200 mb-2">No applicants found</h3>
-                            <p className="text-dark-400">
+                            <Users className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
+                            <h3 className="text-xl font-semibold text-neutral-900 mb-2">No applicants found</h3>
+                            <p className="text-neutral-500">
                                 Try adjusting your search or filter criteria
                             </p>
                         </CardContent>

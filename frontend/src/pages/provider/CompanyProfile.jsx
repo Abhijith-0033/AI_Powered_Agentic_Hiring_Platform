@@ -135,7 +135,7 @@ const CompanyProfile = () => {
         return (
             <DashboardLayout type="provider">
                 <div className="flex justify-center items-center h-64">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
                 </div>
             </DashboardLayout>
         );
@@ -146,23 +146,23 @@ const CompanyProfile = () => {
             <div className="max-w-3xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <h2 className="text-2xl font-bold text-dark-100 mb-2">
+                    <h2 className="text-2xl font-bold text-neutral-900 mb-2">
                         Company Profile
                     </h2>
-                    <p className="text-dark-400">
+                    <p className="text-neutral-500">
                         Manage your company information and employer branding.
                     </p>
                 </div>
 
                 {message.text && (
-                    <div className={`p-4 mb-6 rounded-lg ${message.type === 'success' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                    <div className={`p-4 mb-6 rounded-lg border ${message.type === 'success' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
                         {message.text}
                     </div>
                 )}
 
                 <form onSubmit={handleSubmit}>
                     {/* Company Logo */}
-                    <Card className="mb-6">
+                    <Card className="mb-6 shadow-sm">
                         <CardHeader>
                             <CardTitle>Company Logo</CardTitle>
                             <CardDescription>
@@ -172,7 +172,7 @@ const CompanyProfile = () => {
                         <CardContent>
                             <div className="flex items-center gap-6">
                                 <div className="relative group">
-                                    <div className="w-24 h-24 rounded-xl border-2 border-dark-600 overflow-hidden bg-dark-800 flex items-center justify-center">
+                                    <div className="w-24 h-24 rounded-xl border border-neutral-200 overflow-hidden bg-white flex items-center justify-center shadow-sm">
                                         {logoPreview ? (
                                             <img
                                                 src={logoPreview}
@@ -180,15 +180,15 @@ const CompanyProfile = () => {
                                                 className="w-full h-full object-cover"
                                             />
                                         ) : (
-                                            <Building2 className="w-10 h-10 text-dark-400" />
+                                            <Building2 className="w-10 h-10 text-neutral-300" />
                                         )}
                                     </div>
                                     <button
                                         type="button"
                                         onClick={() => fileInputRef.current?.click()}
-                                        className="absolute inset-0 flex items-center justify-center bg-dark-900/80 opacity-0 group-hover:opacity-100 rounded-xl transition-opacity cursor-pointer"
+                                        className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 rounded-xl transition-opacity cursor-pointer"
                                     >
-                                        <Camera className="w-6 h-6 text-dark-100" />
+                                        <Camera className="w-6 h-6 text-white" />
                                     </button>
                                 </div>
                                 <div>
@@ -199,8 +199,8 @@ const CompanyProfile = () => {
                                         accept="image/png, image/jpeg, image/jpg"
                                         onChange={handleLogoChange}
                                     />
-                                    <p className="text-dark-200 font-medium mb-2">Upload new logo</p>
-                                    <p className="text-sm text-dark-500 mb-3">PNG, JPG up to 5MB.</p>
+                                    <p className="text-neutral-900 font-medium mb-1">Upload new logo</p>
+                                    <p className="text-sm text-neutral-500 mb-3">PNG, JPG up to 5MB.</p>
                                     <Button
                                         type="button"
                                         variant="secondary"
@@ -215,7 +215,7 @@ const CompanyProfile = () => {
                     </Card>
 
                     {/* Company Information */}
-                    <Card className="mb-6">
+                    <Card className="mb-6 shadow-sm">
                         <CardHeader>
                             <CardTitle>Company Information</CardTitle>
                         </CardHeader>
@@ -235,7 +235,7 @@ const CompanyProfile = () => {
                                     label="Company Email"
                                     value={user?.email || ''}
                                     disabled
-                                    className="bg-dark-800/50 text-dark-400 cursor-not-allowed" // Visual indication of read-only
+                                    className="bg-neutral-50 text-neutral-500 cursor-not-allowed border-neutral-200" // Visual indication of read-only
                                     hint="Your registered email is used for company verification"
                                 />
 
@@ -279,7 +279,7 @@ const CompanyProfile = () => {
                     </Card>
 
                     {/* Social Profiles */}
-                    <Card className="mb-6">
+                    <Card className="mb-6 shadow-sm">
                         <CardHeader>
                             <CardTitle>Social Profiles</CardTitle>
                         </CardHeader>

@@ -77,7 +77,6 @@ const AITools = () => {
     ];
 
 
-
     const [jobs, setJobs] = React.useState([]);
     const [selectedJob, setSelectedJob] = React.useState('');
     const [loading, setLoading] = React.useState(false);
@@ -128,10 +127,10 @@ const AITools = () => {
             <div className="max-w-6xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <h2 className="text-2xl font-bold text-dark-100 mb-2">
+                    <h2 className="text-2xl font-bold text-neutral-900 mb-2">
                         AI-Powered Hiring Tools
                     </h2>
-                    <p className="text-dark-400">
+                    <p className="text-neutral-500">
                         Leverage AI to streamline your hiring process and make better decisions.
                     </p>
                 </div>
@@ -146,27 +145,27 @@ const AITools = () => {
                             <Card
                                 key={tool.id}
                                 hover
-                                className="group animate-fade-in"
+                                className="group animate-fade-in shadow-sm hover:shadow-md transition-shadow"
                                 style={{ animationDelay: `${index * 50}ms` }}
                             >
                                 <CardContent>
                                     <div className="flex items-start justify-between mb-4">
                                         <div className={`
                       p-3 rounded-xl 
-                      ${tool.color === 'primary' ? 'bg-primary-500/20' :
-                                                tool.color === 'secondary' ? 'bg-secondary-500/20' :
-                                                    tool.color === 'success' ? 'bg-emerald-500/20' :
-                                                        tool.color === 'warning' ? 'bg-amber-500/20' :
-                                                            'bg-rose-500/20'}
-                      group-hover:scale-110 transition-transform
+                      ${tool.color === 'primary' ? 'bg-primary-50' :
+                                                tool.color === 'secondary' ? 'bg-indigo-50' :
+                                                    tool.color === 'success' ? 'bg-emerald-50' :
+                                                        tool.color === 'warning' ? 'bg-amber-50' :
+                                                            'bg-rose-50'}
+                      group-hover:scale-110 transition-transform duration-300
                     `}>
                                             <Icon className={`
                         w-6 h-6
-                        ${tool.color === 'primary' ? 'text-primary-400' :
-                                                    tool.color === 'secondary' ? 'text-secondary-400' :
-                                                        tool.color === 'success' ? 'text-emerald-400' :
-                                                            tool.color === 'warning' ? 'text-amber-400' :
-                                                                'text-rose-400'}
+                        ${tool.color === 'primary' ? 'text-primary-600' :
+                                                    tool.color === 'secondary' ? 'text-indigo-600' :
+                                                        tool.color === 'success' ? 'text-emerald-600' :
+                                                            tool.color === 'warning' ? 'text-amber-600' :
+                                                                'text-rose-600'}
                       `} />
                                         </div>
                                         {tool.status === 'beta' && (
@@ -174,17 +173,17 @@ const AITools = () => {
                                         )}
                                     </div>
 
-                                    <h3 className="font-semibold text-dark-100 mb-2">{tool.title}</h3>
-                                    <p className="text-sm text-dark-400 mb-4">{tool.description}</p>
+                                    <h3 className="font-semibold text-neutral-900 mb-2">{tool.title}</h3>
+                                    <p className="text-sm text-neutral-500 mb-4">{tool.description}</p>
 
                                     {tool.stats && (
-                                        <p className="text-xs text-dark-500 mb-4">{tool.stats}</p>
+                                        <p className="text-xs text-neutral-400 mb-4">{tool.stats}</p>
                                     )}
 
                                     {isAutoShortlist && (
                                         <div className="mb-4">
                                             <select
-                                                className="w-full bg-dark-800 border border-dark-700 rounded-md p-2 text-sm text-dark-200"
+                                                className="w-full bg-white border border-neutral-200 rounded-lg p-2 text-sm text-neutral-700 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
                                                 value={selectedJob}
                                                 onChange={(e) => setSelectedJob(e.target.value)}
                                             >
@@ -201,6 +200,8 @@ const AITools = () => {
                                         fullWidth
                                         onClick={() => handleRunTool(tool.id)}
                                         disabled={isAutoShortlist && !selectedJob || loading}
+                                        variant="outline"
+                                        className="hover:bg-primary-50 hover:text-primary-600 hover:border-primary-200"
                                     >
                                         {loading && isAutoShortlist ? 'Processing...' : 'Run Tool'}
                                     </Button>
@@ -212,18 +213,18 @@ const AITools = () => {
 
                 {/* Results Section (Temporary) */}
                 {results && (
-                    <Card className="mb-8">
+                    <Card className="mb-8 shadow-sm">
                         <CardHeader>
                             <CardTitle>Shortlist Results</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
                                 {results.map((result, i) => (
-                                    <div key={i} className="flex justify-between items-center p-3 bg-dark-800 rounded">
+                                    <div key={i} className="flex justify-between items-center p-4 bg-neutral-50 rounded-xl border border-neutral-100">
                                         <div>
-                                            <p className="font-bold text-dark-100">{result.name}</p>
-                                            <p className="text-sm text-dark-400">{result.email}</p>
-                                            <p className="text-xs text-dark-500 mt-1">{result.analysis_data?.summary}</p>
+                                            <p className="font-bold text-neutral-900">{result.name}</p>
+                                            <p className="text-sm text-neutral-500">{result.email}</p>
+                                            <p className="text-xs text-neutral-400 mt-1">{result.analysis_data?.summary}</p>
                                         </div>
                                         <div className="text-right">
                                             <Badge variant={result.score > 70 ? 'success' : 'warning'}>

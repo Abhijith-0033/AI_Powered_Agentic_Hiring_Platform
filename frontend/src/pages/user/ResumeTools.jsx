@@ -181,43 +181,43 @@ const ResumeTools = () => {
             <div className="max-w-6xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <h2 className="text-2xl font-bold text-dark-100 mb-2">
+                    <h2 className="text-2xl font-bold text-neutral-900 mb-2">
                         Resume Management
                     </h2>
-                    <p className="text-dark-400">
+                    <p className="text-neutral-500">
                         Upload, optimize, and manage your resumes with AI assistance. ({resumeCount}/5 resumes)
                     </p>
                 </div>
 
                 {/* Quick Actions */}
                 <div className="grid md:grid-cols-3 gap-6 mb-8">
-                    <Card hover className="cursor-not-allowed group opacity-50">
+                    <Card hover className="cursor-not-allowed group opacity-60 bg-neutral-50 border-neutral-200">
                         <CardContent className="text-center py-8">
-                            <div className="p-4 rounded-xl bg-secondary-500/20 w-fit mx-auto mb-4">
-                                <Sparkles className="w-8 h-8 text-secondary-400" />
+                            <div className="p-4 rounded-xl bg-purple-50 w-fit mx-auto mb-4">
+                                <Sparkles className="w-8 h-8 text-purple-600" />
                             </div>
-                            <h3 className="text-lg font-semibold text-dark-100 mb-2">Generate Resume</h3>
-                            <p className="text-sm text-dark-400">Create an AI-optimized resume (Coming Soon)</p>
+                            <h3 className="text-lg font-semibold text-neutral-900 mb-2">Generate Resume</h3>
+                            <p className="text-sm text-neutral-500">Create an AI-optimized resume (Coming Soon)</p>
                         </CardContent>
                     </Card>
 
-                    <Card hover className="cursor-not-allowed group opacity-50">
+                    <Card hover className="cursor-not-allowed group opacity-60 bg-neutral-50 border-neutral-200">
                         <CardContent className="text-center py-8">
-                            <div className="p-4 rounded-xl bg-emerald-500/20 w-fit mx-auto mb-4">
-                                <RefreshCw className="w-8 h-8 text-emerald-400" />
+                            <div className="p-4 rounded-xl bg-emerald-50 w-fit mx-auto mb-4">
+                                <RefreshCw className="w-8 h-8 text-emerald-600" />
                             </div>
-                            <h3 className="text-lg font-semibold text-dark-100 mb-2">Optimize Resume</h3>
-                            <p className="text-sm text-dark-400">Improve your resume for specific jobs (Coming Soon)</p>
+                            <h3 className="text-lg font-semibold text-neutral-900 mb-2">Optimize Resume</h3>
+                            <p className="text-sm text-neutral-500">Improve your resume for specific jobs (Coming Soon)</p>
                         </CardContent>
                     </Card>
 
-                    <Card hover className="cursor-pointer group">
+                    <Card hover className="cursor-pointer group border-neutral-200">
                         <CardContent className="text-center py-8">
-                            <div className="p-4 rounded-xl bg-primary-500/20 w-fit mx-auto mb-4 group-hover:scale-110 transition-transform">
-                                <Upload className="w-8 h-8 text-primary-400" />
+                            <div className="p-4 rounded-xl bg-primary-50 w-fit mx-auto mb-4 group-hover:scale-110 transition-transform">
+                                <Upload className="w-8 h-8 text-primary-600" />
                             </div>
-                            <h3 className="text-lg font-semibold text-dark-100 mb-2">Upload Resume</h3>
-                            <p className="text-sm text-dark-400">Upload your existing resume for analysis</p>
+                            <h3 className="text-lg font-semibold text-neutral-900 mb-2">Upload Resume</h3>
+                            <p className="text-sm text-neutral-500">Upload your existing resume for analysis</p>
                         </CardContent>
                     </Card>
                 </div>
@@ -242,30 +242,30 @@ const ResumeTools = () => {
                             />
 
                             {!canUpload && resumeCount >= 5 && (
-                                <div className="mt-4 p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-                                    <p className="text-sm text-amber-400 font-medium">
+                                <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                                    <p className="text-sm text-amber-600 font-medium">
                                         ⚠️ You can upload a maximum of 5 resumes.
                                     </p>
-                                    <p className="text-xs text-amber-400/80 mt-1">
+                                    <p className="text-xs text-amber-600/80 mt-1">
                                         Delete an existing resume to upload a new one.
                                     </p>
                                 </div>
                             )}
 
                             {canUpload && (
-                                <div className="mt-4 p-4 bg-dark-700/30 rounded-lg border border-dark-700">
-                                    <h4 className="text-sm font-medium text-dark-200 mb-2">After Upload:</h4>
-                                    <ul className="space-y-2 text-sm text-dark-400">
+                                <div className="mt-4 p-4 bg-neutral-50 rounded-lg border border-neutral-200">
+                                    <h4 className="text-sm font-medium text-neutral-900 mb-2">After Upload:</h4>
+                                    <ul className="space-y-2 text-sm text-neutral-500">
                                         <li className="flex items-center gap-2">
-                                            <Check className="w-4 h-4 text-emerald-400" />
+                                            <Check className="w-4 h-4 text-emerald-500" />
                                             Resume saved to your profile
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <Check className="w-4 h-4 text-emerald-400" />
+                                            <Check className="w-4 h-4 text-emerald-500" />
                                             Instantly preview your resume
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <Check className="w-4 h-4 text-emerald-400" />
+                                            <Check className="w-4 h-4 text-emerald-500" />
                                             Ready for job applications
                                         </li>
                                     </ul>
@@ -284,17 +284,17 @@ const ResumeTools = () => {
                         </CardHeader>
                         <CardContent>
                             {loading ? (
-                                <div className="aspect-[8.5/11] bg-dark-700/50 rounded-lg border border-dark-600 flex items-center justify-center mb-4">
+                                <div className="aspect-[8.5/11] bg-neutral-50 rounded-lg border border-neutral-200 flex items-center justify-center mb-4">
                                     <div className="text-center">
-                                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-400 mx-auto mb-4"></div>
-                                        <p className="text-dark-400">Loading resume...</p>
+                                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+                                        <p className="text-neutral-500">Loading resume...</p>
                                     </div>
                                 </div>
                             ) : error ? (
-                                <div className="aspect-[8.5/11] bg-dark-700/50 rounded-lg border border-dark-600 flex items-center justify-center mb-4">
+                                <div className="aspect-[8.5/11] bg-neutral-50 rounded-lg border border-neutral-200 flex items-center justify-center mb-4">
                                     <div className="text-center">
                                         <FileText className="w-16 h-16 text-red-500 mx-auto mb-4" />
-                                        <p className="text-red-400">{error}</p>
+                                        <p className="text-red-500">{error}</p>
                                         <Button
                                             variant="outline"
                                             size="sm"
@@ -306,15 +306,15 @@ const ResumeTools = () => {
                                     </div>
                                 </div>
                             ) : !hasResume ? (
-                                <div className="aspect-[8.5/11] bg-dark-700/50 rounded-lg border border-dark-600 flex items-center justify-center mb-4">
+                                <div className="aspect-[8.5/11] bg-neutral-50 rounded-lg border border-neutral-200 flex items-center justify-center mb-4">
                                     <div className="text-center">
-                                        <FileText className="w-16 h-16 text-dark-500 mx-auto mb-4" />
-                                        <p className="text-dark-400">No resume uploaded yet</p>
-                                        <p className="text-sm text-dark-500 mt-1">Upload a resume to preview</p>
+                                        <FileText className="w-16 h-16 text-neutral-400 mx-auto mb-4" />
+                                        <p className="text-neutral-500">No resume uploaded yet</p>
+                                        <p className="text-sm text-neutral-400 mt-1">Upload a resume to preview</p>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="aspect-[8.5/11] bg-white rounded-lg border border-dark-600 overflow-hidden mb-4">
+                                <div className="aspect-[8.5/11] bg-white rounded-lg border border-neutral-200 overflow-hidden mb-4 shadow-sm">
                                     <iframe
                                         src={previewUrl}
                                         className="w-full h-full"
@@ -358,14 +358,14 @@ const ResumeTools = () => {
                     <CardContent>
                         {loadingResumes ? (
                             <div className="text-center py-8">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-400 mx-auto mb-4"></div>
-                                <p className="text-dark-400">Loading resumes...</p>
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-4"></div>
+                                <p className="text-neutral-500">Loading resumes...</p>
                             </div>
                         ) : resumes.length === 0 ? (
                             <div className="text-center py-8">
-                                <FileText className="w-12 h-12 text-dark-500 mx-auto mb-4" />
-                                <p className="text-dark-400">No resumes uploaded yet</p>
-                                <p className="text-sm text-dark-500 mt-1">Upload your first resume to get started</p>
+                                <FileText className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+                                <p className="text-neutral-500">No resumes uploaded yet</p>
+                                <p className="text-sm text-neutral-400 mt-1">Upload your first resume to get started</p>
                             </div>
                         ) : (
                             <div className="space-y-3">
@@ -373,23 +373,23 @@ const ResumeTools = () => {
                                     <div
                                         key={resume.id}
                                         className={`p-4 rounded-lg border transition-all cursor-pointer ${activeResumeId === resume.id
-                                                ? 'bg-primary-500/10 border-primary-500/50'
-                                                : 'bg-dark-700/30 border-dark-700 hover:border-dark-600'
+                                            ? 'bg-primary-50 border-primary-200 ring-1 ring-primary-200'
+                                            : 'bg-white border-neutral-200 hover:border-neutral-300 hover:shadow-sm'
                                             }`}
                                         onClick={() => handleResumeClick(resume.id)}
                                     >
                                         <div className="flex items-start justify-between">
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1">
-                                                    <FileText className="w-5 h-5 text-primary-400 flex-shrink-0" />
-                                                    <h4 className="font-medium text-dark-100 truncate">
+                                                    <FileText className="w-5 h-5 text-primary-600 flex-shrink-0" />
+                                                    <h4 className="font-medium text-neutral-900 truncate">
                                                         {resume.resume_name}
                                                     </h4>
                                                     {resume.is_default && (
                                                         <Badge variant="success" size="sm">Default</Badge>
                                                     )}
                                                 </div>
-                                                <div className="flex items-center gap-4 text-sm text-dark-400 ml-7">
+                                                <div className="flex items-center gap-4 text-sm text-neutral-500 ml-7">
                                                     <span>
                                                         {new Date(resume.created_at).toLocaleDateString('en-US', {
                                                             year: 'numeric',
@@ -405,7 +405,7 @@ const ResumeTools = () => {
                                                     e.stopPropagation();
                                                     handleDelete(resume.id, resume.resume_name);
                                                 }}
-                                                className="ml-4 p-2 rounded-lg hover:bg-red-500/20 text-dark-400 hover:text-red-400 transition-colors"
+                                                className="ml-4 p-2 rounded-lg hover:bg-red-50 text-neutral-400 hover:text-red-500 transition-colors"
                                                 title="Delete resume"
                                             >
                                                 <Trash2 className="w-4 h-4" />

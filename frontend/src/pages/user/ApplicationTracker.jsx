@@ -72,7 +72,7 @@ const ApplicationTracker = () => {
         return (
             <DashboardLayout type="user" title="Application Tracker">
                 <div className="flex items-center justify-center h-64">
-                    <div className="text-dark-400">Loading applications...</div>
+                    <div className="text-neutral-500">Loading applications...</div>
                 </div>
             </DashboardLayout>
         );
@@ -83,10 +83,10 @@ const ApplicationTracker = () => {
             <div className="max-w-6xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <h2 className="text-2xl font-bold text-dark-100 mb-2">
+                    <h2 className="text-2xl font-bold text-neutral-900 mb-2">
                         Track Your Applications
                     </h2>
-                    <p className="text-dark-400">
+                    <p className="text-neutral-500">
                         Monitor all your job applications in one place.
                     </p>
                 </div>
@@ -95,32 +95,32 @@ const ApplicationTracker = () => {
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
                     <Card padding="sm" className="text-center">
                         <CardContent>
-                            <p className="text-2xl font-bold text-dark-100">{summary.total}</p>
-                            <p className="text-xs text-dark-500">Total</p>
+                            <p className="text-2xl font-bold text-neutral-900">{summary.total}</p>
+                            <p className="text-xs text-neutral-500">Total</p>
                         </CardContent>
                     </Card>
-                    <Card padding="sm" className="text-center border-sky-500/30">
+                    <Card padding="sm" className="text-center border-sky-200 bg-sky-50/50">
                         <CardContent>
-                            <p className="text-2xl font-bold text-sky-400">{summary.applied}</p>
-                            <p className="text-xs text-dark-500">Applied</p>
+                            <p className="text-2xl font-bold text-sky-600">{summary.applied}</p>
+                            <p className="text-xs text-sky-700">Applied</p>
                         </CardContent>
                     </Card>
-                    <Card padding="sm" className="text-center border-amber-500/30">
+                    <Card padding="sm" className="text-center border-amber-200 bg-amber-50/50">
                         <CardContent>
-                            <p className="text-2xl font-bold text-amber-400">{summary.reviewing}</p>
-                            <p className="text-xs text-dark-500">Reviewing</p>
+                            <p className="text-2xl font-bold text-amber-600">{summary.reviewing}</p>
+                            <p className="text-xs text-amber-700">Reviewing</p>
                         </CardContent>
                     </Card>
-                    <Card padding="sm" className="text-center border-emerald-500/30">
+                    <Card padding="sm" className="text-center border-emerald-200 bg-emerald-50/50">
                         <CardContent>
-                            <p className="text-2xl font-bold text-emerald-400">{summary.interview}</p>
-                            <p className="text-xs text-dark-500">Interview/Offer</p>
+                            <p className="text-2xl font-bold text-emerald-600">{summary.interview}</p>
+                            <p className="text-xs text-emerald-700">Interview/Offer</p>
                         </CardContent>
                     </Card>
-                    <Card padding="sm" className="text-center border-rose-500/30">
+                    <Card padding="sm" className="text-center border-rose-200 bg-rose-50/50">
                         <CardContent>
-                            <p className="text-2xl font-bold text-rose-400">{summary.rejected}</p>
-                            <p className="text-xs text-dark-500">Rejected</p>
+                            <p className="text-2xl font-bold text-rose-600">{summary.rejected}</p>
+                            <p className="text-xs text-rose-700">Rejected</p>
                         </CardContent>
                     </Card>
                 </div>
@@ -128,7 +128,7 @@ const ApplicationTracker = () => {
                 {/* Filters */}
                 <Card className="mb-6">
                     <CardContent className="flex items-center gap-4">
-                        <Filter className="w-5 h-5 text-dark-400" />
+                        <Filter className="w-5 h-5 text-neutral-400" />
                         <Select
                             options={statusOptions}
                             value={statusFilter}
@@ -136,7 +136,7 @@ const ApplicationTracker = () => {
                             className="w-48"
                         />
                         <div className="flex-1" />
-                        <p className="text-sm text-dark-400">
+                        <p className="text-sm text-neutral-500">
                             Showing {filteredApplications.length} of {applications.length} applications
                         </p>
                     </CardContent>
@@ -168,16 +168,16 @@ const ApplicationTracker = () => {
                                                     <img
                                                         src={app.company_logo}
                                                         alt={app.company_name}
-                                                        className="w-10 h-10 rounded-lg"
+                                                        className="w-10 h-10 rounded-lg object-cover border border-neutral-100"
                                                     />
                                                 ) : (
-                                                    <div className="w-10 h-10 rounded-lg bg-dark-700 flex items-center justify-center text-xs text-dark-400">
+                                                    <div className="w-10 h-10 rounded-lg bg-neutral-100 flex items-center justify-center text-xs text-neutral-500 font-medium">
                                                         {app.company_name?.charAt(0) || 'C'}
                                                     </div>
                                                 )}
                                                 <div>
-                                                    <p className="font-medium text-dark-100">{app.job_title}</p>
-                                                    <p className="text-sm text-dark-400">{app.company_name}</p>
+                                                    <p className="font-medium text-neutral-900">{app.job_title}</p>
+                                                    <p className="text-sm text-neutral-500">{app.company_name}</p>
                                                 </div>
                                             </div>
                                         </TableCell>
@@ -187,13 +187,13 @@ const ApplicationTracker = () => {
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
-                                            <div className="flex items-center gap-1 text-dark-400">
+                                            <div className="flex items-center gap-1 text-neutral-500">
                                                 <Calendar className="w-4 h-4" />
                                                 <span>{new Date(app.applied_at).toLocaleDateString()}</span>
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <span className="text-dark-400">
+                                            <span className="text-neutral-500">
                                                 {app.last_update ? new Date(app.last_update).toLocaleDateString() : '-'}
                                             </span>
                                         </TableCell>

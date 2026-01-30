@@ -65,28 +65,28 @@ const Sidebar = ({ type = 'user' }) => {
         <aside
             className={`
         fixed left-0 top-0 h-screen
-        bg-dark-900 border-r border-dark-800
+        bg-white border-r border-neutral-200
         flex flex-col
         transition-all duration-300 z-40
         ${isCollapsed ? 'w-20' : 'w-64'}
       `}
         >
             {/* Logo */}
-            <div className="flex items-center justify-between h-16 px-4 border-b border-dark-800">
+            <div className="flex items-center justify-between h-16 px-4 border-b border-neutral-100">
                 <Link to="/" className="flex items-center gap-2">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-primary-500 to-secondary-500">
-                        <Sparkles className="w-5 h-5 text-white" />
+                    <div className="p-2 rounded-lg bg-primary-600 text-white shadow-lg shadow-primary-500/30">
+                        <Sparkles className="w-5 h-5" />
                     </div>
                     {!isCollapsed && (
-                        <span className="text-xl font-bold text-dark-100">
-                            Hire<span className="text-primary-400">AI</span>
+                        <span className="text-xl font-bold text-neutral-900 tracking-tight">
+                            Hire<span className="text-primary-600">AI</span>
                         </span>
                     )}
                 </Link>
 
                 <button
                     onClick={() => setIsCollapsed(!isCollapsed)}
-                    className="p-1.5 rounded-lg text-dark-400 hover:text-dark-100 hover:bg-dark-800 transition-colors"
+                    className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
                 >
                     {isCollapsed ? (
                         <ChevronRight className="w-4 h-4" />
@@ -97,7 +97,7 @@ const Sidebar = ({ type = 'user' }) => {
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 py-4 overflow-y-auto">
+            <nav className="flex-1 py-6 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-200">
                 <div className="px-3 space-y-1">
                     {navItems.map((item) => {
                         const Icon = item.icon;
@@ -108,27 +108,28 @@ const Sidebar = ({ type = 'user' }) => {
                                 key={item.path}
                                 to={item.path}
                                 className={`
-                  flex items-center gap-3 px-3 py-2.5 rounded-lg
-                  transition-all duration-200 group
+                  flex items-center gap-3 px-3 py-2.5 rounded-xl
+                  transition-all duration-200 group relative
                   ${active
-                                        ? 'bg-primary-500/20 text-primary-400'
-                                        : 'text-dark-400 hover:text-dark-100 hover:bg-dark-800'
+                                        ? 'bg-primary-50 text-primary-700 font-medium shadow-sm'
+                                        : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50'
                                     }
                 `}
                             >
-                                <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-primary-400' : ''}`} />
+                                <Icon className={`w-5 h-5 flex-shrink-0 transition-colors ${active ? 'text-primary-600' : 'text-neutral-400 group-hover:text-neutral-600'}`} />
                                 {!isCollapsed && (
-                                    <span className="font-medium text-sm">{item.label}</span>
+                                    <span className="text-sm">{item.label}</span>
                                 )}
                                 {isCollapsed && (
                                     <div className="
-                    absolute left-20 bg-dark-800 text-dark-100 
-                    px-2 py-1 rounded-md text-sm font-medium
+                    absolute left-16 bg-neutral-900 text-white 
+                    px-2.5 py-1.5 rounded-md text-xs font-medium
                     opacity-0 group-hover:opacity-100 pointer-events-none
-                    transition-opacity whitespace-nowrap
-                    shadow-lg border border-dark-700
+                    transition-opacity whitespace-nowrap z-50
+                    shadow-xl
                   ">
                                         {item.label}
+                                        <div className="absolute top-1/2 -left-1 -translate-y-1/2 border-y-4 border-y-transparent border-r-4 border-r-neutral-900" />
                                     </div>
                                 )}
                             </Link>
@@ -138,26 +139,26 @@ const Sidebar = ({ type = 'user' }) => {
             </nav>
 
             {/* Footer */}
-            <div className="border-t border-dark-800 p-3 space-y-1">
+            <div className="border-t border-neutral-100 p-4 space-y-1 bg-neutral-50/50">
                 <button className={`
-          flex items-center gap-3 px-3 py-2.5 rounded-lg w-full
-          text-dark-400 hover:text-dark-100 hover:bg-dark-800
-          transition-colors
+          flex items-center gap-3 px-3 py-2.5 rounded-xl w-full
+          text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100
+          transition-colors group
         `}>
-                    <Settings className="w-5 h-5 flex-shrink-0" />
-                    {!isCollapsed && <span className="font-medium text-sm">Settings</span>}
+                    <Settings className="w-5 h-5 flex-shrink-0 text-neutral-400 group-hover:text-neutral-600" />
+                    {!isCollapsed && <span className="text-sm font-medium">Settings</span>}
                 </button>
 
                 <button
                     onClick={handleLogout}
                     className={`
-          flex items-center gap-3 px-3 py-2.5 rounded-lg w-full
-          text-dark-400 hover:text-rose-400 hover:bg-rose-500/10
-          transition-colors
+          flex items-center gap-3 px-3 py-2.5 rounded-xl w-full
+          text-neutral-500 hover:text-error-600 hover:bg-error-50
+          transition-colors group
         `}
                 >
-                    <LogOut className="w-5 h-5 flex-shrink-0" />
-                    {!isCollapsed && <span className="font-medium text-sm">Logout</span>}
+                    <LogOut className="w-5 h-5 flex-shrink-0 text-neutral-400 group-hover:text-error-500" />
+                    {!isCollapsed && <span className="text-sm font-medium">Logout</span>}
                 </button>
             </div>
         </aside>

@@ -102,20 +102,20 @@ const AIActions = () => {
             <div className="max-w-6xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <h2 className="text-2xl font-bold text-dark-100 mb-2">
+                    <h2 className="text-2xl font-bold text-neutral-900 mb-2">
                         AI-Powered Actions
                     </h2>
-                    <p className="text-dark-400">
+                    <p className="text-neutral-500">
                         Let AI assist you in your job search journey.
                     </p>
                 </div>
 
                 {/* Auto-Apply Section */}
-                <Card className="mb-8 gradient-border">
+                <Card className="mb-8 bg-white border-neutral-200 shadow-sm">
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="p-3 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-500">
+                                <div className="p-3 rounded-xl bg-gradient-to-br from-primary-500 to-indigo-600 shadow-lg shadow-primary-500/20">
                                     <Bot className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
@@ -133,7 +133,7 @@ const AIActions = () => {
                     </CardHeader>
 
                     {autoApply && (
-                        <CardContent className="border-t border-dark-700 pt-6">
+                        <CardContent className="border-t border-neutral-100 pt-6">
                             <div className="grid md:grid-cols-3 gap-6 mb-6">
                                 <Select
                                     label="Minimum Match Score"
@@ -166,11 +166,11 @@ const AIActions = () => {
                                 </div>
                             </div>
 
-                            <div className="flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-                                <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                            <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                                <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
                                 <div>
-                                    <p className="text-sm font-medium text-amber-300">Auto-Apply is Active</p>
-                                    <p className="text-sm text-amber-400/80">
+                                    <p className="text-sm font-medium text-amber-800">Auto-Apply is Active</p>
+                                    <p className="text-sm text-amber-600/90">
                                         The agent will automatically apply to jobs matching your criteria.
                                         You can pause this at any time.
                                     </p>
@@ -185,33 +185,27 @@ const AIActions = () => {
                     {aiActions.map((action) => {
                         const Icon = action.icon;
                         return (
-                            <Card key={action.id} hover className="group">
-                                <CardContent className="flex items-start gap-4">
+                            <Card key={action.id} hover className="group border-neutral-200">
+                                <CardContent className="flex items-start gap-4 p-6">
                                     <div className={`
                     p-3 rounded-xl 
-                    ${action.color === 'primary' ? 'bg-primary-500/20' :
-                                            action.color === 'secondary' ? 'bg-secondary-500/20' :
-                                                action.color === 'success' ? 'bg-emerald-500/20' :
-                                                    'bg-amber-500/20'}
+                    ${action.color === 'primary' ? 'bg-primary-50 text-primary-600' :
+                                            action.color === 'secondary' ? 'bg-purple-50 text-purple-600' :
+                                                action.color === 'success' ? 'bg-emerald-50 text-emerald-600' :
+                                                    'bg-amber-50 text-amber-600'}
                     group-hover:scale-110 transition-transform
                   `}>
-                                        <Icon className={`
-                      w-6 h-6
-                      ${action.color === 'primary' ? 'text-primary-400' :
-                                                action.color === 'secondary' ? 'text-secondary-400' :
-                                                    action.color === 'success' ? 'text-emerald-400' :
-                                                        'text-amber-400'}
-                    `} />
+                                        <Icon className="w-6 h-6" />
                                     </div>
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <h3 className="font-semibold text-dark-100">{action.title}</h3>
+                                            <h3 className="font-semibold text-neutral-900">{action.title}</h3>
                                             {action.status === 'beta' && (
                                                 <Badge variant="warning" size="sm">Beta</Badge>
                                             )}
                                         </div>
-                                        <p className="text-sm text-dark-400 mb-4">{action.description}</p>
-                                        <Button size="sm">
+                                        <p className="text-sm text-neutral-500 mb-4">{action.description}</p>
+                                        <Button size="sm" variant="outline" className="border-neutral-200 hover:bg-neutral-50 hover:text-neutral-900">
                                             Run Action
                                         </Button>
                                     </div>
@@ -231,28 +225,28 @@ const AIActions = () => {
                             {recentActions.map((action) => (
                                 <div
                                     key={action.id}
-                                    className="flex items-center justify-between p-4 bg-dark-700/30 rounded-lg border border-dark-700"
+                                    className="flex items-center justify-between p-4 bg-white rounded-lg border border-neutral-200 hover:border-neutral-300 transition-colors"
                                 >
                                     <div className="flex items-center gap-3">
                                         {action.status === 'completed' ? (
-                                            <div className="p-2 bg-emerald-500/20 rounded-lg">
-                                                <CheckCircle className="w-4 h-4 text-emerald-400" />
+                                            <div className="p-2 bg-emerald-50 rounded-lg">
+                                                <CheckCircle className="w-4 h-4 text-emerald-600" />
                                             </div>
                                         ) : (
-                                            <div className="p-2 bg-amber-500/20 rounded-lg">
-                                                <Clock className="w-4 h-4 text-amber-400" />
+                                            <div className="p-2 bg-amber-50 rounded-lg">
+                                                <Clock className="w-4 h-4 text-amber-600" />
                                             </div>
                                         )}
                                         <div>
-                                            <p className="font-medium text-dark-100">{action.action}</p>
-                                            <p className="text-sm text-dark-400">{action.target}</p>
+                                            <p className="font-medium text-neutral-900">{action.action}</p>
+                                            <p className="text-sm text-neutral-500">{action.target}</p>
                                         </div>
                                     </div>
                                     <div className="text-right">
                                         <Badge variant={action.status === 'completed' ? 'success' : 'warning'} size="sm">
                                             {action.status === 'completed' ? 'Completed' : 'Pending'}
                                         </Badge>
-                                        <p className="text-xs text-dark-500 mt-1">{action.timestamp}</p>
+                                        <p className="text-xs text-neutral-400 mt-1">{action.timestamp}</p>
                                     </div>
                                 </div>
                             ))}

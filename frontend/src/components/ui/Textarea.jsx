@@ -23,7 +23,7 @@ const Textarea = ({
             {label && (
                 <label
                     htmlFor={textareaId}
-                    className="block text-sm font-medium text-dark-200 mb-1.5"
+                    className="block text-sm font-medium text-neutral-700 mb-1.5"
                 >
                     {label}
                 </label>
@@ -33,26 +33,28 @@ const Textarea = ({
                 id={textareaId}
                 rows={rows}
                 className={`
-          w-full bg-dark-800 border rounded-lg
-          text-dark-100 placeholder:text-dark-500
+          w-full bg-white border rounded-lg
+          text-neutral-900 placeholder:text-neutral-400
           transition-all duration-200
           focus:outline-none focus:ring-2 focus:ring-offset-0
-          disabled:opacity-50 disabled:cursor-not-allowed
-          px-4 py-2.5 resize-none
+          disabled:bg-neutral-50 disabled:text-neutral-500 disabled:cursor-not-allowed
+          px-4 py-3 resize-none
           ${error
-                        ? 'border-rose-500/50 focus:border-rose-500 focus:ring-rose-500/30'
-                        : 'border-dark-600 focus:border-primary-500 focus:ring-primary-500/30'
+                        ? 'border-error-300 focus:border-error-500 focus:ring-error-500/20'
+                        : 'border-neutral-300 hover:border-neutral-400 focus:border-primary-500 focus:ring-primary-500/20'
                     }
         `}
                 {...props}
             />
 
             {error && (
-                <p className="mt-1.5 text-sm text-rose-400">{error}</p>
+                <p className="mt-1.5 text-sm text-error-600 animate-slide-down flex items-center gap-1">
+                    {error}
+                </p>
             )}
 
             {hint && !error && (
-                <p className="mt-1.5 text-sm text-dark-500">{hint}</p>
+                <p className="mt-1.5 text-sm text-neutral-500">{hint}</p>
             )}
         </div>
     );

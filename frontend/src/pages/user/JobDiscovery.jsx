@@ -144,10 +144,10 @@ const JobDiscovery = () => {
             <div className="max-w-6xl mx-auto">
                 {/* Search Header */}
                 <div className="mb-8">
-                    <h2 className="text-2xl font-bold text-dark-100 mb-2">
+                    <h2 className="text-2xl font-bold text-neutral-900 mb-2">
                         Discover Your Next Opportunity
                     </h2>
-                    <p className="text-dark-400">
+                    <p className="text-neutral-500">
                         {loading ? 'Loading jobs...' : `${filteredJobs.length} jobs available`}
                     </p>
                 </div>
@@ -169,7 +169,7 @@ const JobDiscovery = () => {
                     >
                         Filters
                         {activeFiltersCount > 0 && (
-                            <span className="ml-2 px-2 py-0.5 bg-white/20 rounded-full text-xs">
+                            <span className="ml-2 px-2 py-0.5 bg-black/10 rounded-full text-xs">
                                 {activeFiltersCount}
                             </span>
                         )}
@@ -181,7 +181,7 @@ const JobDiscovery = () => {
                     <Card className="mb-6 animate-slide-up">
                         <CardContent>
                             <div className="flex items-center justify-between mb-4">
-                                <h3 className="font-semibold text-dark-100">Filters</h3>
+                                <h3 className="font-semibold text-neutral-900">Filters</h3>
                                 {activeFiltersCount > 0 && (
                                     <Button variant="ghost" size="sm" onClick={clearFilters}>
                                         Clear All
@@ -261,7 +261,7 @@ const JobDiscovery = () => {
 
                 {/* Job Results */}
                 {loading ? (
-                    <div className="text-center py-12 text-dark-400">Loading jobs...</div>
+                    <div className="text-center py-12 text-neutral-500">Loading jobs...</div>
                 ) : filteredJobs.length > 0 ? (
                     <div className="grid gap-6">
                         {filteredJobs.map((job, index) => (
@@ -281,9 +281,9 @@ const JobDiscovery = () => {
                 ) : (
                     <Card>
                         <CardContent className="py-16 text-center">
-                            <Search className="w-16 h-16 text-dark-600 mx-auto mb-4" />
-                            <h3 className="text-xl font-semibold text-dark-200 mb-2">No jobs found</h3>
-                            <p className="text-dark-400 mb-4">
+                            <Search className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
+                            <h3 className="text-xl font-semibold text-neutral-900 mb-2">No jobs found</h3>
+                            <p className="text-neutral-500 mb-4">
                                 Try adjusting your search criteria or filters
                             </p>
                             <Button variant="outline" onClick={clearFilters}>

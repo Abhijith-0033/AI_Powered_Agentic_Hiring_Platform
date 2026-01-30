@@ -51,7 +51,7 @@ const Modal = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             {/* Overlay */}
             <div
-                className="absolute inset-0 bg-dark-950/80 backdrop-blur-sm animate-fade-in"
+                className="absolute inset-0 bg-neutral-900/40 backdrop-blur-sm animate-fade-in transition-opacity"
                 onClick={onClose}
             />
 
@@ -59,19 +59,19 @@ const Modal = ({
             <div
                 className={`
           relative w-full ${sizes[size]}
-          bg-dark-800 border border-dark-700
-          rounded-xl shadow-2xl shadow-dark-950/50
-          animate-slide-up
+          bg-white border border-neutral-200
+          rounded-xl shadow-float
+          animate-scale-in origin-center
           ${className}
         `}
             >
                 {/* Header */}
                 {title && (
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-dark-700">
-                        <h2 className="text-lg font-semibold text-dark-100">{title}</h2>
+                    <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-100">
+                        <h2 className="text-xl font-semibold text-neutral-900 tracking-tight">{title}</h2>
                         <button
                             onClick={onClose}
-                            className="p-1 rounded-lg text-dark-400 hover:text-dark-100 hover:bg-dark-700 transition-colors"
+                            className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
                         >
                             <X className="w-5 h-5" />
                         </button>
@@ -91,7 +91,7 @@ const Modal = ({
  * Modal footer for actions
  */
 export const ModalFooter = ({ children, className = '' }) => (
-    <div className={`flex items-center justify-end gap-3 mt-6 pt-4 border-t border-dark-700 ${className}`}>
+    <div className={`flex items-center justify-end gap-3 mt-6 pt-6 border-t border-neutral-100 ${className}`}>
         {children}
     </div>
 );

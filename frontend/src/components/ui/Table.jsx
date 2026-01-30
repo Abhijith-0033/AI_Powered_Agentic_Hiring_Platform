@@ -4,7 +4,7 @@ import { ChevronDown, ChevronsUpDown, ChevronUp } from 'lucide-react';
  * Table component with sorting and empty state support
  */
 export const Table = ({ children, className = '' }) => (
-    <div className="overflow-x-auto rounded-xl border border-dark-700">
+    <div className="overflow-x-auto rounded-xl border border-neutral-200 shadow-sm bg-white">
         <table className={`w-full text-sm ${className}`}>
             {children}
         </table>
@@ -15,7 +15,7 @@ export const Table = ({ children, className = '' }) => (
  * Table Head
  */
 export const TableHead = ({ children, className = '' }) => (
-    <thead className={`bg-dark-800/80 ${className}`}>
+    <thead className={`bg-neutral-50 border-b border-neutral-200 ${className}`}>
         {children}
     </thead>
 );
@@ -24,7 +24,7 @@ export const TableHead = ({ children, className = '' }) => (
  * Table Body
  */
 export const TableBody = ({ children, className = '' }) => (
-    <tbody className={`divide-y divide-dark-700/50 ${className}`}>
+    <tbody className={`divide-y divide-neutral-100 ${className}`}>
         {children}
     </tbody>
 );
@@ -35,8 +35,9 @@ export const TableBody = ({ children, className = '' }) => (
 export const TableRow = ({ children, className = '', hover = true, onClick }) => (
     <tr
         className={`
-      ${hover ? 'hover:bg-dark-700/30 transition-colors' : ''}
+      ${hover ? 'hover:bg-primary-50/30 transition-colors duration-150' : ''}
       ${onClick ? 'cursor-pointer' : ''}
+      even:bg-neutral-50/30
       ${className}
     `}
         onClick={onClick}
@@ -57,20 +58,20 @@ export const TableHeader = ({
 }) => (
     <th
         className={`
-      px-4 py-3 text-left text-xs font-semibold text-dark-300 uppercase tracking-wider
-      ${sortable ? 'cursor-pointer hover:text-dark-100 transition-colors' : ''}
+      px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider
+      ${sortable ? 'cursor-pointer hover:text-neutral-700 hover:bg-neutral-100 transition-colors select-none' : ''}
       ${className}
     `}
         onClick={sortable ? onSort : undefined}
     >
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
             {children}
             {sortable && (
-                <span className="text-dark-500">
+                <span className="text-neutral-400">
                     {sortDirection === 'asc' ? (
-                        <ChevronUp className="w-4 h-4" />
+                        <ChevronUp className="w-4 h-4 text-primary-500" />
                     ) : sortDirection === 'desc' ? (
-                        <ChevronDown className="w-4 h-4" />
+                        <ChevronDown className="w-4 h-4 text-primary-500" />
                     ) : (
                         <ChevronsUpDown className="w-4 h-4" />
                     )}
@@ -84,7 +85,7 @@ export const TableHeader = ({
  * Table Cell
  */
 export const TableCell = ({ children, className = '' }) => (
-    <td className={`px-4 py-4 text-dark-200 ${className}`}>
+    <td className={`px-6 py-4 text-neutral-700 whitespace-nowrap ${className}`}>
         {children}
     </td>
 );
@@ -99,11 +100,17 @@ export const TableEmpty = ({
     colSpan = 1
 }) => (
     <tr>
-        <td colSpan={colSpan} className="px-4 py-12 text-center">
-            <div className="flex flex-col items-center gap-2">
-                {Icon && <Icon className="w-12 h-12 text-dark-600" />}
-                <p className="text-dark-400 font-medium">{message}</p>
-                {description && <p className="text-dark-500 text-sm">{description}</p>}
+        <td colSpan={colSpan} className="px-6 py-16 text-center">
+            <div className="flex flex-col items-center justify-center gap-3">
+                {Icon ? (
+                    <div className="p-4 rounded-full bg-neutral-50 text-neutral-400">
+                        <Icon className="w-8 h-8" />
+                    </div>
+                ) : null}
+                <div className="space-y-1">
+                    <p className="text-neutral-900 font-medium text-base">{message}</p>
+                    {description && <p className="text-neutral-500 text-sm max-w-sm mx-auto">{description}</p>}
+                </div>
             </div>
         </td>
     </tr>
