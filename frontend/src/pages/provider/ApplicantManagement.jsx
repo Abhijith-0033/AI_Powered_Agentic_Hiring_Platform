@@ -115,7 +115,7 @@ const ApplicantManagement = () => {
 
     const statusCounts = {
         all: applicants.length,
-        new: applicants.filter(a => (a.status || 'new').toLowerCase() === 'new' || (a.status || 'new').toLowerCase() === 'applied').length,
+        new: applicants.filter(a => (a.status || 'applied').toLowerCase() === 'applied').length,
         shortlisted: applicants.filter(a => (a.status || '').toLowerCase() === 'shortlisted').length,
         interview: applicants.filter(a => (a.status || '').toLowerCase() === 'interview').length,
         rejected: applicants.filter(a => (a.status || '').toLowerCase() === 'rejected').length,
@@ -147,15 +147,15 @@ const ApplicantManagement = () => {
                 {/* Quick Stats */}
                 <div className="flex flex-wrap gap-3 mb-6">
                     {[
-                        { label: 'All', value: statusCounts.all, active: statusFilter === 'all' },
-                        { label: 'New', value: statusCounts.new, active: statusFilter === 'new', color: 'info' },
-                        { label: 'Shortlisted', value: statusCounts.shortlisted, active: statusFilter === 'shortlisted', color: 'success' },
-                        { label: 'Interview', value: statusCounts.interview, active: statusFilter === 'interview', color: 'warning' },
-                        { label: 'Rejected', value: statusCounts.rejected, active: statusFilter === 'rejected', color: 'error' },
+                        { label: 'All', value: statusCounts.all, active: statusFilter === 'all', id: 'all' },
+                        { label: 'Applied', value: statusCounts.new, active: statusFilter === 'applied', color: 'info', id: 'applied' },
+                        { label: 'Shortlisted', value: statusCounts.shortlisted, active: statusFilter === 'shortlisted', color: 'success', id: 'shortlisted' },
+                        { label: 'Interview', value: statusCounts.interview, active: statusFilter === 'interview', color: 'warning', id: 'interview' },
+                        { label: 'Rejected', value: statusCounts.rejected, active: statusFilter === 'rejected', color: 'error', id: 'rejected' },
                     ].map((stat) => (
                         <button
-                            key={stat.label}
-                            onClick={() => setStatusFilter(stat.label.toLowerCase())}
+                            key={stat.id}
+                            onClick={() => setStatusFilter(stat.id)}
                             className={`
                 px-4 py-2 rounded-lg font-medium text-sm transition-all
                 ${stat.active
@@ -203,8 +203,10 @@ const ApplicantManagement = () => {
                                 <ApplicantCard
                                     applicant={applicant}
                                     onViewResume={() => handleViewDetails(applicant)}
-                                    onShortlist={() => handleUpdateStatus(applicant.id, 'Shortlisted')}
-                                    onReject={() => handleUpdateStatus(applicant.id, 'Rejected')}
+                                    onShortlist={() => handleUpdateStatus(applicant.id, 'shortlisted')}
+                                    onInterview={() => handleUpdateStatus(applicant.id, 'interview')}
+                                    onAccept={() => handleUpdateStatus(applicant.id, 'accepted')}
+                                    onReject={() => handleUpdateStatus(applicant.id, 'rejected')}
                                 />
                             </div>
                         ))}

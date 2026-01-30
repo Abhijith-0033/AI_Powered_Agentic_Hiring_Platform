@@ -19,6 +19,7 @@ router.post('/jobs/:id/apply', auth, roleGuard('job_seeker'), async (req, res) =
         const { resume_id, answers, education, skills } = req.body;
 
         if (!resume_id) {
+            console.log('[Apply] Missing resume_id in body:', req.body);
             return res.status(400).json({ success: false, message: 'Resume is required' });
         }
 
@@ -58,10 +59,12 @@ router.post('/jobs/:id/apply', auth, roleGuard('job_seeker'), async (req, res) =
 
         // 4. Validate Requirements
         if (require_education && (!education || education.length === 0)) {
+            console.log(`[Apply] Education required but missing. Education: ${JSON.stringify(education)}`);
             return res.status(400).json({ success: false, message: 'Education details are required for this job' });
         }
 
         if (require_skills && (!skills || skills.length === 0)) {
+            console.log(`[Apply] Skills required but missing. Skills: ${JSON.stringify(skills)}`);
             return res.status(400).json({ success: false, message: 'Skills are required for this job' });
         }
 
@@ -163,9 +166,11 @@ router.get('/applications/my-applications', auth, roleGuard('job_seeker'), async
         const query = `
             SELECT 
                 ja.id AS application_id,
+                ja.job_id,
                 ja.status,
                 ja.applied_at,
-                ja.applied_at as last_update,
+                ja.applied_at,
+                COALESCE(ja.updated_at, ja.applied_at) as last_update,
                 jp.job_title,
                 jp.location,
                 c.name AS company_name,
@@ -326,23 +331,57 @@ router.patch('/recruiter/applications/:id/status', auth, roleGuard('recruiter'),
         const appId = req.params.id;
         const { status } = req.body;
         const userId = req.user.userId;
+        const validStatuses = ['applied', 'shortlisted', 'interview', 'accepted', 'rejected'];
 
-        // Verify Ownership happens implicitly by checking join with companies
-        const updateQuery = `
-            UPDATE job_applications ja
-            SET status = $1
-            FROM companies c
-            WHERE ja.company_id = c.id
-            AND c.created_by = $2
-            AND ja.id = $3
-            RETURNING ja.id, ja.status
-        `;
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({ success: false, message: 'Invalid status value' });
+        }
 
-        const { rows } = await pool.query(updateQuery, [status, userId, appId]);
+        // 1. Fetch current status and verify ownership
+        const currentAppRes = await pool.query(`
+            SELECT ja.status 
+            FROM job_applications ja
+            JOIN companies c ON ja.company_id = c.id
+            WHERE ja.id = $1 AND c.created_by = $2
+        `, [appId, userId]);
 
-        if (rows.length === 0) {
+        if (currentAppRes.rows.length === 0) {
             return res.status(404).json({ success: false, message: 'Application not found or access denied' });
         }
+
+        const currentStatus = currentAppRes.rows[0].status;
+
+        // 2. Validate Transitions
+        const transitions = {
+            'applied': ['shortlisted', 'rejected'],
+            'shortlisted': ['interview', 'rejected'],
+            'interview': ['accepted', 'rejected'],
+            'accepted': [],
+            'rejected': []
+        };
+
+        // Allow resetting to 'applied' or 'shortlisted' only if correcting a mistake? 
+        // Strict requirements say: "Current Status -> Allowed Actions". 
+        // Assuming strictly forward only based on requirements table.
+        // However, usually "Shortlist" button on "Available" implies move to Shortlist.
+        // If strict adherence to the table:
+        const allowed = transitions[currentStatus] || [];
+        if (!allowed.includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: `Invalid status transition from '${currentStatus}' to '${status}'`
+            });
+        }
+
+        // 3. Update Status
+        const updateQuery = `
+            UPDATE job_applications
+            SET status = $1, updated_at = NOW()
+            WHERE id = $2
+            RETURNING id, status, updated_at
+        `;
+
+        const { rows } = await pool.query(updateQuery, [status, appId]);
 
         res.json({ success: true, message: 'Status updated', data: rows[0] });
 

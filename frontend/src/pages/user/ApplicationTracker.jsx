@@ -43,8 +43,9 @@ const ApplicationTracker = () => {
     const statusOptions = [
         { value: 'all', label: 'All Applications' },
         { value: 'applied', label: 'Applied' }, // strict lower case matching from API
-        { value: 'reviewing', label: 'Under Review' }, // API maps Shortlisted -> reviewing
-        { value: 'interview', label: 'Interview' }, // API maps Interview/Offer -> interview
+        { value: 'reviewing', label: 'Under Review' },
+        { value: 'interview', label: 'Interview' },
+        { value: 'accepted', label: 'Accepted' },
         { value: 'rejected', label: 'Rejected' },
     ];
 
@@ -62,6 +63,7 @@ const ApplicationTracker = () => {
         if (s === 'applied') return 'primary';
         if (s === 'shortlisted' || s === 'reviewing') return 'info';
         if (s === 'interview' || s === 'offer') return 'warning';
+        if (s === 'accepted') return 'success';
         if (s === 'rejected') return 'error';
         return 'default';
     };

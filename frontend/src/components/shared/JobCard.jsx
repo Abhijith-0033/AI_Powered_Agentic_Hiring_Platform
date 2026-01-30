@@ -150,12 +150,13 @@ const JobCard = ({
 
                 <Button
                     size="sm"
+                    disabled={isApplied}
+                    variant={isApplied ? "outline" : "primary"}
                     onClick={(e) => {
-                        console.log("Button clicked in JobCard");
-                        if (onApply) onApply(e);
+                        if (!isApplied && onApply) onApply(e);
                     }}
                 >
-                    Apply Now
+                    {isApplied ? <span className="flex items-center gap-1"><CheckCircle className="w-4 h-4" /> Applied</span> : 'Apply Now'}
                 </Button>
             </div>
         </div>

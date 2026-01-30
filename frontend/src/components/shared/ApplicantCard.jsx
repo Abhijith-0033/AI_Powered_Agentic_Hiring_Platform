@@ -135,24 +135,47 @@ const ApplicantCard = ({
                     leftIcon={<FileText className="w-4 h-4" />}
                     onClick={onViewResume}
                 >
-                    View Resume
+                    Resume
                 </Button>
-                <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={onShortlist}
-                    disabled={status === 'shortlisted'}
-                >
-                    Shortlist
-                </Button>
-                <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={onReject}
-                    disabled={status === 'rejected'}
-                >
-                    Reject
-                </Button>
+
+                {/* Dynamic Actions based on Status */}
+                {status === 'applied' && (
+                    <>
+                        <Button variant="primary" size="sm" onClick={() => onShortlist && onShortlist()}>
+                            Shortlist
+                        </Button>
+                        <Button variant="danger" size="sm" onClick={() => onReject && onReject()}>
+                            Reject
+                        </Button>
+                    </>
+                )}
+
+                {status === 'shortlisted' && (
+                    <>
+                        <Button variant="warning" size="sm" onClick={() => props.onInterview && props.onInterview()}>
+                            Interview
+                        </Button>
+                        <Button variant="danger" size="sm" onClick={() => onReject && onReject()}>
+                            Reject
+                        </Button>
+                    </>
+                )}
+
+                {status === 'interview' && (
+                    <>
+                        <Button variant="success" size="sm" onClick={() => props.onAccept && props.onAccept()}>
+                            Accept
+                        </Button>
+                        <Button variant="danger" size="sm" onClick={() => onReject && onReject()}>
+                            Reject
+                        </Button>
+                    </>
+                )}
+
+                {/* Final States - No Actions */}
+                {status === 'accepted' && <span className="text-emerald-400 text-sm font-medium ml-auto">Accepted</span>}
+                {status === 'rejected' && <span className="text-rose-400 text-sm font-medium ml-auto">Rejected</span>}
+
             </div>
         </div>
     );

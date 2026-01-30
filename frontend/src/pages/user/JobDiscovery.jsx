@@ -125,7 +125,7 @@ const JobDiscovery = () => {
             try {
                 const res = await getUserApplications();
                 if (res.success) {
-                    setUserApplications(res.data);
+                    setUserApplications(res.applications || []);
                 }
             } catch (err) {
                 console.error("Failed to fetch user applications", err);
@@ -272,6 +272,7 @@ const JobDiscovery = () => {
                             >
                                 <JobCard
                                     job={job}
+                                    isApplied={userApplications.some(app => app.job_id === job.job_id)}
                                     onApply={() => handleApplyClick(job)}
                                 />
                             </div>
