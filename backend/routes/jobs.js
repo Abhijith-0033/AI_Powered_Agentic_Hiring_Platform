@@ -1,6 +1,6 @@
 import express from 'express';
 import pool from '../config/db.js';
-import { syncJobs } from '../services/adzunaService.js';
+import { syncJobs, fetchAdzunaJobs } from '../services/adzunaService.js';
 import { fetchJoobleJobs } from '../services/joobleService.js';
 
 const router = express.Router();
@@ -25,84 +25,23 @@ router.get('/india', async (req, res) => {
 
         const offset = (page - 1) * limit;
 
-        // Trigger Adzuna sync if DB is empty
-        const countRes = await pool.query("SELECT COUNT(*) FROM job_postings WHERE source = 'external'");
-        const totalInDb = parseInt(countRes.rows[0].count);
+        console.log('📊 Fetching jobs from Adzuna (Live API) and Jooble (Live API)...');
 
-        if (totalInDb === 0) {
-            console.log('Database empty, triggering initial Adzuna sync...');
-            await syncJobs();
-        }
-
-        // 1. Build Adzuna Query (DB)
-        let query = `
-            SELECT *, COUNT(*) OVER() as total_count FROM job_postings 
-            WHERE source = 'external' 
-            AND source_name = 'adzuna'
-        `;
-        const params = [];
-        let paramIdx = 1;
-
-        // TOLERANT LOCATION: Check location column, job_title, and job_description
-        if (location && location.trim()) {
-            query += ` AND (location ILIKE $${paramIdx} OR job_title ILIKE $${paramIdx} OR job_description ILIKE $${paramIdx})`;
-            params.push(`%${location.trim()}%`);
-            paramIdx++;
-        }
-
-        if (role && role.trim()) {
-            const keywords = role.trim().split(/\s+/).filter(k => k.length > 0);
-            const roleConditions = [];
-            keywords.forEach(keyword => {
-                roleConditions.push(`job_title ILIKE $${paramIdx}`);
-                roleConditions.push(`job_description ILIKE $${paramIdx}`);
-                params.push(`%${keyword}%`);
-                paramIdx++;
-            });
-            if (roleConditions.length > 0) {
-                query += ` AND (${roleConditions.join(' OR ')})`;
-            }
-        }
-
-        if (type && type.trim()) {
-            query += ` AND (job_type ILIKE $${paramIdx} OR job_title ILIKE $${paramIdx} OR job_description ILIKE $${paramIdx})`;
-            params.push(`%${type.trim()}%`);
-            paramIdx++;
-        }
-
-        if (experience && experience.trim()) {
-            let expKeyword = experience.trim();
-            if (expKeyword.toLowerCase() === 'fresher') expKeyword = '0-1|entry|fresher|graduate';
-            else if (expKeyword.toLowerCase() === 'junior') expKeyword = '1-3|junior|associate';
-            else if (expKeyword.toLowerCase() === 'mid') expKeyword = '3-6|mid|intermediate';
-            else if (expKeyword.toLowerCase() === 'senior') expKeyword = '6+|senior|expert|lead';
-
-            query += ` AND (experience_level ~* $${paramIdx} OR job_title ~* $${paramIdx} OR job_description ~* $${paramIdx})`;
-            params.push(expKeyword);
-            paramIdx++;
-        }
-
-        query += ` ORDER BY last_synced_at DESC NULLS LAST, created_at DESC LIMIT $${paramIdx++} OFFSET $${paramIdx++}`;
-        params.push(limit, offset);
-
-        console.log('📊 Fetching jobs from Adzuna (DB) and Jooble (API)...');
-
-        // 2. Execute Parallel Requests (Adzuna DB + Jooble API)
+        // Execute Parallel Requests (Adzuna Live + Jooble Live)
         const [adzunaResult, joobleResult] = await Promise.all([
-            pool.query(query, params),
-            fetchJoobleJobs({ location, role, page }) // Jooble handles its own filtering
+            fetchAdzunaJobs({ location, role, page }),
+            fetchJoobleJobs({ location, role, page })
         ]);
 
-        const adzunaJobs = adzunaResult.rows;
+        const adzunaJobs = adzunaResult.jobs || [];
         const joobleJobs = joobleResult.jobs || [];
 
-        const adzunaTotal = adzunaJobs.length > 0 ? parseInt(adzunaJobs[0].total_count) : 0;
+        const adzunaTotal = adzunaResult.total || 0;
         const joobleTotal = joobleResult.total || 0;
 
         console.log(`📊 Raw Results - Adzuna: ${adzunaJobs.length}/${adzunaTotal}, Jooble: ${joobleJobs.length}/${joobleTotal}`);
 
-        // 3. Deduplication (Prioritize Adzuna)
-        // Create identifiers for Adzuna jobs to check against Jooble
+        // Deduplication (Prioritize Adzuna)
         const normalize = (str) => str ? str.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
         const adzunaSignatures = new Set(adzunaJobs.map(job => {
             const company = job.external_company_name || 'unknown';
@@ -111,9 +50,7 @@ router.get('/india', async (req, res) => {
 
         const uniqueJoobleJobs = joobleJobs.filter(job => {
             const signature = `${normalize(job.job_title)}_${normalize(job.external_company_name)}_${normalize(job.location)}`;
-            const isDuplicate = adzunaSignatures.has(signature);
-            // if (isDuplicate) console.log(`Duplicate filtered: ${job.job_title} at ${job.external_company_name}`);
-            return !isDuplicate;
+            return !adzunaSignatures.has(signature);
         });
 
         const duplicatesRemoved = joobleJobs.length - uniqueJoobleJobs.length;
@@ -121,7 +58,7 @@ router.get('/india', async (req, res) => {
             console.log(`🔄 Deduplication: Removed ${duplicatesRemoved} duplicate(s) from Jooble results`);
         }
 
-        // 4. Merge
+        // Merge
         const unifiedJobs = [...adzunaJobs, ...uniqueJoobleJobs];
         const unifiedTotal = adzunaTotal + joobleTotal;
 
@@ -157,11 +94,23 @@ router.get('/', async (req, res) => {
         const { status } = req.query;
         let query = 'SELECT * FROM job_postings';
         const params = [];
+        const conditions = [];
+
+        // STRICT FILTER: Internal Jobs Only
+        // 1. Exclude 'external' source (Adzuna/Jooble)
+        // 2. Ensure company_id is present (Recruiter jobs)
+        // 3. source IS DISTINCT FROM 'external' handles NULLs correctly (Postgres)
+        conditions.push("source IS DISTINCT FROM 'external'");
+        conditions.push("company_id IS NOT NULL");
 
         // By default, show only open jobs unless 'all' is requested
         if (status !== 'all') {
-            query += ' WHERE status = $1';
             params.push('Open');
+            conditions.push(`status = $${params.length}`);
+        }
+
+        if (conditions.length > 0) {
+            query += ' WHERE ' + conditions.join(' AND ');
         }
 
         query += ' ORDER BY created_at DESC';

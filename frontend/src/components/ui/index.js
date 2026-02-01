@@ -19,7 +19,7 @@ export { default as EmptyState } from './EmptyState';
 export { default as Divider } from './Divider';
 
 // Feedback & Overlay
-export { default as Toast } from './Toast';
+export { ToastProvider, useToast } from './Toast';
 export { default as Tooltip } from './Tooltip';
 export { default as LoadingSpinner } from './LoadingSpinner';
 export { default as Avatar } from './Avatar';

@@ -22,10 +22,16 @@ const PORT = process.env.PORT || 3000;
 // ============================================================
 
 // CORS configuration - Allow requests from frontend
-app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+// In development, allow all origins for network access
+// In production, restrict to specific FRONTEND_URL
+const corsOptions = {
+    origin: process.env.NODE_ENV === 'production'
+        ? process.env.FRONTEND_URL
+        : true, // Allow all origins in development
     credentials: true
-}));
+};
+
+app.use(cors(corsOptions));
 
 // Body parser middleware
 app.use(express.json());
@@ -86,14 +92,30 @@ app.use((err, req, res, next) => {
 // START SERVER
 // ============================================================
 
+import os from 'os';
+
 app.listen(PORT, () => {
+    // Get network interfaces
+    const interfaces = os.networkInterfaces();
+    const addresses = [];
+    for (const k in interfaces) {
+        for (const k2 in interfaces[k]) {
+            const address = interfaces[k][k2];
+            if (address.family === 'IPv4' && !address.internal) {
+                addresses.push(address.address);
+            }
+        }
+    }
+
     console.log('');
     console.log('🚀 ============================================');
     console.log(`   AI Hiring Platform API Server`);
     console.log('   ============================================');
-    console.log(`   🌐 Server running on: http://localhost:${PORT}`);
-    console.log(`   📊 Health check: http://localhost:${PORT}/health`);
-    console.log(`   🔐 Auth API: http://localhost:${PORT}/api/auth`);
+    console.log(`   🌐 Local:   http://localhost:${PORT}`);
+    addresses.forEach(ip => {
+        console.log(`   📡 Network: http://${ip}:${PORT}`);
+    });
+    console.log(`   📊 Health:  http://localhost:${PORT}/health`);
     console.log('   ============================================');
     console.log('');
 });
