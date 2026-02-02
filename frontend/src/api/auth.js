@@ -77,3 +77,5 @@ export const authAPI = {
         return data;
     }
 };
+
+export default authAPI;

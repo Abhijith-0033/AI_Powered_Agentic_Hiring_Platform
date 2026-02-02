@@ -23,6 +23,7 @@ const JobPosting = () => {
         salary_max: '',
         job_description: '',
         required_skills: '',
+        required_education: '',
         remote: false,
         require_education: false,
         require_skills: false
@@ -121,7 +122,7 @@ const JobPosting = () => {
                 setFormData({
                     job_title: '', department: '', job_type: 'Full-time', experience_level: '',
                     location: '', salary_min: '', salary_max: '', job_description: '',
-                    required_skills: '', remote: false
+                    required_skills: '', required_education: '', remote: false
                 });
                 setRequirements([{ requirement_text: '', is_mandatory: true }]);
                 setQuestions([{ question_text: '', question_type: 'text', options: [], is_required: true }]);
@@ -148,6 +149,7 @@ const JobPosting = () => {
             salary_max: job.salary_max,
             job_description: job.job_description,
             required_skills: job.required_skills,
+            required_education: job.required_education || '',
             remote: job.location?.toLowerCase() === 'remote',
             require_education: job.require_education || false,
             require_skills: job.require_skills || false
@@ -177,7 +179,7 @@ const JobPosting = () => {
         setFormData({
             job_title: '', department: '', job_type: 'Full-time', experience_level: '',
             location: '', salary_min: '', salary_max: '', job_description: '',
-            required_skills: '', remote: false,
+            required_skills: '', required_education: '', remote: false,
             require_education: false, require_skills: false
         });
         setRequirements([{ requirement_text: '', is_mandatory: true }]);
@@ -219,6 +221,16 @@ const JobPosting = () => {
                                                 <span className="flex items-center gap-1">
                                                     <DollarSign className="w-4 h-4" /> ${job.salary_min?.toLocaleString()} - ${job.salary_max?.toLocaleString()}
                                                 </span>
+                                                {job.required_skills && (
+                                                    <span className="flex items-center gap-1">
+                                                        <Badge variant="outline">Skills: {job.required_skills}</Badge>
+                                                    </span>
+                                                )}
+                                                {job.required_education && (
+                                                    <span className="flex items-center gap-1 text-sm text-neutral-500">
+                                                        🎓 {job.required_education}
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                         <Button variant="outline" size="sm" onClick={() => handleManageClick(job)}>Manage</Button>
@@ -333,6 +345,12 @@ const JobPosting = () => {
                                     required
                                     value={formData.required_skills}
                                     onChange={(e) => setFormData({ ...formData, required_skills: e.target.value })}
+                                />
+                                <Input
+                                    label="Required Educational Qualification"
+                                    placeholder="e.g. Bachelor's in Computer Science or equivalent"
+                                    value={formData.required_education}
+                                    onChange={(e) => setFormData({ ...formData, required_education: e.target.value })}
                                 />
                             </CardContent>
                         </Card>

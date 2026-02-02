@@ -4,6 +4,8 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import Landing from '../pages/Landing';
 import {
     AITools,
+    AutoShortlist,
+    InterviewScheduler,
     ApplicantManagement,
     CompanyProfile,
     JobPosting,
@@ -56,6 +58,8 @@ const AppRoutes = () => {
                     <Route path="post-job" element={<JobPosting />} />
                     <Route path="applicants" element={<ApplicantManagement />} />
                     <Route path="ai-tools" element={<AITools />} />
+                    <Route path="ai-tools/auto-shortlist" element={<AutoShortlist />} />
+                    <Route path="ai-tools/interview-scheduler" element={<InterviewScheduler />} />
                     <Route path="company" element={<CompanyProfile />} />
                 </Route>
             </Route>

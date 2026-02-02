@@ -146,6 +146,7 @@ router.post('/', auth, roleGuard('recruiter'), async (req, res) => {
             salary_max,
             job_description,
             required_skills,
+            required_education, // Added new field
             status,
             requirements, // Array of { requirement_text, is_mandatory }
             questions     // Array of { question_text, question_type, options, is_required }
@@ -181,9 +182,9 @@ router.post('/', auth, roleGuard('recruiter'), async (req, res) => {
             INSERT INTO job_postings (
                 job_title, department, job_type, experience_level, location, 
                 salary_min, salary_max, job_description, required_skills, status, company_id,
-                require_education, require_skills
+                require_education, require_skills, required_education
             )
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, COALESCE($10, 'Open'), $11, $12, $13)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, COALESCE($10, 'Open'), $11, $12, $13, $14)
             RETURNING job_id;
         `;
 
@@ -193,7 +194,8 @@ router.post('/', auth, roleGuard('recruiter'), async (req, res) => {
             salary_max ? parseInt(salary_max) : null,
             job_description, required_skills, status, companyId,
             req.body.require_education || false,
-            req.body.require_skills || false
+            req.body.require_skills || false,
+            req.body.required_education || null
         ];
 
         const jobResult = await client.query(jobQuery, jobValues);
@@ -268,7 +270,8 @@ router.get('/recruiter', auth, roleGuard('recruiter'), async (req, res) => {
                 job_id, job_title, department, job_type, 
                 experience_level, location, status, 
                 created_at, updated_at,
-                require_education, require_skills
+                require_education, require_skills,
+                required_skills, required_education
             FROM job_postings
             WHERE company_id = $1
             ORDER BY created_at DESC
@@ -384,6 +387,7 @@ router.put('/:id', auth, roleGuard('recruiter'), async (req, res) => {
                 status = COALESCE($10, status), 
                 require_education = COALESCE($12, require_education),
                 require_skills = COALESCE($13, require_skills),
+                required_education = COALESCE($14, required_education),
                 updated_at = CURRENT_TIMESTAMP
             WHERE job_id = $11
         `;
@@ -400,7 +404,8 @@ router.put('/:id', auth, roleGuard('recruiter'), async (req, res) => {
             status || null,
             jobId,
             req.body.require_education !== undefined ? req.body.require_education : null,
-            req.body.require_skills !== undefined ? req.body.require_skills : null
+            req.body.require_skills !== undefined ? req.body.require_skills : null,
+            req.body.required_education || null
         ];
         await client.query(updateQuery, updateValues);
 

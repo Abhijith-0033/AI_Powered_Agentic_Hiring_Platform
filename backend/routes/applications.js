@@ -144,33 +144,36 @@ router.post('/jobs/:id/apply', auth, roleGuard('job_seeker'), async (req, res) =
  * STRICT IMPLEMENTATION PER USER REQUEST
  */
 router.get('/applications/my-applications', auth, roleGuard('job_seeker'), async (req, res) => {
+    const fs = await import('fs');
+    const logFile = 'debug-apps.log';
+    const log = (msg) => fs.appendFileSync(logFile, `[${new Date().toISOString()}] ${msg}\n`);
+
     try {
         const userId = req.user.userId;
-        console.log(`[Job Seeker Apps] Request for User ID: ${userId}`);
+        log(`[START] Request for User ID: ${userId}`);
 
-        // 1. Resolve Candidate ID from User ID (Credentials)
+        // 1. Resolve Candidate ID
         const candidateRes = await pool.query(
             'SELECT id, name FROM candidates WHERE user_id = $1',
             [userId]
         );
 
         if (candidateRes.rows.length === 0) {
-            console.log(`[Job Seeker Apps] No candidate profile found for User ID: ${userId}`);
+            log(`[ERROR] No candidate profile found for User ID: ${userId}`);
             return res.status(404).json({ success: false, message: 'Candidate profile not found' });
         }
 
         const candidateId = candidateRes.rows[0].id;
-        console.log(`[Job Seeker Apps] Found Candidate ID: ${candidateId} (${candidateRes.rows[0].name})`);
+        log(`[INFO] Found Candidate ID: ${candidateId}`);
 
-        // 2. Fetch Applications using User's Required Query
+        // 2. Fetch Applications
         const query = `
             SELECT 
                 ja.id AS application_id,
                 ja.job_id,
                 ja.status,
                 ja.applied_at,
-                ja.applied_at,
-                COALESCE(ja.updated_at, ja.applied_at) as last_update,
+                ja.applied_at as last_update,
                 jp.job_title,
                 jp.location,
                 c.name AS company_name,
@@ -184,9 +187,9 @@ router.get('/applications/my-applications', auth, roleGuard('job_seeker'), async
         `;
 
         const { rows } = await pool.query(query, [userId]);
-        console.log(`[Job Seeker Apps] Found ${rows.length} applications for Candidate ID: ${candidateId}`);
+        log(`[SUCCESS] Found ${rows.length} applications for User ID: ${userId}`);
 
-        // 3. Construct Summary Counts
+        // 3. Construct Summary counts
         const summary = {
             total: rows.length,
             applied: rows.filter(a => a.status === 'Applied' || a.status === 'applied').length,
@@ -210,6 +213,7 @@ router.get('/applications/my-applications', auth, roleGuard('job_seeker'), async
         });
 
     } catch (error) {
+        log(`[FATAL] Error fetching my applications: ${error.message}`);
         console.error('Error fetching my applications:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }

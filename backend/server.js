@@ -9,6 +9,8 @@ import dashboardRoutes from './routes/dashboard.js';
 import aiRoutes from './routes/ai.js';
 import resumeRoutes from './routes/resumes.js';
 import companiesRoutes from './routes/companies.js';
+import aiToolsRoutes from './routes/aiToolsRoutes.js';
+import interviewRoutes from './routes/interviewRoutes.js';
 import pool from './config/db.js'; // Initialize PostgreSQL connection
 
 // Load environment variables
@@ -65,6 +67,8 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/candidate', resumeRoutes);
 app.use('/api/companies', companiesRoutes);
+app.use('/api/ai-tools', aiToolsRoutes);
+app.use('/api/interviews', interviewRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -98,11 +102,10 @@ app.listen(PORT, () => {
     // Get network interfaces
     const interfaces = os.networkInterfaces();
     const addresses = [];
-    for (const k in interfaces) {
-        for (const k2 in interfaces[k]) {
-            const address = interfaces[k][k2];
-            if (address.family === 'IPv4' && !address.internal) {
-                addresses.push(address.address);
+    for (const name in interfaces) {
+        for (const iface of interfaces[name]) {
+            if (iface.family === 'IPv4' && !iface.internal) {
+                addresses.push({ name, address: iface.address });
             }
         }
     }
@@ -112,8 +115,8 @@ app.listen(PORT, () => {
     console.log(`   AI Hiring Platform API Server`);
     console.log('   ============================================');
     console.log(`   🌐 Local:   http://localhost:${PORT}`);
-    addresses.forEach(ip => {
-        console.log(`   📡 Network: http://${ip}:${PORT}`);
+    addresses.forEach(info => {
+        console.log(`   📡 Network (${info.name}): http://${info.address}:${PORT}`);
     });
     console.log(`   📊 Health:  http://localhost:${PORT}/health`);
     console.log('   ============================================');
