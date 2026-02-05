@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import Card, { CardHeader, CardTitle, CardDescription, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui';
-import { Calendar, Clock, Users, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Calendar, Clock, Users, CheckCircle, ArrowLeft, UserPlus, X, Coffee } from 'lucide-react';
 
 const InterviewScheduler = () => {
     const navigate = useNavigate();
@@ -22,6 +22,15 @@ const InterviewScheduler = () => {
     const [slotDuration, setSlotDuration] = useState(30);
     const [mode, setMode] = useState('online');
     const [meetingLink, setMeetingLink] = useState('');
+
+    // Interviewer management state
+    const [interviewers, setInterviewers] = useState([]);
+    const [newInterviewerName, setNewInterviewerName] = useState('');
+    const [newInterviewerEmail, setNewInterviewerEmail] = useState('');
+
+    // Break configuration
+    const [breakDuration, setBreakDuration] = useState(15);
+    const [breakFrequency, setBreakFrequency] = useState(3);
 
     // Fetch jobs on mount
     useEffect(() => {
@@ -99,6 +108,11 @@ const InterviewScheduler = () => {
             return;
         }
 
+        if (interviewers.length === 0) {
+            setMessage({ type: 'error', text: 'Please add at least one interviewer.' });
+            return;
+        }
+
         setScheduling(true);
         setMessage(null);
 
@@ -108,7 +122,10 @@ const InterviewScheduler = () => {
                 startTime,
                 slotDuration,
                 mode,
-                meetingLink: mode === 'online' ? meetingLink : null
+                meetingLink: mode === 'online' ? meetingLink : null,
+                interviewers,
+                breakDuration,
+                breakFrequency
             });
 
             if (response.data.success) {
@@ -129,6 +146,35 @@ const InterviewScheduler = () => {
         } finally {
             setScheduling(false);
         }
+    };
+
+    // Add interviewer
+    const handleAddInterviewer = () => {
+        if (!newInterviewerName.trim() || !newInterviewerEmail.trim()) {
+            setMessage({ type: 'error', text: 'Please enter both name and email for the interviewer.' });
+            return;
+        }
+
+        // Basic email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(newInterviewerEmail)) {
+            setMessage({ type: 'error', text: 'Please enter a valid email address.' });
+            return;
+        }
+
+        setInterviewers([...interviewers, {
+            name: newInterviewerName.trim(),
+            email: newInterviewerEmail.trim()
+        }]);
+
+        setNewInterviewerName('');
+        setNewInterviewerEmail('');
+        setMessage(null);
+    };
+
+    // Remove interviewer
+    const handleRemoveInterviewer = (index) => {
+        setInterviewers(interviewers.filter((_, i) => i !== index));
     };
 
     return (
@@ -152,8 +198,8 @@ const InterviewScheduler = () => {
             {/* Notification */}
             {message && (
                 <div className={`p-4 rounded-lg text-sm font-medium ${message.type === 'success' ? 'bg-green-50 text-green-700' :
-                        message.type === 'warning' ? 'bg-yellow-50 text-yellow-700' :
-                            'bg-red-50 text-red-700'
+                    message.type === 'warning' ? 'bg-yellow-50 text-yellow-700' :
+                        'bg-red-50 text-red-700'
                     }`}>
                     {message.text}
                 </div>
@@ -235,6 +281,99 @@ const InterviewScheduler = () => {
                                 ))}
                             </div>
                         )}
+                    </CardContent>
+                </Card>
+            )}
+
+            {/* Interviewer Management */}
+            {selectedJob && topCandidates.length > 0 && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <UserPlus className="w-5 h-5" />
+                            Interviewer Management
+                        </CardTitle>
+                        <CardDescription>
+                            Add interviewers who will conduct these interviews. The system will automatically distribute candidates fairly using Round-Robin scheduling.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {/* Add Interviewer Form */}
+                        <div className="space-y-4">
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                                        Interviewer Name <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={newInterviewerName}
+                                        onChange={(e) => setNewInterviewerName(e.target.value)}
+                                        placeholder="John Doe"
+                                        className="block w-full rounded-lg border-neutral-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-3 px-4"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                                        Interviewer Email <span className="text-red-500">*</span>
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="email"
+                                            value={newInterviewerEmail}
+                                            onChange={(e) => setNewInterviewerEmail(e.target.value)}
+                                            placeholder="john@company.com"
+                                            className="block w-full rounded-lg border-neutral-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-3 px-4"
+                                            onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddInterviewer())}
+                                        />
+                                        <Button
+                                            type="button"
+                                            onClick={handleAddInterviewer}
+                                            variant="outline"
+                                            className="px-4"
+                                        >
+                                            <UserPlus className="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Interviewer List */}
+                            {interviewers.length > 0 && (
+                                <div className="mt-4">
+                                    <p className="text-sm font-medium text-neutral-700 mb-2">
+                                        Added Interviewers ({interviewers.length})
+                                    </p>
+                                    <div className="space-y-2">
+                                        {interviewers.map((interviewer, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex items-center justify-between p-3 bg-indigo-50 rounded-lg border border-indigo-200"
+                                            >
+                                                <div>
+                                                    <p className="font-semibold text-neutral-900">{interviewer.name}</p>
+                                                    <p className="text-sm text-neutral-500">{interviewer.email}</p>
+                                                </div>
+                                                <button
+                                                    onClick={() => handleRemoveInterviewer(index)}
+                                                    className="p-1 hover:bg-red-100 rounded transition-colors"
+                                                    title="Remove interviewer"
+                                                >
+                                                    <X className="w-4 h-4 text-red-600" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Algorithm Info */}
+                                    <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                        <p className="text-sm text-blue-900">
+                                            <strong>📊 Algorithm:</strong> Interviews will be distributed fairly among {interviewers.length} interviewer{interviewers.length > 1 ? 's' : ''} using Round-Robin scheduling with automatic break management.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </CardContent>
                 </Card>
             )}
@@ -327,6 +466,43 @@ const InterviewScheduler = () => {
                                             <span className="text-sm text-neutral-700">Offline</span>
                                         </label>
                                     </div>
+                                </div>
+
+                                {/* Break Duration */}
+                                <div>
+                                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                                        <Coffee className="w-4 h-4 inline mr-1" />
+                                        Break Duration <span className="text-red-500">*</span>
+                                    </label>
+                                    <select
+                                        value={breakDuration}
+                                        onChange={(e) => setBreakDuration(Number(e.target.value))}
+                                        className="block w-full rounded-lg border-neutral-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-3 px-4"
+                                        required
+                                    >
+                                        <option value={10}>10 minutes</option>
+                                        <option value={15}>15 minutes</option>
+                                        <option value={30}>30 minutes</option>
+                                    </select>
+                                </div>
+
+                                {/* Break Frequency */}
+                                <div>
+                                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                                        Break After (Interviews) <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        max="10"
+                                        value={breakFrequency}
+                                        onChange={(e) => setBreakFrequency(Number(e.target.value))}
+                                        className="block w-full rounded-lg border-neutral-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-3 px-4"
+                                        required
+                                    />
+                                    <p className="mt-1 text-xs text-neutral-500">
+                                        Interviewer gets a break after every {breakFrequency} interview{breakFrequency > 1 ? 's' : ''}
+                                    </p>
                                 </div>
                             </div>
 
@@ -428,7 +604,14 @@ const InterviewScheduler = () => {
                                         key={index}
                                         className="flex items-center justify-between p-3 bg-white rounded-lg border border-green-200"
                                     >
-                                        <span className="font-medium text-neutral-900">{interview.candidateName}</span>
+                                        <div className="flex-1">
+                                            <span className="font-medium text-neutral-900">{interview.candidateName}</span>
+                                            {interview.interviewerName && interview.interviewerName !== 'Not assigned' && (
+                                                <p className="text-xs text-neutral-500 mt-1">
+                                                    👤 Interviewer: {interview.interviewerName}
+                                                </p>
+                                            )}
+                                        </div>
                                         <span className="text-sm font-bold text-indigo-600">{interview.timeSlot}</span>
                                     </div>
                                 ))}

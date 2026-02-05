@@ -12,7 +12,7 @@ import pool from '../config/db.js';
  * @returns {Promise<Object>} Created notification
  */
 export async function createInterviewNotification(candidateUserId, interviewDetails) {
-    const { jobTitle, interviewDate, startTime, endTime, mode, meetingLink } = interviewDetails;
+    const { jobTitle, interviewDate, startTime, endTime, mode, meetingLink, interviewerName } = interviewDetails;
 
     // Format the notification message
     const title = `Interview Scheduled: ${jobTitle}`;
@@ -28,6 +28,10 @@ export async function createInterviewNotification(candidateUserId, interviewDeta
     message += `Time: ${startTime} - ${endTime}\n`;
     message += `Mode: ${mode.charAt(0).toUpperCase() + mode.slice(1)}\n`;
 
+    if (interviewerName) {
+        message += `Interviewer: ${interviewerName}\n`;
+    }
+
     if (mode === 'online' && meetingLink) {
         message += `Meeting Link: ${meetingLink}\n`;
     }
@@ -40,7 +44,8 @@ export async function createInterviewNotification(candidateUserId, interviewDeta
         startTime,
         endTime,
         mode,
-        meetingLink: meetingLink || null
+        meetingLink: meetingLink || null,
+        interviewerName: interviewerName || null
     };
 
     try {

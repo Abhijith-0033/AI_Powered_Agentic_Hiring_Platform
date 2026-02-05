@@ -3,6 +3,7 @@ import pool from '../config/db.js';
 import auth from '../middleware/auth.js';
 import roleGuard from '../middleware/roleGuard.js';
 import { createInterviewNotification } from '../services/notificationService.js';
+import { scheduleInterviewsWithRoundRobin, scheduleInterviewsSequential } from '../services/schedulingAlgorithm.js';
 
 const router = express.Router();
 
@@ -68,27 +69,29 @@ router.post('/schedule/:jobId', auth, roleGuard('recruiter'), async (req, res) =
         const topCandidates = candidatesResult.rows;
         console.log(`[Interview Scheduler] Found ${topCandidates.length} top candidates`);
 
-        // 3. Calculate sequential time slots
-        const interviews = [];
-        const [startHour, startMinute] = startTime.split(':').map(Number);
+        // Extract request parameters
+        const { interviewers = [], breakDuration = 15, breakFrequency = 3 } = req.body;
 
-        for (let i = 0; i < topCandidates.length; i++) {
-            const candidate = topCandidates[i];
+        // 3. Schedule interviews using algorithm
+        let scheduledSlots;
 
-            // Calculate this candidate's slot
-            const slotStartMinutes = startHour * 60 + startMinute + (i * slotDuration);
-            const slotEndMinutes = slotStartMinutes + slotDuration;
-
-            const slotStartTime = `${String(Math.floor(slotStartMinutes / 60)).padStart(2, '0')}:${String(slotStartMinutes % 60).padStart(2, '0')}`;
-            const slotEndTime = `${String(Math.floor(slotEndMinutes / 60)).padStart(2, '0')}:${String(slotEndMinutes % 60).padStart(2, '0')}`;
-
-            interviews.push({
-                applicationId: candidate.application_id,
-                candidateId: candidate.candidate_id,
-                candidateName: candidate.candidate_name,
-                candidateUserId: candidate.candidate_user_id,
-                startTime: slotStartTime,
-                endTime: slotEndTime
+        if (interviewers && interviewers.length > 0) {
+            // Use Break-Aware Round-Robin Algorithm
+            console.log(`[Interview Scheduler] Using Round-Robin algorithm with ${interviewers.length} interviewers`);
+            scheduledSlots = scheduleInterviewsWithRoundRobin(topCandidates, interviewers, {
+                startTime,
+                slotDuration,
+                breakDuration,
+                breakFrequency,
+                interviewDate
+            });
+        } else {
+            // Fallback to sequential scheduling (backward compatibility)
+            console.log('[Interview Scheduler] No interviewers provided, using sequential mode');
+            scheduledSlots = scheduleInterviewsSequential(topCandidates, {
+                startTime,
+                slotDuration,
+                interviewDate
             });
         }
 
@@ -97,24 +100,28 @@ router.post('/schedule/:jobId', auth, roleGuard('recruiter'), async (req, res) =
 
         const insertQuery = `
             INSERT INTO interviews 
-                (job_id, application_id, candidate_id, interview_date, start_time, end_time, mode, meeting_link, created_by)
+                (job_id, application_id, candidate_id, interview_date, start_time, end_time, mode, meeting_link, 
+                 interviewer_name, interviewer_email, interviewer_index, created_by)
             VALUES 
-                ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
             RETURNING id
         `;
 
         const scheduledInterviews = [];
 
-        for (const interview of interviews) {
+        for (const slot of scheduledSlots) {
             const values = [
                 jobId,
-                interview.applicationId,
-                interview.candidateId,
+                slot.applicationId,
+                slot.candidateId,
                 interviewDate,
-                interview.startTime,
-                interview.endTime,
+                slot.startTime,
+                slot.endTime,
                 mode,
                 meetingLink || null,
+                slot.interviewerName,
+                slot.interviewerEmail,
+                slot.interviewerIndex,
                 userId
             ];
 
@@ -123,19 +130,21 @@ router.post('/schedule/:jobId', auth, roleGuard('recruiter'), async (req, res) =
 
             scheduledInterviews.push({
                 interviewId,
-                candidateName: interview.candidateName,
-                timeSlot: `${interview.startTime} - ${interview.endTime}`
+                candidateName: slot.candidateName,
+                timeSlot: `${slot.startTime} - ${slot.endTime}`,
+                interviewerName: slot.interviewerName || 'Not assigned'
             });
 
             // 5. Create Notification for Candidate
-            if (interview.candidateUserId) {
-                await createInterviewNotification(interview.candidateUserId, {
+            if (slot.candidateUserId) {
+                await createInterviewNotification(slot.candidateUserId, {
                     jobTitle,
                     interviewDate,
-                    startTime: interview.startTime,
-                    endTime: interview.endTime,
+                    startTime: slot.startTime,
+                    endTime: slot.endTime,
                     mode,
-                    meetingLink: meetingLink || null
+                    meetingLink: meetingLink || null,
+                    interviewerName: slot.interviewerName
                 });
             }
         }
