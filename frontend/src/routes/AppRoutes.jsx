@@ -22,6 +22,7 @@ import {
 
 // Auth components
 import AuthPage from '../components/auth/AuthPage';
+import OAuthSuccess from '../components/auth/OAuthSuccess';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 
 /**
@@ -34,6 +35,7 @@ const AppRoutes = () => {
             {/* Public Routes */}
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<AuthPage />} />
+            <Route path="/oauth-success" element={<OAuthSuccess />} />
 
             {/* User (Job Seeker) Routes - Protected */}
             <Route element={<ProtectedRoute allowedRoles={['job_seeker']} />}>

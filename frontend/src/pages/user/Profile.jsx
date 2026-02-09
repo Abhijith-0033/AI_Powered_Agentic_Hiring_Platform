@@ -11,6 +11,7 @@ import EducationForm from '../../components/profile/EducationForm';
 import AchievementsForm from '../../components/profile/AchievementsForm';
 import ProjectsForm from '../../components/profile/ProjectsForm';
 import ResumeUpload from '../../components/profile/ResumeUpload';
+import ResumeAutoFill from '../../components/profile/ResumeAutoFill';
 
 const Profile = () => {
     const [profile, setProfile] = useState({
@@ -34,6 +35,7 @@ const Profile = () => {
     const [error, setError] = useState(null);
     const [profileImage, setProfileImage] = useState(null);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
+    const [profileMode, setProfileMode] = useState('manual'); // 'manual' or 'resume'
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -348,63 +350,102 @@ const Profile = () => {
     return (
         <DashboardLayout type="user" title="Profile">
             <div className="max-w-4xl mx-auto pb-10">
-                <PersonalInfoForm
-                    profile={profile}
-                    setProfile={setProfile}
-                    profileImage={profileImage}
-                    handleImageUpload={handleImageUpload}
-                    isUploadingImage={isUploadingImage}
-                />
+                {/* Mode Selector */}
+                <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4 mb-6">
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setProfileMode('manual')}
+                            className={`flex-1 py-2.5 px-4 rounded-lg font-medium transition-all ${profileMode === 'manual'
+                                ? 'bg-primary-600 text-white shadow-sm'
+                                : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                                }`}
+                        >
+                            📝 Manual Entry
+                        </button>
+                        <button
+                            onClick={() => setProfileMode('resume')}
+                            className={`flex-1 py-2.5 px-4 rounded-lg font-medium transition-all ${profileMode === 'resume'
+                                ? 'bg-primary-600 text-white shadow-sm'
+                                : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                                }`}
+                        >
+                            🤖 Fill from Resume
+                        </button>
+                    </div>
+                </div>
 
-                <SkillsForm
-                    skills={profile.skills}
-                    onAdd={handleAddSkill}
-                    onRemove={handleRemoveSkill}
-                />
-
-                {!profile.isFresher && (
-                    <ExperienceForm
-                        experience={profile.experience}
-                        onUpdate={(index, key, value) => updateArrayItem('experience', index, key, value)}
-                        onAdd={() => addArrayItem('experience', {})}
-                        onRemove={(index) => removeArrayItem('experience', index)}
+                {/* Resume Auto-Fill Mode */}
+                {profileMode === 'resume' && (
+                    <ResumeAutoFill
+                        onExtractComplete={(data) => {
+                            // Profile will auto-reload after successful upload
+                            console.log('Resume parsed:', data);
+                        }}
                     />
                 )}
 
-                <EducationForm
-                    education={profile.education}
-                    onUpdate={(index, key, value) => updateArrayItem('education', index, key, value)}
-                    onAdd={() => addArrayItem('education', {})}
-                    onRemove={(index) => removeArrayItem('education', index)}
-                />
+                {/* Manual Entry Mode (existing forms) */}
+                {profileMode === 'manual' && (
+                    <>
+                        <PersonalInfoForm
+                            profile={profile}
+                            setProfile={setProfile}
+                            profileImage={profileImage}
+                            handleImageUpload={handleImageUpload}
+                            isUploadingImage={isUploadingImage}
+                        />
 
-                <AchievementsForm
-                    achievements={profile.achievements}
-                    onUpdate={(index, key, value) => updateArrayItem('achievements', index, key, value)}
-                    onAdd={() => addArrayItem('achievements', {})}
-                    onRemove={(index) => removeArrayItem('achievements', index)}
-                />
+                        <SkillsForm
+                            skills={profile.skills}
+                            onAdd={handleAddSkill}
+                            onRemove={handleRemoveSkill}
+                        />
 
-                <ProjectsForm
-                    projects={profile.projects}
-                    onUpdate={(index, key, value) => updateArrayItem('projects', index, key, value)}
-                    onAdd={() => addArrayItem('projects', { technologies: [] })}
-                    onRemove={(index) => removeArrayItem('projects', index)}
-                />
+                        {!profile.isFresher && (
+                            <ExperienceForm
+                                experience={profile.experience}
+                                onUpdate={(index, key, value) => updateArrayItem('experience', index, key, value)}
+                                onAdd={() => addArrayItem('experience', {})}
+                                onRemove={(index) => removeArrayItem('experience', index)}
+                            />
+                        )}
 
-                <ResumeUpload
-                    hasResume={hasResume}
-                    resumeFile={resumeFile}
-                    onSelectFile={setResumeFile}
-                    onDelete={handleDeleteResume}
-                    pViewResume={handleViewResume}
-                    onReupload={handleReuploadResume}
-                />
+                        <EducationForm
+                            education={profile.education}
+                            onUpdate={(index, key, value) => updateArrayItem('education', index, key, value)}
+                            onAdd={() => addArrayItem('education', {})}
+                            onRemove={(index) => removeArrayItem('education', index)}
+                        />
 
-                <div className="flex justify-end gap-3 mb-6 bg-white p-4 rounded-lg shadow-sm sticky bottom-0 z-10 border border-neutral-100">
-                    <Button variant="secondary" onClick={() => window.location.reload()}>Cancel</Button>
-                    <Button onClick={handleSave} loading={saving} disabled={saving}>Save Profile</Button>
-                </div>
+                        <AchievementsForm
+                            achievements={profile.achievements}
+                            onUpdate={(index, key, value) => updateArrayItem('achievements', index, key, value)}
+                            onAdd={() => addArrayItem('achievements', {})}
+                            onRemove={(index) => removeArrayItem('achievements', index)}
+                        />
+
+                        <ProjectsForm
+                            projects={profile.projects}
+                            onUpdate={(index, key, value) => updateArrayItem('projects', index, key, value)}
+                            onAdd={() => addArrayItem('projects', { technologies: [] })}
+                            onRemove={(index) => removeArrayItem('projects', index)}
+                        />
+
+                        <ResumeUpload
+                            hasResume={hasResume}
+                            resumeFile={resumeFile}
+                            onSelectFile={setResumeFile}
+                            onDelete={handleDeleteResume}
+                            pViewResume={handleViewResume}
+                            onReupload={handleReuploadResume}
+                        />
+
+                        <div className="flex justify-end gap-3 mb-6 bg-white p-4 rounded-lg shadow-sm sticky bottom-0 z-10 border border-neutral-100">
+                            <Button variant="secondary" onClick={() => window.location.reload()}>Cancel</Button>
+                            <Button onClick={handleSave} loading={saving} disabled={saving}>Save Profile</Button>
+                        </div>
+                    </>
+                )}
             </div>
         </DashboardLayout>
     );

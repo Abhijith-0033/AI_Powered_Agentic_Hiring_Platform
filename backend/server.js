@@ -12,6 +12,10 @@ import aiToolsRoutes from './routes/aiToolsRoutes.js';
 import interviewRoutes from './routes/interviewRoutes.js';
 import profileImageRoutes from './routes/profileImage.js';
 import pool from './config/db.js'; // Initialize PostgreSQL connection
+import dns from 'dns';
+
+// Force IPv4 to avoid delay/timeouts with IPv6 on some networks
+dns.setDefaultResultOrder('ipv4first');
 
 // Load environment variables
 dotenv.config();
@@ -44,6 +48,10 @@ app.use((req, res, next) => {
     console.log(`${req.method} ${req.path}`);
     next();
 });
+
+// Initialize Passport
+import passport from './config/passport.js';
+app.use(passport.initialize());
 
 // ============================================================
 // ROUTES
@@ -119,6 +127,7 @@ app.listen(PORT, () => {
         console.log(`   📡 Network (${info.name}): http://${info.address}:${PORT}`);
     });
     console.log(`   📊 Health:  http://localhost:${PORT}/health`);
+    console.log(`   💻 Frontend: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
     console.log('   ============================================');
     console.log('');
 });
