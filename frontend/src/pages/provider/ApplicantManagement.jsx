@@ -1,7 +1,7 @@
 import { Search, Users } from 'lucide-react';
 import React, { useState } from 'react';
 import { DashboardLayout } from '../../components/layout';
-import { ApplicantCard } from '../../components/shared';
+import { ApplicantCard, CandidateProfilePanel } from '../../components/shared';
 import ApplicantDetailsModal from '../../components/shared/ApplicantDetailsModal';
 import { Input, Select } from '../../components/ui';
 import Card, { CardContent } from '../../components/ui/Card';
@@ -22,6 +22,11 @@ const ApplicantManagement = () => {
     // Modal State
     const [selectedApplicant, setSelectedApplicant] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Profile Panel State (NEW)
+    const [profilePanelOpen, setProfilePanelOpen] = useState(false);
+    const [profilePanelAppId, setProfilePanelAppId] = useState(null);
+    const [profilePanelCandidateName, setProfilePanelCandidateName] = useState('');
 
     // Fetch applicants from API
     const fetchApplicants = async () => {
@@ -81,6 +86,13 @@ const ApplicantManagement = () => {
     const handleViewDetails = (app) => {
         setSelectedApplicant(app);
         setIsModalOpen(true);
+    };
+
+    // Open Profile Panel (NEW)
+    const handleViewProfile = (app) => {
+        setProfilePanelAppId(app.id);
+        setProfilePanelCandidateName(app.name);
+        setProfilePanelOpen(true);
     };
 
     const statusOptions = [
@@ -203,6 +215,7 @@ const ApplicantManagement = () => {
                                 <ApplicantCard
                                     applicant={applicant}
                                     onViewResume={() => handleViewDetails(applicant)}
+                                    onViewProfile={() => handleViewProfile(applicant)}
                                     onShortlist={() => handleUpdateStatus(applicant.id, 'shortlisted')}
                                     onInterview={() => handleUpdateStatus(applicant.id, 'interview')}
                                     onAccept={() => handleUpdateStatus(applicant.id, 'accepted')}
@@ -229,6 +242,14 @@ const ApplicantManagement = () => {
                 onClose={() => setIsModalOpen(false)}
                 applicant={selectedApplicant}
                 onUpdateStatus={handleUpdateStatus}
+            />
+
+            {/* Candidate Profile Side Panel (NEW) */}
+            <CandidateProfilePanel
+                applicationId={profilePanelAppId}
+                isOpen={profilePanelOpen}
+                onClose={() => setProfilePanelOpen(false)}
+                candidateName={profilePanelCandidateName}
             />
         </DashboardLayout>
     );

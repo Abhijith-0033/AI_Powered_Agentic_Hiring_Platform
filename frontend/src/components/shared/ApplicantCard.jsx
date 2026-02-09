@@ -1,4 +1,4 @@
-import { Calendar, FileText, MapPin, Star } from 'lucide-react';
+import { Calendar, FileText, MapPin, Star, User } from 'lucide-react';
 import Badge from '../ui/Badge';
 import Button from '../ui/Button';
 
@@ -8,12 +8,14 @@ import Button from '../ui/Button';
  * @param {Object} props
  * @param {Object} props.applicant - Applicant data
  * @param {Function} props.onViewResume - View resume handler
+ * @param {Function} props.onViewProfile - View full profile handler (NEW)
  * @param {Function} props.onShortlist - Shortlist handler
  * @param {Function} props.onReject - Reject handler
  */
 const ApplicantCard = ({
     applicant,
     onViewResume,
+    onViewProfile,
     onShortlist,
     onReject,
     className = '',
@@ -137,6 +139,18 @@ const ApplicantCard = ({
                 >
                     Resume
                 </Button>
+
+                {/* View Profile Button (NEW) */}
+                {onViewProfile && (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        leftIcon={<User className="w-4 h-4" />}
+                        onClick={onViewProfile}
+                    >
+                        Profile
+                    </Button>
+                )}
 
                 {/* Dynamic Actions based on Status */}
                 {status === 'applied' && (

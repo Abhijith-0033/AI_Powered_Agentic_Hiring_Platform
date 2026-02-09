@@ -1,6 +1,7 @@
 import { Bell, Search, User } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
+import { getProfileImage } from '../../api/users';
 
 /**
  * Dashboard layout wrapper with sidebar and header
@@ -12,6 +13,30 @@ import Sidebar from './Sidebar';
  */
 const DashboardLayout = ({ type = 'user', title, children }) => {
     const [sidebarWidth, setSidebarWidth] = useState(256); // 64 = w-64, 80 = w-20
+    const [profileImageUrl, setProfileImageUrl] = useState(null);
+
+    useEffect(() => {
+        let objectUrl = null;
+        const fetchProfileImage = async () => {
+            if (type !== 'user') return; // Only fetch for job seekers
+            try {
+                const blob = await getProfileImage();
+                if (blob.size > 0) {
+                    objectUrl = URL.createObjectURL(blob);
+                    setProfileImageUrl(objectUrl);
+                }
+            } catch (error) {
+                // Silently fail to default avatar if no image or error
+                console.debug('Could not fetch profile image:', error);
+            }
+        };
+
+        fetchProfileImage();
+
+        return () => {
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
+        };
+    }, [type]);
 
     return (
         <div className="min-h-screen bg-neutral-50 text-neutral-900">
@@ -41,9 +66,17 @@ const DashboardLayout = ({ type = 'user', title, children }) => {
 
                             {/* User Avatar */}
                             <button className="flex items-center gap-2 p-1 rounded-full hover:bg-neutral-100 transition-colors ml-2">
-                                <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-semibold border border-primary-200">
-                                    <User className="w-4 h-4" />
-                                </div>
+                                {profileImageUrl ? (
+                                    <img
+                                        src={profileImageUrl}
+                                        alt="Profile"
+                                        className="w-8 h-8 rounded-full object-cover border border-neutral-200"
+                                    />
+                                ) : (
+                                    <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-semibold border border-primary-200">
+                                        <User className="w-4 h-4" />
+                                    </div>
+                                )}
                             </button>
                         </div>
                     </div>

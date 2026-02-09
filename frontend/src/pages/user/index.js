@@ -4,6 +4,5 @@ export { default as ApplicationTracker } from './ApplicationTracker';
 export { default as JobDiscovery } from './JobDiscovery';
 export { default as JobsInIndia } from './JobsInIndia';
 export { default as Profile } from './Profile';
-export { default as ResumeTools } from './ResumeTools';
 export { default as UserDashboard } from './UserDashboard';
 

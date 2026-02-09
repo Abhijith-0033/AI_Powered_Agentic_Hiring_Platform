@@ -41,7 +41,6 @@ const Sidebar = ({ type = 'user' }) => {
     const userNavItems = [
         { icon: LayoutDashboard, label: 'Dashboard', path: '/user/dashboard' },
         { icon: User, label: 'Profile', path: '/user/profile' },
-        { icon: FileText, label: 'Resume Tools', path: '/user/resume-tools' },
         { icon: Search, label: 'Job Discovery', path: '/user/jobs' },
         { icon: Globe, label: 'Jobs in India', path: '/user/jobs-india' },
         { icon: Bot, label: 'AI Actions', path: '/user/ai-actions' },

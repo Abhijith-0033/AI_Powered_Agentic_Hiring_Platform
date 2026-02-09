@@ -42,3 +42,9 @@ export const getApplicationResume = async (applicationId) => {
     });
     return response.data; // Returns Blob
 };
+
+// Recruiter: Get Candidate Profile Snapshot (NEW)
+export const getApplicationProfileSnapshot = async (applicationId) => {
+    const response = await axios.get(`/recruiter/applications/${applicationId}/profile-snapshot`);
+    return response.data;
+};

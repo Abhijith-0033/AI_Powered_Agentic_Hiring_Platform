@@ -18,15 +18,65 @@ export const updateFresherStatus = async (isFresher) => {
     return response.data;
 };
 
-// Add Education (Single)
+// Education
 export const addEducation = async (data) => {
     const response = await axios.post('/candidates/education', data);
     return response.data;
 };
 
-// Add Experience (Single)
+export const deleteEducation = async (id) => {
+    const response = await axios.delete(`/candidates/education/${id}`);
+    return response.data;
+};
+
+// Experience
 export const addExperience = async (data) => {
     const response = await axios.post('/candidates/experience', data);
+    return response.data;
+};
+
+export const deleteExperience = async (id) => {
+    const response = await axios.delete(`/candidates/experience/${id}`);
+    return response.data;
+};
+
+// Achievements
+export const addAchievement = async (data) => {
+    const response = await axios.post('/candidates/achievements', data);
+    return response.data;
+};
+
+export const deleteAchievement = async (id) => {
+    const response = await axios.delete(`/candidates/achievements/${id}`);
+    return response.data;
+};
+
+// Projects
+export const addProject = async (data) => {
+    const response = await axios.post('/candidates/projects', data);
+    return response.data;
+};
+
+export const deleteProject = async (id) => {
+    const response = await axios.delete(`/candidates/projects/${id}`);
+    return response.data;
+};
+
+// Profile Image
+export const getProfileImage = async () => {
+    // Returns Blob or Base64 string depending on backend response type
+    const response = await axios.get('/profile-image', { responseType: 'blob' });
+    return response.data;
+};
+
+export const uploadProfileImage = async (data) => {
+    // data is { image_data: base64String, image_type: 'image/png' }
+    const response = await axios.post('/profile-image', data);
+    return response.data;
+};
+
+export const deleteProfileImage = async () => {
+    const response = await axios.delete('/profile-image');
     return response.data;
 };
 

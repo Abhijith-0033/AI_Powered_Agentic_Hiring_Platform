@@ -23,6 +23,7 @@ export const getJobById = async (id) => {
     const response = await axios.get(`/jobs/${id}`);
     return response.data;
 };
+
 // Get External Jobs (Adzuna - India)
 export const getJobsInIndia = async (params = {}) => {
     // Filter out empty values to avoid sending ?role=&location=
@@ -31,5 +32,17 @@ export const getJobsInIndia = async (params = {}) => {
     );
     const queryParams = new URLSearchParams(cleanParams).toString();
     const response = await axios.get(`/jobs/india${queryParams ? `?${queryParams}` : ''}`);
+    return response.data;
+};
+
+// Update job status (open/closed/deleted) - Recruiter only
+export const updateJobStatus = async (jobId, status) => {
+    const response = await axios.patch(`/jobs/${jobId}/status`, { status });
+    return response.data;
+};
+
+// Soft delete a job - Recruiter only
+export const deleteJob = async (jobId) => {
+    const response = await axios.delete(`/jobs/${jobId}`);
     return response.data;
 };

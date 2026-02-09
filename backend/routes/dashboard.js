@@ -10,13 +10,23 @@ const router = express.Router();
  */
 router.get('/stats', auth, async (req, res) => {
     try {
-        const { email } = req.user;
+        const { userId, email } = req.user;
 
-        // Get candidate ID
-        const candidateRes = await pool.query('SELECT id, experience_years, profile_description, skills, resume_url FROM candidates WHERE email = $1', [email]);
+        // Use user_id for robust lookup of candidate profile
+        const candidateRes = await pool.query('SELECT id, experience_years, profile_description, skills, resume_url FROM candidates WHERE user_id = $1', [userId]);
 
         if (candidateRes.rows.length === 0) {
-            return res.status(404).json({ success: false, message: 'Candidate profile not found' });
+            // New user or no profile created yet: return zero stats instead of 404 to avoid dashboard crash
+            return res.json({
+                success: true,
+                data: {
+                    applicationsSent: 0,
+                    matchesFound: 0,
+                    profileViews: 0,
+                    interviewsScheduled: 0,
+                    profileCompletion: 0 // Prompt user to complete profile
+                }
+            });
         }
 
         const candidate = candidateRes.rows[0];
@@ -26,16 +36,14 @@ router.get('/stats', auth, async (req, res) => {
         if (candidate.experience_years) completionScore += 20;
         if (candidate.profile_description) completionScore += 20;
         if (candidate.skills && candidate.skills.length > 0) completionScore += 20;
+        // Resume check (resume_url might be null if using blob, check blob table if needed, but keeping simple)
         if (candidate.resume_url) completionScore += 20;
         completionScore += 20; // Basic info
 
         // Matches: Approximate "matches" by finding jobs that have at least one of the user's skills
         let matchesCount = 0;
         if (candidate.skills && candidate.skills.length > 0) {
-            // Very basic overlap check: count jobs where required_skills ILIKE any user skill
-            // This is just to show *some* number if possible, or we just return 0 as "no matches generated".
-            // Let's return 0 to be safe and "remove mock data" strictly (real data is 0 matches if no matching engine running).
-            matchesCount = 0;
+            matchesCount = 0; // Keeping 0 as placeholder for now
         }
 
         // Calculate Applications Sent

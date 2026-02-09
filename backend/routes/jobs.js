@@ -149,7 +149,8 @@ router.post('/', auth, roleGuard('recruiter'), async (req, res) => {
             required_education, // Added new field
             status,
             requirements, // Array of { requirement_text, is_mandatory }
-            questions     // Array of { question_text, question_type, options, is_required }
+            questions,    // Array of { question_text, question_type, options, is_required }
+            job_expectations // NEW: { expected_experience_years, expected_education, notes }
         } = req.body;
 
         // Validation
@@ -214,11 +215,11 @@ router.post('/', auth, roleGuard('recruiter'), async (req, res) => {
             }
         }
 
-        // 3. Insert Questions
+        // 3. Insert Questions (with expected_answer for recruiter evaluation)
         if (questions && Array.isArray(questions) && questions.length > 0) {
             const questQuery = `
-                INSERT INTO job_questions (job_id, question_text, question_type, options, is_required)
-                VALUES ($1, $2, $3, $4, $5)
+                INSERT INTO job_questions (job_id, question_text, question_type, options, is_required, expected_answer)
+                VALUES ($1, $2, $3, $4, $5, $6)
             `;
             for (const q of questions) {
                 if (q.question_text && q.question_type) {
@@ -227,10 +228,25 @@ router.post('/', auth, roleGuard('recruiter'), async (req, res) => {
                         q.question_text,
                         q.question_type,
                         q.options || null,
-                        q.is_required !== false
+                        q.is_required !== false,
+                        q.expected_answer || null  // NEW: Recruiter-only expected answer
                     ]);
                 }
             }
+        }
+
+        // 4. Insert Job Expectations (NEW)
+        if (job_expectations && (job_expectations.expected_experience_years || job_expectations.expected_education)) {
+            const expQuery = `
+                INSERT INTO job_expectations (job_id, expected_experience_years, expected_education, notes)
+                VALUES ($1, $2, $3, $4)
+            `;
+            await client.query(expQuery, [
+                newJobId,
+                job_expectations.expected_experience_years || null,
+                job_expectations.expected_education || null,
+                job_expectations.notes || null
+            ]);
         }
 
         await client.query('COMMIT');
@@ -292,7 +308,7 @@ router.get('/recruiter', auth, roleGuard('recruiter'), async (req, res) => {
 });
 /**
  * GET /api/jobs/:id
- * Fetch job details by ID, including company info, requirements, and questions.
+ * Fetch job details by ID, including company info, requirements, questions, and expectations.
  */
 router.get('/:id', async (req, res) => {
     try {
@@ -328,12 +344,18 @@ router.get('/:id', async (req, res) => {
         const questQuery = 'SELECT * FROM job_questions WHERE job_id = $1 ORDER BY id ASC';
         const questResult = await pool.query(questQuery, [jobId]);
 
+        // 4. Fetch Job Expectations (NEW)
+        const expQuery = 'SELECT expected_experience_years, expected_education, notes FROM job_expectations WHERE job_id = $1';
+        const expResult = await pool.query(expQuery, [jobId]);
+        const expectations = expResult.rows.length > 0 ? expResult.rows[0] : null;
+
         res.json({
             success: true,
             data: {
                 ...job,
                 requirements: reqResult.rows,
-                questions: questResult.rows
+                questions: questResult.rows,
+                expectations // NEW: { expected_experience_years, expected_education, notes } or null
             }
         });
 
@@ -442,16 +464,16 @@ router.put('/:id', auth, roleGuard('recruiter'), async (req, res) => {
             }
         }
 
-        // 2. Upsert (Update existing / Insert new)
+        // 2. Upsert (Update existing / Insert new) with expected_answer support
         if (questions && Array.isArray(questions) && questions.length > 0) {
             const updateQQuery = `
                 UPDATE job_questions 
-                SET question_text = $1, question_type = $2, options = $3, is_required = $4
-                WHERE id = $5
+                SET question_text = $1, question_type = $2, options = $3, is_required = $4, expected_answer = $5
+                WHERE id = $6
             `;
             const insertQQuery = `
-                INSERT INTO job_questions (job_id, question_text, question_type, options, is_required)
-                VALUES ($1, $2, $3, $4, $5)
+                INSERT INTO job_questions (job_id, question_text, question_type, options, is_required, expected_answer)
+                VALUES ($1, $2, $3, $4, $5, $6)
             `;
 
             for (const q of questions) {
@@ -463,6 +485,7 @@ router.put('/:id', auth, roleGuard('recruiter'), async (req, res) => {
                             q.question_type,
                             q.options || null,
                             q.is_required !== false,
+                            q.expected_answer || null,  // NEW
                             q.id
                         ]);
                     } else {
@@ -472,7 +495,8 @@ router.put('/:id', auth, roleGuard('recruiter'), async (req, res) => {
                             q.question_text,
                             q.question_type,
                             q.options || null,
-                            q.is_required !== false
+                            q.is_required !== false,
+                            q.expected_answer || null  // NEW
                         ]);
                     }
                 }
@@ -494,4 +518,113 @@ router.put('/:id', auth, roleGuard('recruiter'), async (req, res) => {
     }
 });
 
+/**
+ * PATCH /api/jobs/:id/status
+ * Update job status (open/closed/deleted)
+ * Only the recruiter who owns the job can change status
+ */
+router.patch('/:id/status', auth, roleGuard('recruiter'), async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const jobId = req.params.id;
+        const { status } = req.body;
+
+        // Validate status value
+        const validStatuses = ['open', 'closed', 'deleted'];
+        if (!status || !validStatuses.includes(status.toLowerCase())) {
+            return res.status(400).json({
+                success: false,
+                message: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
+            });
+        }
+
+        // Verify ownership
+        const checkQuery = `
+            SELECT jp.job_id, jp.status as current_status
+            FROM job_postings jp
+            JOIN companies c ON jp.company_id = c.id
+            WHERE jp.job_id = $1 AND c.created_by = $2
+        `;
+        const checkResult = await pool.query(checkQuery, [jobId, userId]);
+
+        if (checkResult.rows.length === 0) {
+            return res.status(403).json({
+                success: false,
+                message: 'Job not found or access denied'
+            });
+        }
+
+        const currentStatus = checkResult.rows[0].current_status;
+
+        // Update status
+        const updateQuery = `
+            UPDATE job_postings 
+            SET status = $1, updated_at = CURRENT_TIMESTAMP
+            WHERE job_id = $2
+            RETURNING job_id, status
+        `;
+        const result = await pool.query(updateQuery, [status.toLowerCase(), jobId]);
+
+        console.log(`[Job Status] Job ${jobId}: ${currentStatus} → ${status.toLowerCase()}`);
+
+        res.json({
+            success: true,
+            message: `Job status updated to ${status}`,
+            data: result.rows[0]
+        });
+
+    } catch (error) {
+        console.error('Error updating job status:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+/**
+ * DELETE /api/jobs/:id
+ * Soft delete a job (set status to 'deleted')
+ * Preserves application history
+ */
+router.delete('/:id', auth, roleGuard('recruiter'), async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const jobId = req.params.id;
+
+        // Verify ownership
+        const checkQuery = `
+            SELECT jp.job_id 
+            FROM job_postings jp
+            JOIN companies c ON jp.company_id = c.id
+            WHERE jp.job_id = $1 AND c.created_by = $2
+        `;
+        const checkResult = await pool.query(checkQuery, [jobId, userId]);
+
+        if (checkResult.rows.length === 0) {
+            return res.status(403).json({
+                success: false,
+                message: 'Job not found or access denied'
+            });
+        }
+
+        // Soft delete by setting status to 'deleted'
+        const updateQuery = `
+            UPDATE job_postings 
+            SET status = 'deleted', updated_at = CURRENT_TIMESTAMP
+            WHERE job_id = $1
+        `;
+        await pool.query(updateQuery, [jobId]);
+
+        console.log(`[Job Delete] Job ${jobId} soft-deleted by user ${userId}`);
+
+        res.json({
+            success: true,
+            message: 'Job deleted successfully'
+        });
+
+    } catch (error) {
+        console.error('Error deleting job:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
 export default router;
+

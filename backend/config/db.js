@@ -33,7 +33,7 @@ const pool = new Pool({
     },
     max: 20, // Maximum pool size
     idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-    connectionTimeoutMillis: 10000 // Return error after 10 seconds if connection cannot be established
+    connectionTimeoutMillis: 30000 // Return error after 30 seconds if connection cannot be established
 });
 
 // Test connection on startup

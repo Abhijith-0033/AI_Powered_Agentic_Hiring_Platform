@@ -1,9 +1,10 @@
-import { Briefcase, Clock, DollarSign, MapPin, Plus, Users, Trash2, X } from 'lucide-react';
+import { Briefcase, Clock, DollarSign, MapPin, Plus, Users, Trash2, X, PlayCircle, PauseCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '../../components/layout';
 import { Badge, Button, Input, Select, Textarea, Toggle } from '../../components/ui';
 import Card, { CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card';
 import api from '../../api/axios';
+import { updateJobStatus, deleteJob } from '../../api/jobs';
 
 const JobPosting = () => {
     const [jobs, setJobs] = useState([]);
@@ -34,10 +35,17 @@ const JobPosting = () => {
         { requirement_text: '', is_mandatory: true }
     ]);
 
-    // Dynamic Questions State
+    // Dynamic Questions State (with expected_answer for recruiter reference)
     const [questions, setQuestions] = useState([
-        { question_text: '', question_type: 'text', options: [], is_required: true }
+        { question_text: '', question_type: 'text', options: [], is_required: true, expected_answer: '' }
     ]);
+
+    // Job Expectations State (NEW)
+    const [expectations, setExpectations] = useState({
+        expected_experience_years: '',
+        expected_education: '',
+        notes: ''
+    });
 
     const fetchJobs = async () => {
         try {
@@ -75,7 +83,7 @@ const JobPosting = () => {
 
     // Helper to Add/Remove Questions
     const addQuestion = () => {
-        setQuestions([...questions, { question_text: '', question_type: 'text', options: [], is_required: true }]);
+        setQuestions([...questions, { question_text: '', question_type: 'text', options: [], is_required: true, expected_answer: '' }]);
     };
 
     const removeQuestion = (index) => {
@@ -105,7 +113,12 @@ const JobPosting = () => {
                 salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
                 salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
                 requirements: requirements.filter(r => r.requirement_text.trim() !== ''),
-                questions: questions.filter(q => q.question_text.trim() !== '')
+                questions: questions.filter(q => q.question_text.trim() !== ''),
+                job_expectations: {
+                    expected_experience_years: expectations.expected_experience_years ? parseInt(expectations.expected_experience_years) : null,
+                    expected_education: expectations.expected_education || null,
+                    notes: expectations.notes || null
+                }
             };
 
             let response;
@@ -126,6 +139,7 @@ const JobPosting = () => {
                 });
                 setRequirements([{ requirement_text: '', is_mandatory: true }]);
                 setQuestions([{ question_text: '', question_type: 'text', options: [], is_required: true }]);
+                setExpectations({ expected_experience_years: '', expected_education: '', notes: '' });
                 fetchJobs();
             }
         } catch (error) {
@@ -166,6 +180,17 @@ const JobPosting = () => {
                     options: q.options || [] // Ensure array
                 }));
                 setQuestions(mappedQuestions.length > 0 ? mappedQuestions : [{ question_text: '', question_type: 'text', options: [], is_required: true }]);
+
+                // Load expectations (NEW)
+                if (fullJob.expectations) {
+                    setExpectations({
+                        expected_experience_years: fullJob.expectations.expected_experience_years || '',
+                        expected_education: fullJob.expectations.expected_education || '',
+                        notes: fullJob.expectations.notes || ''
+                    });
+                } else {
+                    setExpectations({ expected_experience_years: '', expected_education: '', notes: '' });
+                }
             }
         } catch (err) {
             console.error("Failed to load details", err);
@@ -183,8 +208,33 @@ const JobPosting = () => {
             require_education: false, require_skills: false
         });
         setRequirements([{ requirement_text: '', is_mandatory: true }]);
-        setQuestions([{ question_text: '', question_type: 'text', options: [], is_required: true }]);
+        setQuestions([{ question_text: '', question_type: 'text', options: [], is_required: true, expected_answer: '' }]);
+        setExpectations({ expected_experience_years: '', expected_education: '', notes: '' });
         setShowForm(true);
+    };
+
+    // Job Status Management Handlers
+    const handleStatusChange = async (jobId, newStatus) => {
+        try {
+            await updateJobStatus(jobId, newStatus);
+            await fetchJobs(); // Refresh the list
+        } catch (error) {
+            console.error('Failed to update job status:', error);
+            alert('Failed to update job status. Please try again.');
+        }
+    };
+
+    const handleDeleteJob = async (jobId) => {
+        if (!window.confirm('Are you sure you want to delete this job? This action cannot be undone and the job will be hidden from all job seekers.')) {
+            return;
+        }
+        try {
+            await deleteJob(jobId);
+            await fetchJobs(); // Refresh the list
+        } catch (error) {
+            console.error('Failed to delete job:', error);
+            alert('Failed to delete job. Please try again.');
+        }
     };
 
     return (
@@ -233,7 +283,38 @@ const JobPosting = () => {
                                                 )}
                                             </div>
                                         </div>
-                                        <Button variant="outline" size="sm" onClick={() => handleManageClick(job)}>Manage</Button>
+                                        <div className="flex gap-2">
+                                            {/* Status Management Buttons */}
+                                            {job.status?.toLowerCase() === 'open' && (
+                                                <Button
+                                                    variant="warning"
+                                                    size="sm"
+                                                    onClick={() => handleStatusChange(job.job_id, 'closed')}
+                                                    leftIcon={<PauseCircle className="w-4 h-4" />}
+                                                >
+                                                    Close
+                                                </Button>
+                                            )}
+                                            {job.status?.toLowerCase() === 'closed' && (
+                                                <Button
+                                                    variant="success"
+                                                    size="sm"
+                                                    onClick={() => handleStatusChange(job.job_id, 'open')}
+                                                    leftIcon={<PlayCircle className="w-4 h-4" />}
+                                                >
+                                                    Reopen
+                                                </Button>
+                                            )}
+                                            <Button
+                                                variant="destructive"
+                                                size="sm"
+                                                onClick={() => handleDeleteJob(job.job_id)}
+                                                leftIcon={<Trash2 className="w-4 h-4" />}
+                                            >
+                                                Delete
+                                            </Button>
+                                            <Button variant="outline" size="sm" onClick={() => handleManageClick(job)}>Manage</Button>
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -281,16 +362,22 @@ const JobPosting = () => {
                                             { value: 'Full-time', label: 'Full-time' },
                                             { value: 'Part-time', label: 'Part-time' },
                                             { value: 'Contract', label: 'Contract' },
-                                            { value: 'Freelance', label: 'Freelance' },
+                                            { value: 'Remote', label: 'Remote' },
                                             { value: 'Internship', label: 'Internship' }
                                         ]}
                                         value={formData.job_type}
                                         onChange={(e) => setFormData({ ...formData, job_type: e.target.value })}
                                     />
-                                    <Input
-                                        label="Experience Level"
-                                        placeholder="e.g. 3-5 years"
+                                    <Select
+                                        label="Experience Level Required"
                                         required
+                                        options={[
+                                            { value: 'Fresher', label: 'Fresher (0 years)' },
+                                            { value: 'Junior', label: 'Junior (1-3 years)' },
+                                            { value: 'Mid', label: 'Mid-Level (3-5 years)' },
+                                            { value: 'Senior', label: 'Senior (5-8 years)' },
+                                            { value: 'Lead', label: 'Lead (8+ years)' }
+                                        ]}
                                         value={formData.experience_level}
                                         onChange={(e) => setFormData({ ...formData, experience_level: e.target.value })}
                                     />
@@ -497,8 +584,55 @@ const JobPosting = () => {
                                             />
                                             <span className="text-sm text-neutral-500">Required answer</span>
                                         </div>
+
+                                        {/* Expected Answer - Recruiter Only Field */}
+                                        <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                                            <Textarea
+                                                label="Expected Answer (For Your Reference Only)"
+                                                placeholder="Enter the expected or ideal answer. This will NOT be shown to candidates."
+                                                value={q.expected_answer || ''}
+                                                onChange={(e) => updateQuestion(idx, 'expected_answer', e.target.value)}
+                                                className="bg-white"
+                                            />
+                                            <p className="text-xs text-amber-700 mt-1">
+                                                ⚠️ This is visible only to you and helps evaluate candidate responses
+                                            </p>
+                                        </div>
                                     </div>
                                 ))}
+                            </CardContent>
+                        </Card>
+
+                        {/* Job Expectations Section (NEW) */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Job Expectations (Optional)</CardTitle>
+                                <CardDescription>These expectations will be visible to candidates when applying</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Input
+                                        label="Expected Experience (Years)"
+                                        type="number"
+                                        min="0"
+                                        placeholder="e.g. 3"
+                                        value={expectations.expected_experience_years}
+                                        onChange={(e) => setExpectations({ ...expectations, expected_experience_years: e.target.value })}
+                                    />
+                                    <Input
+                                        label="Expected Education"
+                                        placeholder="e.g. Bachelor's in Computer Science"
+                                        value={expectations.expected_education}
+                                        onChange={(e) => setExpectations({ ...expectations, expected_education: e.target.value })}
+                                    />
+                                </div>
+                                <Textarea
+                                    label="Internal Notes (Not visible to candidates)"
+                                    placeholder="Notes about ideal candidate profile..."
+                                    rows={2}
+                                    value={expectations.notes}
+                                    onChange={(e) => setExpectations({ ...expectations, notes: e.target.value })}
+                                />
                             </CardContent>
                         </Card>
 

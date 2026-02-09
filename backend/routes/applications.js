@@ -16,7 +16,7 @@ router.post('/jobs/:id/apply', auth, roleGuard('job_seeker'), async (req, res) =
     try {
         const userId = req.user.userId;
         const jobId = req.params.id;
-        const { resume_id, answers, education, skills } = req.body;
+        const { resume_id, answers, education, skills, profile_snapshot } = req.body;
 
         if (!resume_id) {
             console.log('[Apply] Missing resume_id in body:', req.body);
@@ -84,7 +84,17 @@ router.post('/jobs/:id/apply', auth, roleGuard('job_seeker'), async (req, res) =
         const appResult = await client.query(appQuery, appValues);
         const applicationId = appResult.rows[0].id;
 
-        // 6. Insert Answers
+        // 6. Insert Profile Snapshot (NEW)
+        if (profile_snapshot && typeof profile_snapshot === 'object') {
+            const snapshotQuery = `
+                INSERT INTO job_application_profile_snapshot (application_id, job_seeker_id, profile_snapshot)
+                VALUES ($1, $2, $3)
+            `;
+            await client.query(snapshotQuery, [applicationId, candidateId, JSON.stringify(profile_snapshot)]);
+            console.log(`[Apply] Profile snapshot saved for application ${applicationId}`);
+        }
+
+        // 7. Insert Answers
         if (answers && answers.length > 0) {
             const answerQuery = `
                 INSERT INTO job_application_answers (application_id, question_id, answer)
@@ -95,7 +105,7 @@ router.post('/jobs/:id/apply', auth, roleGuard('job_seeker'), async (req, res) =
             }
         }
 
-        // 7. Insert Education
+        // 8. Insert Education
         if (education && education.length > 0) {
             const eduQuery = `
                 INSERT INTO job_application_education (application_id, degree, institution, graduation_year, gpa)
@@ -106,7 +116,7 @@ router.post('/jobs/:id/apply', auth, roleGuard('job_seeker'), async (req, res) =
             }
         }
 
-        // 8. Insert Skills
+        // 9. Insert Skills
         if (skills && skills.length > 0) {
             const skillQuery = `
                 INSERT INTO job_application_skills (application_id, skill)
@@ -241,7 +251,7 @@ router.get('/recruiter/jobs/:id/applications', auth, roleGuard('recruiter'), asy
             return res.status(403).json({ success: false, message: 'Access denied' });
         }
 
-        // Fetch Applications with Candidate Details & Answers
+        // Fetch Applications with Candidate Details & Answers (including expected_answer for recruiters)
         // Using JSON logic to bundle answers might be cleaner, but simple join is fine for now
         const appsQuery = `
             SELECT 
@@ -251,7 +261,8 @@ router.get('/recruiter/jobs/:id/applications', auth, roleGuard('recruiter'), asy
                 json_agg(DISTINCT jsonb_build_object(
                     'question', jq.question_text,
                     'answer', jaa.answer,
-                    'type', jq.question_type
+                    'type', jq.question_type,
+                    'expected_answer', jq.expected_answer
                 )) FILTER (WHERE jaa.id IS NOT NULL) as answers,
                 json_agg(DISTINCT jsonb_build_object(
                     'degree', jae.degree,
@@ -337,23 +348,28 @@ router.patch('/recruiter/applications/:id/status', auth, roleGuard('recruiter'),
         const userId = req.user.userId;
         const validStatuses = ['applied', 'shortlisted', 'interview', 'accepted', 'rejected'];
 
+        console.log(`[StatusUpdate] App ID: ${appId}, New Status: '${status}', User ID: ${userId}`);
+
         if (!validStatuses.includes(status)) {
+            console.log(`[StatusUpdate] Invalid status '${status}'`);
             return res.status(400).json({ success: false, message: 'Invalid status value' });
         }
 
         // 1. Fetch current status and verify ownership
         const currentAppRes = await pool.query(`
-            SELECT ja.status 
+            SELECT ja.status, ja.candidate_id 
             FROM job_applications ja
             JOIN companies c ON ja.company_id = c.id
             WHERE ja.id = $1 AND c.created_by = $2
         `, [appId, userId]);
 
         if (currentAppRes.rows.length === 0) {
+            console.log(`[StatusUpdate] App or ownership failed. AppId: ${appId}, UserId: ${userId}`);
             return res.status(404).json({ success: false, message: 'Application not found or access denied' });
         }
 
-        const currentStatus = currentAppRes.rows[0].status;
+        const currentStatus = (currentAppRes.rows[0].status || 'applied').toLowerCase();
+        console.log(`[StatusUpdate] Current Status (Normalized): '${currentStatus}'`);
 
         // 2. Validate Transitions
         const transitions = {
@@ -364,29 +380,34 @@ router.patch('/recruiter/applications/:id/status', auth, roleGuard('recruiter'),
             'rejected': []
         };
 
-        // Allow resetting to 'applied' or 'shortlisted' only if correcting a mistake? 
-        // Strict requirements say: "Current Status -> Allowed Actions". 
-        // Assuming strictly forward only based on requirements table.
-        // However, usually "Shortlist" button on "Available" implies move to Shortlist.
-        // If strict adherence to the table:
         const allowed = transitions[currentStatus] || [];
+        // Relax restriction slightly for testing? No, user wants solution.
+        // If currentStatus is whitespace different etc.
+        // But debug log will show that.
+
         if (!allowed.includes(status)) {
+            console.log(`[StatusUpdate] Transition failed: '${currentStatus}' -> '${status}'. Allowed: ${JSON.stringify(allowed)}`);
+            // TEMPORARY FIX: Allow reset if user is stuck? Or force strict?
+            // Strict is requested "without affecting other functionalities".
+            // But if user is blocked, strict is the problem.
+            // Let's rely on logging to diagnose first. But I'll return the error WITH details.
             return res.status(400).json({
                 success: false,
-                message: `Invalid status transition from '${currentStatus}' to '${status}'`
+                message: `Invalid status transition from '${currentStatus}' to '${status}'. Allowed: ${allowed.join(', ')}`
             });
         }
 
         // 3. Update Status
         const updateQuery = `
             UPDATE job_applications
-            SET status = $1, updated_at = NOW()
+            SET status = $1
             WHERE id = $2
-            RETURNING id, status, updated_at
+            RETURNING id, status
         `;
 
         const { rows } = await pool.query(updateQuery, [status, appId]);
 
+        console.log(`[StatusUpdate] Success. Updated to '${status}'`);
         res.json({ success: true, message: 'Status updated', data: rows[0] });
 
     } catch (error) {
@@ -448,6 +469,115 @@ router.get('/recruiter/applications/:id/resume', auth, roleGuard('recruiter'), a
         res.status(500).json({ success: false, message: 'Server error' });
     } finally {
         client.release();
+    }
+});
+
+/**
+ * GET /api/recruiter/applications/:id/profile-snapshot
+ * Fetch candidate profile snapshot (or fallback to live data)
+ * Auth: Recruiter only (owner of the job)
+ */
+router.get('/recruiter/applications/:id/profile-snapshot', auth, roleGuard('recruiter'), async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const applicationId = req.params.id;
+
+        // 1. Verify Ownership & Get Application Data
+        const appQuery = `
+            SELECT ja.id, ja.candidate_id, ja.applied_at
+            FROM job_applications ja
+            JOIN job_postings jp ON ja.job_id = jp.job_id
+            JOIN companies c ON jp.company_id = c.id
+            WHERE ja.id = $1 AND c.created_by = $2
+        `;
+        const { rows: appRows } = await pool.query(appQuery, [applicationId, userId]);
+
+        if (appRows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Application not found or unauthorized' });
+        }
+
+        const { candidate_id, applied_at } = appRows[0];
+
+        // 2. Try to fetch snapshot
+        const snapshotQuery = `
+            SELECT profile_snapshot, created_at 
+            FROM job_application_profile_snapshot 
+            WHERE application_id = $1
+        `;
+        const { rows: snapshotRows } = await pool.query(snapshotQuery, [applicationId]);
+
+        if (snapshotRows.length > 0) {
+            // Return snapshot
+            return res.json({
+                success: true,
+                data: {
+                    snapshot: snapshotRows[0].profile_snapshot,
+                    is_snapshot: true,
+                    snapshot_date: snapshotRows[0].created_at
+                }
+            });
+        }
+
+        // 3. Fallback: Fetch live candidate data
+        const liveQuery = `
+            SELECT 
+                c.name, c.email, c.phone, c.location, c.linkedin, c.github,
+                c.about, c.job_title as title, c.skills, c.experience_years
+            FROM candidates c
+            WHERE c.id = $1
+        `;
+        const { rows: liveRows } = await pool.query(liveQuery, [candidate_id]);
+
+        if (liveRows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Candidate not found' });
+        }
+
+        const liveData = liveRows[0];
+
+        // Fetch education, experience, achievements, projects
+        const eduQuery = 'SELECT * FROM candidate_education WHERE candidate_id = $1';
+        const expQuery = 'SELECT * FROM candidate_experience WHERE candidate_id = $1';
+        const achQuery = 'SELECT * FROM candidate_achievements WHERE candidate_id = $1';
+        const projQuery = 'SELECT * FROM candidate_projects WHERE candidate_id = $1';
+
+        const [eduRes, expRes, achRes, projRes] = await Promise.all([
+            pool.query(eduQuery, [candidate_id]),
+            pool.query(expQuery, [candidate_id]),
+            pool.query(achQuery, [candidate_id]),
+            pool.query(projQuery, [candidate_id])
+        ]);
+
+        const liveSnapshot = {
+            personal_info: {
+                name: liveData.name,
+                email: liveData.email,
+                phone: liveData.phone,
+                location: liveData.location,
+                linkedin: liveData.linkedin,
+                github: liveData.github,
+                about: liveData.about,
+                title: liveData.title
+            },
+            skills: liveData.skills ? (typeof liveData.skills === 'string' ? liveData.skills.split(',') : liveData.skills) : [],
+            education: eduRes.rows,
+            experience: expRes.rows,
+            achievements: achRes.rows,
+            projects: projRes.rows,
+            snapshot_timestamp: applied_at
+        };
+
+        return res.json({
+            success: true,
+            data: {
+                snapshot: liveSnapshot,
+                is_snapshot: false, // Indicates this is live data, not a snapshot
+                snapshot_date: null
+            }
+        });
+
+    } catch (error) {
+        console.error('Error fetching profile snapshot:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
     }
 });
 

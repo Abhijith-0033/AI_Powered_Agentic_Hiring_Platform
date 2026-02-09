@@ -7,10 +7,10 @@ import candidatesRoutes from './routes/candidates.js';
 import applicationsRoutes from './routes/applications.js';
 import dashboardRoutes from './routes/dashboard.js';
 import aiRoutes from './routes/ai.js';
-import resumeRoutes from './routes/resumes.js';
 import companiesRoutes from './routes/companies.js';
 import aiToolsRoutes from './routes/aiToolsRoutes.js';
 import interviewRoutes from './routes/interviewRoutes.js';
+import profileImageRoutes from './routes/profileImage.js';
 import pool from './config/db.js'; // Initialize PostgreSQL connection
 
 // Load environment variables
@@ -36,8 +36,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Body parser middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' })); // Increased limit for image uploads
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Request logging middleware (development)
 app.use((req, res, next) => {
@@ -62,10 +62,10 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobsRoutes);
 app.use('/api/candidates', candidatesRoutes);
+app.use('/api/profile-image', profileImageRoutes);
 app.use('/api', applicationsRoutes); // Flat structure for /api/jobs/:id/apply etc.
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/ai', aiRoutes);
-app.use('/api/candidate', resumeRoutes);
 app.use('/api/companies', companiesRoutes);
 app.use('/api/ai-tools', aiToolsRoutes);
 app.use('/api/interviews', interviewRoutes);
