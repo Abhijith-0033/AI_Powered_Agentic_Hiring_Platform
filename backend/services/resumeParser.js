@@ -1,6 +1,6 @@
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-const pdf = require('pdf-parse');
+import { PDFParse } from 'pdf-parse';
 const mammoth = require('mammoth');
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { PDFDocument } from 'pdf-lib';
@@ -18,10 +18,9 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 export const extractText = async (buffer, mimeType) => {
     try {
         if (mimeType === 'application/pdf' || mimeType.includes('pdf')) {
-            // Handle pdf-parse import structure (CJS/ESM interop)
-            const pdfParse = typeof pdf === 'function' ? pdf : pdf.default;
-            const data = await pdfParse(buffer);
-            return data.text;
+            const parser = new PDFParse({ data: buffer });
+            const result = await parser.getText();
+            return result.text;
         } else if (mimeType.includes('word') || mimeType.includes('document')) {
             const result = await mammoth.extractRawText({ buffer });
             return result.value;
@@ -72,7 +71,7 @@ const extractPhotoFromPDF = async (buffer, mimeType) => {
  */
 const extractDataWithGemini = async (text) => {
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
         const prompt = `
         You are an expert resume parser. Extract the following information from the resume text below and return it in strictly valid JSON format.
