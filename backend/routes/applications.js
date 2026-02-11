@@ -346,7 +346,7 @@ router.patch('/recruiter/applications/:id/status', auth, roleGuard('recruiter'),
         const appId = req.params.id;
         const { status } = req.body;
         const userId = req.user.userId;
-        const validStatuses = ['applied', 'shortlisted', 'interview', 'accepted', 'rejected'];
+        const validStatuses = ['applied', 'shortlisted', 'shortlisted_for_test', 'interview', 'accepted', 'rejected'];
 
         console.log(`[StatusUpdate] App ID: ${appId}, New Status: '${status}', User ID: ${userId}`);
 
@@ -374,7 +374,8 @@ router.patch('/recruiter/applications/:id/status', auth, roleGuard('recruiter'),
         // 2. Validate Transitions
         const transitions = {
             'applied': ['shortlisted', 'rejected'],
-            'shortlisted': ['interview', 'rejected'],
+            'shortlisted': ['shortlisted_for_test', 'interview', 'rejected'],
+            'shortlisted_for_test': ['interview', 'rejected'],
             'interview': ['accepted', 'rejected'],
             'accepted': [],
             'rejected': []

@@ -13,7 +13,8 @@ import {
     Sparkles,
     User,
     Users,
-    Globe
+    Globe,
+    Video
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -45,6 +46,7 @@ const Sidebar = ({ type = 'user' }) => {
         { icon: Globe, label: 'Jobs in India', path: '/user/jobs-india' },
         { icon: Bot, label: 'AI Actions', path: '/user/ai-actions' },
         { icon: ClipboardList, label: 'Applications', path: '/user/applications' },
+        { icon: Video, label: 'Interviews', path: '/user/interviews' },
     ];
 
     // Provider navigation items
@@ -53,6 +55,7 @@ const Sidebar = ({ type = 'user' }) => {
         { icon: PlusCircle, label: 'Post Job', path: '/provider/post-job' },
         { icon: Users, label: 'Applicants', path: '/provider/applicants' },
         { icon: Sparkles, label: 'AI Tools', path: '/provider/ai-tools' },
+        { icon: Video, label: 'Interviews', path: '/provider/interviews' },
         { icon: Building2, label: 'Company', path: '/provider/company' },
     ];
 

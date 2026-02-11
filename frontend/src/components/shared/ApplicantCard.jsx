@@ -1,4 +1,4 @@
-import { Calendar, FileText, MapPin, Star, User } from 'lucide-react';
+import { Calendar, CheckCircle, ClipboardCheck, FileText, MapPin, Star, User, XCircle, Video } from 'lucide-react';
 import Badge from '../ui/Badge';
 import Button from '../ui/Button';
 
@@ -8,8 +8,10 @@ import Button from '../ui/Button';
  * @param {Object} props
  * @param {Object} props.applicant - Applicant data
  * @param {Function} props.onViewResume - View resume handler
- * @param {Function} props.onViewProfile - View full profile handler (NEW)
+ * @param {Function} props.onViewProfile - View full profile handler
  * @param {Function} props.onShortlist - Shortlist handler
+ * @param {Function} props.onInterview - Schedule interview handler
+ * @param {Function} props.onAccept - Accept handler
  * @param {Function} props.onReject - Reject handler
  */
 const ApplicantCard = ({
@@ -17,6 +19,8 @@ const ApplicantCard = ({
     onViewResume,
     onViewProfile,
     onShortlist,
+    onInterview,
+    onAccept,
     onReject,
     className = '',
 }) => {
@@ -36,14 +40,18 @@ const ApplicantCard = ({
     } = applicant;
 
     const statusConfig = {
+        applied: { label: 'Applied', color: 'info' },
         new: { label: 'New', color: 'info' },
         reviewing: { label: 'Reviewing', color: 'warning' },
         shortlisted: { label: 'Shortlisted', color: 'success' },
-        interview: { label: 'Interview', color: 'success' },
+        shortlisted_for_test: { label: 'Test Scheduled', color: 'warning' },
+        interview: { label: 'Interview', color: 'warning' },
+        accepted: { label: 'Accepted', color: 'success' },
         rejected: { label: 'Rejected', color: 'error' },
     };
 
-    const statusInfo = statusConfig[status] || statusConfig.new;
+    const normalizedStatus = (status || 'applied').toLowerCase();
+    const statusInfo = statusConfig[normalizedStatus] || statusConfig.applied;
 
     return (
         <div
@@ -130,7 +138,7 @@ const ApplicantCard = ({
             )}
 
             {/* Actions */}
-            <div className="flex items-center gap-2 pt-4 border-t border-neutral-100">
+            <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-neutral-100">
                 <Button
                     variant="secondary"
                     size="sm"
@@ -140,7 +148,7 @@ const ApplicantCard = ({
                     Resume
                 </Button>
 
-                {/* View Profile Button (NEW) */}
+                {/* View Profile Button */}
                 {onViewProfile && (
                     <Button
                         variant="outline"
@@ -153,43 +161,109 @@ const ApplicantCard = ({
                 )}
 
                 {/* Dynamic Actions based on Status */}
-                {status === 'applied' && (
+                {normalizedStatus === 'applied' && (
                     <>
-                        <Button variant="primary" size="sm" onClick={() => onShortlist && onShortlist()}>
+                        <Button
+                            variant="primary"
+                            size="sm"
+                            leftIcon={<CheckCircle className="w-3.5 h-3.5" />}
+                            onClick={() => onShortlist && onShortlist()}
+                        >
                             Shortlist
                         </Button>
-                        <Button variant="danger" size="sm" onClick={() => onReject && onReject()}>
+                        <Button
+                            variant="danger"
+                            size="sm"
+                            leftIcon={<XCircle className="w-3.5 h-3.5" />}
+                            onClick={() => onReject && onReject()}
+                        >
                             Reject
                         </Button>
                     </>
                 )}
 
-                {status === 'shortlisted' && (
+                {normalizedStatus === 'shortlisted' && (
                     <>
-                        <Button variant="warning" size="sm" onClick={() => props.onInterview && props.onInterview()}>
+                        <Button
+                            variant="warning"
+                            size="sm"
+                            leftIcon={<ClipboardCheck className="w-3.5 h-3.5" />}
+                            onClick={() => onShortlist && onShortlist('shortlisted_for_test')}
+                        >
+                            For Test
+                        </Button>
+                        <Button
+                            variant="primary"
+                            size="sm"
+                            leftIcon={<Video className="w-3.5 h-3.5" />}
+                            onClick={() => onInterview && onInterview()}
+                        >
                             Interview
                         </Button>
-                        <Button variant="danger" size="sm" onClick={() => onReject && onReject()}>
+                        <Button
+                            variant="danger"
+                            size="sm"
+                            leftIcon={<XCircle className="w-3.5 h-3.5" />}
+                            onClick={() => onReject && onReject()}
+                        >
                             Reject
                         </Button>
                     </>
                 )}
 
-                {status === 'interview' && (
+                {normalizedStatus === 'shortlisted_for_test' && (
                     <>
-                        <Button variant="success" size="sm" onClick={() => props.onAccept && props.onAccept()}>
+                        <Button
+                            variant="primary"
+                            size="sm"
+                            leftIcon={<Video className="w-3.5 h-3.5" />}
+                            onClick={() => onInterview && onInterview()}
+                        >
+                            Interview
+                        </Button>
+                        <Button
+                            variant="danger"
+                            size="sm"
+                            leftIcon={<XCircle className="w-3.5 h-3.5" />}
+                            onClick={() => onReject && onReject()}
+                        >
+                            Reject
+                        </Button>
+                    </>
+                )}
+
+                {normalizedStatus === 'interview' && (
+                    <>
+                        <Button
+                            variant="success"
+                            size="sm"
+                            leftIcon={<CheckCircle className="w-3.5 h-3.5" />}
+                            onClick={() => onAccept && onAccept()}
+                        >
                             Accept
                         </Button>
-                        <Button variant="danger" size="sm" onClick={() => onReject && onReject()}>
+                        <Button
+                            variant="danger"
+                            size="sm"
+                            leftIcon={<XCircle className="w-3.5 h-3.5" />}
+                            onClick={() => onReject && onReject()}
+                        >
                             Reject
                         </Button>
                     </>
                 )}
 
-                {/* Final States - No Actions */}
-                {status === 'accepted' && <span className="text-emerald-600 text-sm font-medium ml-auto">Accepted</span>}
-                {status === 'rejected' && <span className="text-rose-500 text-sm font-medium ml-auto">Rejected</span>}
-
+                {/* Final States - No Action Buttons */}
+                {normalizedStatus === 'accepted' && (
+                    <span className="text-emerald-600 text-sm font-medium ml-auto flex items-center gap-1">
+                        <CheckCircle className="w-4 h-4" /> Accepted
+                    </span>
+                )}
+                {normalizedStatus === 'rejected' && (
+                    <span className="text-rose-500 text-sm font-medium ml-auto flex items-center gap-1">
+                        <XCircle className="w-4 h-4" /> Rejected
+                    </span>
+                )}
             </div>
         </div>
     );

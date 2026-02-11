@@ -100,7 +100,9 @@ const ApplicantManagement = () => {
         { value: 'new', label: 'New' },
         { value: 'reviewing', label: 'Reviewing' },
         { value: 'shortlisted', label: 'Shortlisted' },
+        { value: 'shortlisted_for_test', label: 'Test Scheduled' },
         { value: 'interview', label: 'Interview' },
+        { value: 'accepted', label: 'Accepted' },
         { value: 'rejected', label: 'Rejected' },
     ];
 
@@ -129,7 +131,9 @@ const ApplicantManagement = () => {
         all: applicants.length,
         new: applicants.filter(a => (a.status || 'applied').toLowerCase() === 'applied').length,
         shortlisted: applicants.filter(a => (a.status || '').toLowerCase() === 'shortlisted').length,
+        shortlisted_for_test: applicants.filter(a => (a.status || '').toLowerCase() === 'shortlisted_for_test').length,
         interview: applicants.filter(a => (a.status || '').toLowerCase() === 'interview').length,
+        accepted: applicants.filter(a => (a.status || '').toLowerCase() === 'accepted').length,
         rejected: applicants.filter(a => (a.status || '').toLowerCase() === 'rejected').length,
     };
 
@@ -162,7 +166,9 @@ const ApplicantManagement = () => {
                         { label: 'All', value: statusCounts.all, active: statusFilter === 'all', id: 'all' },
                         { label: 'Applied', value: statusCounts.new, active: statusFilter === 'applied', color: 'info', id: 'applied' },
                         { label: 'Shortlisted', value: statusCounts.shortlisted, active: statusFilter === 'shortlisted', color: 'success', id: 'shortlisted' },
+                        { label: 'Test', value: statusCounts.shortlisted_for_test, active: statusFilter === 'shortlisted_for_test', color: 'warning', id: 'shortlisted_for_test' },
                         { label: 'Interview', value: statusCounts.interview, active: statusFilter === 'interview', color: 'warning', id: 'interview' },
+                        { label: 'Accepted', value: statusCounts.accepted, active: statusFilter === 'accepted', color: 'success', id: 'accepted' },
                         { label: 'Rejected', value: statusCounts.rejected, active: statusFilter === 'rejected', color: 'error', id: 'rejected' },
                     ].map((stat) => (
                         <button
@@ -216,7 +222,7 @@ const ApplicantManagement = () => {
                                     applicant={applicant}
                                     onViewResume={() => handleViewDetails(applicant)}
                                     onViewProfile={() => handleViewProfile(applicant)}
-                                    onShortlist={() => handleUpdateStatus(applicant.id, 'shortlisted')}
+                                    onShortlist={(customStatus) => handleUpdateStatus(applicant.id, customStatus || 'shortlisted')}
                                     onInterview={() => handleUpdateStatus(applicant.id, 'interview')}
                                     onAccept={() => handleUpdateStatus(applicant.id, 'accepted')}
                                     onReject={() => handleUpdateStatus(applicant.id, 'rejected')}
