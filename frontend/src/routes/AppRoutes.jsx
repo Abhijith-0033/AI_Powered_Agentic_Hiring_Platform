@@ -11,6 +11,7 @@ import {
     JobPosting,
     ProviderDashboard,
     InterviewsPage as ProviderInterviewsPage,
+    TestsPage as ProviderTestsPage,
 } from '../pages/provider';
 import {
     AIActions,
@@ -20,7 +21,10 @@ import {
     Profile,
     UserDashboard,
     InterviewsPage as UserInterviewsPage,
+    MyTestsPage,
+    TestResultPage,
 } from '../pages/user';
+import TestAttemptPage from '../pages/user/TestAttemptPage';
 
 // Auth components
 import AuthPage from '../components/auth/AuthPage';
@@ -53,6 +57,9 @@ const AppRoutes = () => {
                     <Route path="ai-actions" element={<AIActions />} />
                     <Route path="applications" element={<ApplicationTracker />} />
                     <Route path="interviews" element={<UserInterviewsPage />} />
+                    <Route path="tests" element={<MyTestsPage />} />
+                    <Route path="tests/:id/attempt" element={<TestAttemptPage />} />
+                    <Route path="tests/:id/results" element={<TestResultPage />} />
                 </Route>
             </Route>
 
@@ -68,6 +75,7 @@ const AppRoutes = () => {
                     <Route path="ai-tools/interview-scheduler" element={<InterviewScheduler />} />
                     <Route path="company" element={<CompanyProfile />} />
                     <Route path="interviews" element={<ProviderInterviewsPage />} />
+                    <Route path="tests" element={<ProviderTestsPage />} />
                 </Route>
             </Route>
 

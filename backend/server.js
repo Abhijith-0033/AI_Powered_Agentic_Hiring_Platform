@@ -12,6 +12,7 @@ import companiesRoutes from './routes/companies.js';
 import aiToolsRoutes from './routes/aiToolsRoutes.js';
 import interviewRoutes from './routes/interviewRoutes.js';
 import profileImageRoutes from './routes/profileImage.js';
+import testRoutes from './routes/testRoutes.js';
 import pool from './config/db.js'; // Initialize PostgreSQL connection
 import dns from 'dns';
 
@@ -82,6 +83,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/companies', companiesRoutes);
 app.use('/api/ai-tools', aiToolsRoutes);
 app.use('/api/interviews', interviewRoutes);
+app.use('/api/tests', testRoutes);
 app.use('/api/ai/cover-letter', aiCoverLetterRoutes);
 import aiResumeRoutes from './routes/aiResumeRoutes.js';
 app.use('/api/ai/resume', aiResumeRoutes);

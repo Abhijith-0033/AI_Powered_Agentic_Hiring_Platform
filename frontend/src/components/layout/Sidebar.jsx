@@ -47,6 +47,7 @@ const Sidebar = ({ type = 'user' }) => {
         { icon: Bot, label: 'AI Actions', path: '/user/ai-actions' },
         { icon: ClipboardList, label: 'Applications', path: '/user/applications' },
         { icon: Video, label: 'Interviews', path: '/user/interviews' },
+        { icon: FileText, label: 'Tests', path: '/user/tests' },
     ];
 
     // Provider navigation items
@@ -56,6 +57,7 @@ const Sidebar = ({ type = 'user' }) => {
         { icon: Users, label: 'Applicants', path: '/provider/applicants' },
         { icon: Sparkles, label: 'AI Tools', path: '/provider/ai-tools' },
         { icon: Video, label: 'Interviews', path: '/provider/interviews' },
+        { icon: FileText, label: 'Tests', path: '/provider/tests' },
         { icon: Building2, label: 'Company', path: '/provider/company' },
     ];
 
