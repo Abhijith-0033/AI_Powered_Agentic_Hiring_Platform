@@ -4,15 +4,7 @@ import Button from '../ui/Button';
 
 /**
  * Applicant card for recruiter view
- * 
- * @param {Object} props
- * @param {Object} props.applicant - Applicant data
- * @param {Function} props.onViewResume - View resume handler
- * @param {Function} props.onViewProfile - View full profile handler
- * @param {Function} props.onShortlist - Shortlist handler
- * @param {Function} props.onInterview - Schedule interview handler
- * @param {Function} props.onAccept - Accept handler
- * @param {Function} props.onReject - Reject handler
+ * All action buttons are always visible so the recruiter can change status at any time.
  */
 const ApplicantCard = ({
     applicant,
@@ -137,7 +129,7 @@ const ApplicantCard = ({
                 </p>
             )}
 
-            {/* Actions */}
+            {/* Actions — Always visible so recruiter can change status at any time */}
             <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-neutral-100">
                 <Button
                     variant="secondary"
@@ -148,7 +140,6 @@ const ApplicantCard = ({
                     Resume
                 </Button>
 
-                {/* View Profile Button */}
                 {onViewProfile && (
                     <Button
                         variant="outline"
@@ -160,110 +151,53 @@ const ApplicantCard = ({
                     </Button>
                 )}
 
-                {/* Dynamic Actions based on Status */}
-                {normalizedStatus === 'applied' && (
-                    <>
-                        <Button
-                            variant="primary"
-                            size="sm"
-                            leftIcon={<CheckCircle className="w-3.5 h-3.5" />}
-                            onClick={() => onShortlist && onShortlist()}
-                        >
-                            Shortlist
-                        </Button>
-                        <Button
-                            variant="danger"
-                            size="sm"
-                            leftIcon={<XCircle className="w-3.5 h-3.5" />}
-                            onClick={() => onReject && onReject()}
-                        >
-                            Reject
-                        </Button>
-                    </>
-                )}
-
-                {normalizedStatus === 'shortlisted' && (
-                    <>
-                        <Button
-                            variant="warning"
-                            size="sm"
-                            leftIcon={<ClipboardCheck className="w-3.5 h-3.5" />}
-                            onClick={() => onShortlist && onShortlist('shortlisted_for_test')}
-                        >
-                            For Test
-                        </Button>
-                        <Button
-                            variant="primary"
-                            size="sm"
-                            leftIcon={<Video className="w-3.5 h-3.5" />}
-                            onClick={() => onInterview && onInterview()}
-                        >
-                            Interview
-                        </Button>
-                        <Button
-                            variant="danger"
-                            size="sm"
-                            leftIcon={<XCircle className="w-3.5 h-3.5" />}
-                            onClick={() => onReject && onReject()}
-                        >
-                            Reject
-                        </Button>
-                    </>
-                )}
-
-                {normalizedStatus === 'shortlisted_for_test' && (
-                    <>
-                        <Button
-                            variant="primary"
-                            size="sm"
-                            leftIcon={<Video className="w-3.5 h-3.5" />}
-                            onClick={() => onInterview && onInterview()}
-                        >
-                            Interview
-                        </Button>
-                        <Button
-                            variant="danger"
-                            size="sm"
-                            leftIcon={<XCircle className="w-3.5 h-3.5" />}
-                            onClick={() => onReject && onReject()}
-                        >
-                            Reject
-                        </Button>
-                    </>
-                )}
-
-                {normalizedStatus === 'interview' && (
-                    <>
-                        <Button
-                            variant="success"
-                            size="sm"
-                            leftIcon={<CheckCircle className="w-3.5 h-3.5" />}
-                            onClick={() => onAccept && onAccept()}
-                        >
-                            Accept
-                        </Button>
-                        <Button
-                            variant="danger"
-                            size="sm"
-                            leftIcon={<XCircle className="w-3.5 h-3.5" />}
-                            onClick={() => onReject && onReject()}
-                        >
-                            Reject
-                        </Button>
-                    </>
-                )}
-
-                {/* Final States - No Action Buttons */}
-                {normalizedStatus === 'accepted' && (
-                    <span className="text-emerald-600 text-sm font-medium ml-auto flex items-center gap-1">
-                        <CheckCircle className="w-4 h-4" /> Accepted
-                    </span>
-                )}
-                {normalizedStatus === 'rejected' && (
-                    <span className="text-rose-500 text-sm font-medium ml-auto flex items-center gap-1">
-                        <XCircle className="w-4 h-4" /> Rejected
-                    </span>
-                )}
+                <div className="w-full mt-2 flex flex-wrap gap-2">
+                    <Button
+                        variant={normalizedStatus === 'shortlisted' ? 'primary' : 'outline'}
+                        size="sm"
+                        leftIcon={<CheckCircle className="w-3.5 h-3.5" />}
+                        onClick={() => onShortlist && onShortlist()}
+                        disabled={normalizedStatus === 'shortlisted'}
+                    >
+                        Shortlist
+                    </Button>
+                    <Button
+                        variant={normalizedStatus === 'shortlisted_for_test' ? 'warning' : 'outline'}
+                        size="sm"
+                        leftIcon={<ClipboardCheck className="w-3.5 h-3.5" />}
+                        onClick={() => onShortlist && onShortlist('shortlisted_for_test')}
+                        disabled={normalizedStatus === 'shortlisted_for_test'}
+                    >
+                        Test
+                    </Button>
+                    <Button
+                        variant={normalizedStatus === 'interview' ? 'primary' : 'outline'}
+                        size="sm"
+                        leftIcon={<Video className="w-3.5 h-3.5" />}
+                        onClick={() => onInterview && onInterview()}
+                        disabled={normalizedStatus === 'interview'}
+                    >
+                        Interview
+                    </Button>
+                    <Button
+                        variant={normalizedStatus === 'accepted' ? 'success' : 'outline'}
+                        size="sm"
+                        leftIcon={<CheckCircle className="w-3.5 h-3.5" />}
+                        onClick={() => onAccept && onAccept()}
+                        disabled={normalizedStatus === 'accepted'}
+                    >
+                        Accept
+                    </Button>
+                    <Button
+                        variant={normalizedStatus === 'rejected' ? 'danger' : 'outline'}
+                        size="sm"
+                        leftIcon={<XCircle className="w-3.5 h-3.5" />}
+                        onClick={() => onReject && onReject()}
+                        disabled={normalizedStatus === 'rejected'}
+                    >
+                        Reject
+                    </Button>
+                </div>
             </div>
         </div>
     );

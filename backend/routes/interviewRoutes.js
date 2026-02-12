@@ -109,6 +109,122 @@ router.post('/select', auth, roleGuard('recruiter'), async (req, res) => {
 });
 
 /**
+ * POST /api/interviews/create-and-schedule
+ * Combined endpoint: creates interview record (if needed) and schedules it in one shot
+ * Accessible by: Recruiter only
+ */
+router.post('/create-and-schedule', auth, roleGuard('recruiter'), async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const userId = req.user.userId;
+        const { jobId, applicationId, candidateId, interviewDate, startTime, endTime } = req.body;
+
+        console.log('[CreateAndSchedule] Received:', { jobId, applicationId, candidateId, interviewDate, startTime, endTime, userId });
+
+        // Validation
+        if (!jobId || !applicationId || !candidateId || !interviewDate || !startTime || !endTime) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required fields'
+            });
+        }
+
+        // Verify recruiter owns the job
+        const ownershipQuery = `
+            SELECT jp.job_id, jp.job_title, c.name AS company_name
+            FROM job_postings jp
+            JOIN companies c ON jp.company_id = c.id
+            WHERE jp.job_id = $1 AND c.created_by = $2
+        `;
+        const ownershipResult = await client.query(ownershipQuery, [jobId, userId]);
+
+        if (ownershipResult.rows.length === 0) {
+            console.log('[CreateAndSchedule] Ownership check failed. jobId:', jobId, 'userId:', userId);
+            return res.status(403).json({
+                success: false,
+                message: 'Access denied or job not found'
+            });
+        }
+
+        await client.query('BEGIN');
+
+        // Check if interview record already exists
+        let interviewId;
+        const existingQuery = 'SELECT id FROM interviews WHERE application_id = $1';
+        const existing = await client.query(existingQuery, [applicationId]);
+
+        if (existing.rows.length > 0) {
+            interviewId = existing.rows[0].id;
+            console.log('[CreateAndSchedule] Using existing interview:', interviewId);
+        } else {
+            // Create interview record
+            const channelName = `interview_${applicationId}_${Date.now()}`;
+            const insertQuery = `
+                INSERT INTO interviews (
+                    job_id, application_id, candidate_id, recruiter_id,
+                    channel_name, status, created_at, updated_at
+                )
+                VALUES ($1, $2, $3, $4, $5, 'pending', NOW(), NOW())
+                RETURNING id
+            `;
+            const insertResult = await client.query(insertQuery, [
+                jobId, applicationId, candidateId, userId, channelName
+            ]);
+            interviewId = insertResult.rows[0].id;
+            console.log('[CreateAndSchedule] Created new interview:', interviewId);
+        }
+
+        // Schedule the interview
+        const scheduledAt = `${interviewDate} ${startTime}`;
+        const meetingLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/interview/interview_${applicationId}_${Date.now()}`;
+
+        const updateQuery = `
+            UPDATE interviews
+            SET 
+                interview_date = $1,
+                start_time = $2,
+                end_time = $3,
+                scheduled_at = $4,
+                meeting_link = $5,
+                status = 'scheduled',
+                updated_at = NOW()
+            WHERE id = $6
+            RETURNING id, interview_date, start_time, end_time, meeting_link, status
+        `;
+        const result = await client.query(updateQuery, [
+            interviewDate, startTime, endTime, scheduledAt, meetingLink, interviewId
+        ]);
+
+        // Also update the application status to 'interview'
+        await client.query(
+            'UPDATE job_applications SET status = $1 WHERE id = $2',
+            ['interview', applicationId]
+        );
+
+        await client.query('COMMIT');
+
+        console.log('[CreateAndSchedule] Success! Interview', interviewId, 'scheduled');
+
+        res.json({
+            success: true,
+            message: 'Interview created and scheduled successfully',
+            data: result.rows[0]
+        });
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Error in create-and-schedule:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to create and schedule interview',
+            error: error.message
+        });
+    } finally {
+        client.release();
+    }
+});
+
+/**
  * PUT /api/interviews/schedule/:id
  * Schedule an interview (update date/time and change status to 'scheduled')
  * Accessible by: Recruiter only

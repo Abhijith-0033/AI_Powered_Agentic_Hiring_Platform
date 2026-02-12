@@ -202,10 +202,12 @@ router.get('/applications/my-applications', auth, roleGuard('job_seeker'), async
         // 3. Construct Summary counts
         const summary = {
             total: rows.length,
-            applied: rows.filter(a => a.status === 'Applied' || a.status === 'applied').length,
-            reviewing: rows.filter(a => a.status === 'Shortlisted' || a.status === 'reviewing').length,
-            interview: rows.filter(a => ['Interview', 'interview', 'Offer', 'offer'].includes(a.status)).length,
-            rejected: rows.filter(a => a.status === 'Rejected' || a.status === 'rejected').length
+            applied: rows.filter(a => (a.status || '').toLowerCase() === 'applied').length,
+            shortlisted: rows.filter(a => (a.status || '').toLowerCase() === 'shortlisted').length,
+            shortlisted_for_test: rows.filter(a => (a.status || '').toLowerCase() === 'shortlisted_for_test').length,
+            interview: rows.filter(a => (a.status || '').toLowerCase() === 'interview').length,
+            accepted: rows.filter(a => (a.status || '').toLowerCase() === 'accepted').length,
+            rejected: rows.filter(a => (a.status || '').toLowerCase() === 'rejected').length
         };
 
         // 4. Process Logo and Return Response
@@ -357,7 +359,7 @@ router.patch('/recruiter/applications/:id/status', auth, roleGuard('recruiter'),
 
         // 1. Fetch current status and verify ownership
         const currentAppRes = await pool.query(`
-            SELECT ja.status, ja.candidate_id 
+            SELECT ja.status, ja.candidate_id, ja.job_id
             FROM job_applications ja
             JOIN companies c ON ja.company_id = c.id
             WHERE ja.id = $1 AND c.created_by = $2
@@ -369,34 +371,10 @@ router.patch('/recruiter/applications/:id/status', auth, roleGuard('recruiter'),
         }
 
         const currentStatus = (currentAppRes.rows[0].status || 'applied').toLowerCase();
+        const { candidate_id, job_id } = currentAppRes.rows[0];
         console.log(`[StatusUpdate] Current Status (Normalized): '${currentStatus}'`);
 
-        // 2. Validate Transitions
-        const transitions = {
-            'applied': ['shortlisted', 'rejected'],
-            'shortlisted': ['shortlisted_for_test', 'interview', 'rejected'],
-            'shortlisted_for_test': ['interview', 'rejected'],
-            'interview': ['accepted', 'rejected'],
-            'accepted': [],
-            'rejected': []
-        };
-
-        const allowed = transitions[currentStatus] || [];
-        // Relax restriction slightly for testing? No, user wants solution.
-        // If currentStatus is whitespace different etc.
-        // But debug log will show that.
-
-        if (!allowed.includes(status)) {
-            console.log(`[StatusUpdate] Transition failed: '${currentStatus}' -> '${status}'. Allowed: ${JSON.stringify(allowed)}`);
-            // TEMPORARY FIX: Allow reset if user is stuck? Or force strict?
-            // Strict is requested "without affecting other functionalities".
-            // But if user is blocked, strict is the problem.
-            // Let's rely on logging to diagnose first. But I'll return the error WITH details.
-            return res.status(400).json({
-                success: false,
-                message: `Invalid status transition from '${currentStatus}' to '${status}'. Allowed: ${allowed.join(', ')}`
-            });
-        }
+        // Allow any valid status change (recruiter can change at any time)
 
         // 3. Update Status
         const updateQuery = `
@@ -408,11 +386,90 @@ router.patch('/recruiter/applications/:id/status', auth, roleGuard('recruiter'),
 
         const { rows } = await pool.query(updateQuery, [status, appId]);
 
+        // 4. Auto-create interview record when status changes to 'interview'
+        let interviewData = null;
+        if (status === 'interview' && candidate_id && job_id) {
+            try {
+                // Check if interview already exists
+                const existingInterview = await pool.query(
+                    'SELECT id FROM interviews WHERE application_id = $1',
+                    [appId]
+                );
+
+                if (existingInterview.rows.length === 0) {
+                    // Generate a unique channel name
+                    const channelName = `interview_${appId}_${Date.now()}`;
+
+                    const insertRes = await pool.query(`
+                        INSERT INTO interviews (
+                            job_id, application_id, candidate_id, recruiter_id,
+                            channel_name, status, created_at, updated_at
+                        )
+                        VALUES ($1, $2, $3, $4, $5, 'pending', NOW(), NOW())
+                        RETURNING id, channel_name, status
+                    `, [job_id, appId, candidate_id, userId, channelName]);
+
+                    interviewData = insertRes.rows[0];
+                    console.log(`[StatusUpdate] Auto-created interview record: ${interviewData.id}`);
+                } else {
+                    console.log(`[StatusUpdate] Interview record already exists for app ${appId}`);
+                }
+            } catch (interviewError) {
+                console.error('[StatusUpdate] Error auto-creating interview:', interviewError.message);
+                // Don't fail the status update if interview creation fails
+            }
+        }
+
         console.log(`[StatusUpdate] Success. Updated to '${status}'`);
-        res.json({ success: true, message: 'Status updated', data: rows[0] });
+        res.json({ success: true, message: 'Status updated', data: { ...rows[0], interview: interviewData } });
 
     } catch (error) {
         console.error('Error updating status:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+/**
+ * GET /api/recruiter/interview-candidates
+ * Get candidates selected for interview or test from job_applications
+ * Auth: Recruiter only
+ */
+router.get('/recruiter/interview-candidates', auth, roleGuard('recruiter'), async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        const query = `
+            SELECT 
+                ja.id, ja.status, ja.applied_at, ja.job_id, ja.resume_name, ja.resume_id,
+                ja.candidate_id,
+                jp.job_title,
+                c.name as candidate_name, 
+                c.email as candidate_email,
+                c.experience_years as experience,
+                c.skills,
+                comp.name as company_name,
+                i.id as interview_id,
+                i.channel_name,
+                i.status as interview_status,
+                i.interview_date,
+                i.start_time,
+                i.end_time,
+                i.email_sent
+            FROM job_applications ja
+            LEFT JOIN job_postings jp ON ja.job_id = jp.job_id
+            LEFT JOIN companies comp ON jp.company_id = comp.id
+            LEFT JOIN candidates c ON ja.candidate_id = c.id
+            LEFT JOIN interviews i ON i.application_id = ja.id
+            WHERE comp.created_by = $1
+              AND ja.status IN ('interview', 'shortlisted_for_test')
+            ORDER BY ja.applied_at DESC
+        `;
+
+        const { rows } = await pool.query(query, [userId]);
+
+        res.json({ success: true, data: rows });
+    } catch (error) {
+        console.error('Error fetching interview candidates:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });

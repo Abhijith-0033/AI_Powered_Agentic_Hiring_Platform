@@ -15,8 +15,11 @@ const ApplicationTracker = () => {
     const [summary, setSummary] = useState({
         total: 0,
         applied: 0,
+        shortlisted: 0,
+        shortlisted_for_test: 0,
         reviewing: 0,
         interview: 0,
+        accepted: 0,
         rejected: 0
     });
 
@@ -42,8 +45,9 @@ const ApplicationTracker = () => {
 
     const statusOptions = [
         { value: 'all', label: 'All Applications' },
-        { value: 'applied', label: 'Applied' }, // strict lower case matching from API
-        { value: 'reviewing', label: 'Under Review' },
+        { value: 'applied', label: 'Applied' },
+        { value: 'shortlisted', label: 'Shortlisted' },
+        { value: 'shortlisted_for_test', label: 'Test Scheduled' },
         { value: 'interview', label: 'Interview' },
         { value: 'accepted', label: 'Accepted' },
         { value: 'rejected', label: 'Rejected' },
@@ -52,20 +56,31 @@ const ApplicationTracker = () => {
     const filteredApplications = statusFilter === 'all'
         ? applications
         : applications.filter(app => {
-            // Map frontend filter values to possible API status values
-            if (statusFilter === 'reviewing') return ['Shortlisted', 'reviewing'].includes(app.status);
-            if (statusFilter === 'interview') return ['Interview', 'interview', 'Offer', 'offer'].includes(app.status);
-            return app.status.toLowerCase() === statusFilter.toLowerCase();
+            const s = (app.status || '').toLowerCase();
+            return s === statusFilter;
         });
 
     const getBadgeVariant = (status) => {
-        const s = status.toLowerCase();
+        const s = (status || '').toLowerCase();
         if (s === 'applied') return 'primary';
-        if (s === 'shortlisted' || s === 'reviewing') return 'info';
-        if (s === 'interview' || s === 'offer') return 'warning';
+        if (s === 'shortlisted') return 'info';
+        if (s === 'shortlisted_for_test') return 'warning';
+        if (s === 'interview') return 'warning';
         if (s === 'accepted') return 'success';
         if (s === 'rejected') return 'error';
         return 'default';
+    };
+
+    const getStatusLabel = (status) => {
+        const labels = {
+            'applied': 'Applied',
+            'shortlisted': 'Shortlisted',
+            'shortlisted_for_test': 'Test Scheduled',
+            'interview': 'Interview',
+            'accepted': 'Accepted',
+            'rejected': 'Rejected',
+        };
+        return labels[(status || '').toLowerCase()] || status;
     };
 
     if (loading) {
@@ -92,7 +107,7 @@ const ApplicationTracker = () => {
                 </div>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
                     <Card padding="sm" className="text-center">
                         <CardContent>
                             <p className="text-2xl font-bold text-neutral-900">{summary.total}</p>
@@ -105,16 +120,28 @@ const ApplicationTracker = () => {
                             <p className="text-xs text-sky-700">Applied</p>
                         </CardContent>
                     </Card>
+                    <Card padding="sm" className="text-center border-blue-200 bg-blue-50/50">
+                        <CardContent>
+                            <p className="text-2xl font-bold text-blue-600">{summary.shortlisted || 0}</p>
+                            <p className="text-xs text-blue-700">Shortlisted</p>
+                        </CardContent>
+                    </Card>
                     <Card padding="sm" className="text-center border-amber-200 bg-amber-50/50">
                         <CardContent>
-                            <p className="text-2xl font-bold text-amber-600">{summary.reviewing}</p>
-                            <p className="text-xs text-amber-700">Reviewing</p>
+                            <p className="text-2xl font-bold text-amber-600">{summary.shortlisted_for_test || 0}</p>
+                            <p className="text-xs text-amber-700">Test</p>
+                        </CardContent>
+                    </Card>
+                    <Card padding="sm" className="text-center border-orange-200 bg-orange-50/50">
+                        <CardContent>
+                            <p className="text-2xl font-bold text-orange-600">{summary.interview}</p>
+                            <p className="text-xs text-orange-700">Interview</p>
                         </CardContent>
                     </Card>
                     <Card padding="sm" className="text-center border-emerald-200 bg-emerald-50/50">
                         <CardContent>
-                            <p className="text-2xl font-bold text-emerald-600">{summary.interview}</p>
-                            <p className="text-xs text-emerald-700">Interview/Offer</p>
+                            <p className="text-2xl font-bold text-emerald-600">{summary.accepted || 0}</p>
+                            <p className="text-xs text-emerald-700">Accepted</p>
                         </CardContent>
                     </Card>
                     <Card padding="sm" className="text-center border-rose-200 bg-rose-50/50">
@@ -183,7 +210,7 @@ const ApplicationTracker = () => {
                                         </TableCell>
                                         <TableCell>
                                             <Badge variant={getBadgeVariant(app.status)} dot>
-                                                {app.status}
+                                                {getStatusLabel(app.status)}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
