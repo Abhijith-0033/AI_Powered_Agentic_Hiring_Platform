@@ -5,4 +5,5 @@ export { default as JobDiscovery } from './JobDiscovery';
 export { default as JobsInIndia } from './JobsInIndia';
 export { default as Profile } from './Profile';
 export { default as UserDashboard } from './UserDashboard';
+export { default as InterviewsPage } from './InterviewsPage';
 

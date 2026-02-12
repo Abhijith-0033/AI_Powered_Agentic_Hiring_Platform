@@ -6,4 +6,5 @@ export { default as JobPosting } from './JobPosting';
 export { default as ProviderDashboard } from './ProviderDashboard';
 export { default as AutoShortlist } from './AutoShortlist';
 export { default as InterviewScheduler } from './InterviewScheduler';
+export { default as InterviewsPage } from './InterviewsPage';
 

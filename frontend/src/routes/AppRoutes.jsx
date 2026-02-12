@@ -10,6 +10,7 @@ import {
     CompanyProfile,
     JobPosting,
     ProviderDashboard,
+    InterviewsPage as ProviderInterviewsPage,
 } from '../pages/provider';
 import {
     AIActions,
@@ -18,11 +19,16 @@ import {
     JobsInIndia,
     Profile,
     UserDashboard,
+    InterviewsPage as UserInterviewsPage,
 } from '../pages/user';
 
 // Auth components
 import AuthPage from '../components/auth/AuthPage';
+import OAuthSuccess from '../components/auth/OAuthSuccess';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
+
+// Shared components
+import InterviewRoom from '../pages/InterviewRoom';
 
 /**
  * Application routes configuration
@@ -34,6 +40,7 @@ const AppRoutes = () => {
             {/* Public Routes */}
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<AuthPage />} />
+            <Route path="/oauth-success" element={<OAuthSuccess />} />
 
             {/* User (Job Seeker) Routes - Protected */}
             <Route element={<ProtectedRoute allowedRoles={['job_seeker']} />}>
@@ -45,6 +52,7 @@ const AppRoutes = () => {
                     <Route path="jobs-india" element={<JobsInIndia />} />
                     <Route path="ai-actions" element={<AIActions />} />
                     <Route path="applications" element={<ApplicationTracker />} />
+                    <Route path="interviews" element={<UserInterviewsPage />} />
                 </Route>
             </Route>
 
@@ -59,7 +67,13 @@ const AppRoutes = () => {
                     <Route path="ai-tools/auto-shortlist" element={<AutoShortlist />} />
                     <Route path="ai-tools/interview-scheduler" element={<InterviewScheduler />} />
                     <Route path="company" element={<CompanyProfile />} />
+                    <Route path="interviews" element={<ProviderInterviewsPage />} />
                 </Route>
+            </Route>
+
+            {/* Shared Interview Room Route (accessible by both roles) */}
+            <Route element={<ProtectedRoute allowedRoles={['recruiter', 'job_seeker']} />}>
+                <Route path="/interview/:channelName" element={<InterviewRoom />} />
             </Route>
 
             {/* Catch-all redirect to login for unauthenticated users */}

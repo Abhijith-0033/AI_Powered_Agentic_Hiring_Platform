@@ -1,8 +1,25 @@
 import express from 'express';
+import multer from 'multer';
 import pool from '../config/db.js';
 import auth from '../middleware/auth.js';
+import { parseResume } from '../services/resumeParser.js';
 
 const router = express.Router();
+
+// Multer configuration for resume upload
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        if (allowedTypes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only PDF and DOCX files are allowed'));
+        }
+    }
+});
+
 
 // Helper to get candidate ID from user ID
 const getCandidateId = async (userId) => {
@@ -62,6 +79,139 @@ const syncPrimaryData = async (client, candidateId) => {
         exp?.description || null
     ]);
 };
+
+// POST /api/candidates/parse-resume
+// Upload resume and extract structured data (with optional auto-save)
+router.post('/parse-resume', auth, upload.single('resume'), async (req, res) => {
+    const client = await pool.connect();
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'No resume file uploaded' });
+        }
+
+        const userId = req.user.userId;
+        const { autoSave } = req.body; // If true, auto-save to DB
+
+        // Parse resume using rule-based parser
+        const extractedData = await parseResume(req.file.buffer, req.file.mimetype);
+
+        // If autoSave is requested, save to database
+        if (autoSave === 'true' || autoSave === true) {
+            await client.query('BEGIN');
+
+            // Get or create candidate
+            let candidateId;
+            const checkRes = await client.query('SELECT id, email FROM candidates WHERE user_id = $1', [userId]);
+
+            if (checkRes.rows.length === 0) {
+                const credRes = await client.query('SELECT email FROM credentials WHERE id = $1', [userId]);
+                if (credRes.rows.length === 0) throw new Error('User credentials not found');
+                const email = credRes.rows[0].email;
+
+                const createRes = await client.query(`
+                    INSERT INTO candidates (user_id, name, email, created_at, updated_at)
+                    VALUES ($1, $2, $3, NOW(), NOW())
+                    RETURNING id
+                `, [userId, extractedData.personal_info.name || 'Unknown', email]);
+                candidateId = createRes.rows[0].id;
+            } else {
+                candidateId = checkRes.rows[0].id;
+            }
+
+            // Update personal info
+            await client.query(`
+                UPDATE candidates SET
+                    name = COALESCE($2, name),
+                    phone_number = COALESCE($3, phone_number),
+                    location = COALESCE($4, location),
+                    github_url = COALESCE($5, github_url),
+                    linkedin_url = COALESCE($6, linkedin_url),
+                    skills = COALESCE($7, skills),
+                    bio = COALESCE($8, bio),
+                    portfolio_url = COALESCE($9, portfolio_url),
+                    updated_at = NOW()
+                WHERE id = $1
+            `, [
+                candidateId,
+                extractedData.personal_info.name,
+                extractedData.personal_info.phone_number,
+                extractedData.personal_info.location,
+                extractedData.personal_info.github_url,
+                extractedData.personal_info.linkedin_url,
+                extractedData.personal_info.skills,
+                extractedData.personal_info.profile_description,
+                extractedData.personal_info.portfolio_url
+            ]);
+
+            // Save education
+            for (const edu of extractedData.education) {
+                if (edu.degree && edu.school) {
+                    await client.query(`
+                        INSERT INTO candidate_education (candidate_id, institution, degree, field_of_study, start_date, end_date, grade_or_cgpa, description)
+                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                    `, [candidateId, edu.school, edu.degree, edu.fieldOfStudy, edu.startDate, edu.endDate, edu.grade, '']);
+                }
+            }
+
+            // Save experience
+            for (const exp of extractedData.experience) {
+                if (exp.company) {
+                    await client.query(`
+                        INSERT INTO candidate_experience (candidate_id, company_name, job_title, employment_type, location, start_date, end_date, is_current, description)
+                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                    `, [candidateId, exp.company, exp.title, '', exp.location, exp.startDate, exp.endDate, exp.current, exp.description]);
+                }
+            }
+
+            // Save projects
+            for (const proj of extractedData.projects) {
+                if (proj.title) {
+                    await client.query(`
+                        INSERT INTO candidate_projects (candidate_id, project_title, project_description, technologies_used, project_link, start_date, end_date)
+                        VALUES ($1, $2, $3, $4, $5, $6, $7)
+                    `, [candidateId, proj.title, proj.description, proj.technologies, proj.link, '', '']);
+                }
+            }
+
+            // Save achievements
+            if (extractedData.achievements) {
+                for (const ach of extractedData.achievements) {
+                    if (ach.title) {
+                        await client.query(`
+                            INSERT INTO candidate_achievements (candidate_id, title, description, date_earned)
+                            VALUES ($1, $2, $3, $4)
+                        `, [candidateId, ach.title, ach.description, ach.date]);
+                    }
+                }
+            }
+
+            // Sync primary data
+            await syncPrimaryData(client, candidateId);
+
+            await client.query('COMMIT');
+
+            res.json({
+                success: true,
+                message: 'Resume parsed and saved successfully',
+                data: extractedData
+            });
+        } else {
+            // Just return extracted data without saving
+            res.json({
+                success: true,
+                message: 'Resume parsed successfully',
+                data: extractedData
+            });
+        }
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('[Parse Resume Error]', error);
+        res.status(500).json({ success: false, message: error.message });
+    } finally {
+        client.release();
+    }
+});
 
 // POST /api/candidates/profile
 // Full Profile Save (Multi-table transaction)
@@ -220,10 +370,18 @@ router.get('/profile', auth, async (req, res) => {
         if (candidateRes.rows.length === 0) {
             console.warn(`[PROFILE_DEBUG] No candidate record found for UserID: ${userId}. Returning empty structure.`);
             // Return empty structure instead of 404 to gracefully handle "new user" scenario in Apply Flow
+            // Fetch basic info from credentials to pre-fill the form
+            const credRes = await pool.query('SELECT name, email FROM credentials WHERE id = $1', [userId]);
+            const basicInfo = credRes.rows[0] || {};
+
             return res.json({
                 success: true,
                 data: {
-                    personal_info: { skills: [] }, // Minimal structure to prevent frontend crash
+                    personal_info: {
+                        name: basicInfo.name || '',
+                        email: basicInfo.email || '',
+                        skills: []
+                    },
                     education: [],
                     experience: [],
                     achievements: [],
