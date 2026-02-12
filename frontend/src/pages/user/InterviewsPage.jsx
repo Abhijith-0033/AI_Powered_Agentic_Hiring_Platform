@@ -28,8 +28,13 @@ const InterviewsPage = () => {
         const now = new Date();
         const timeDiff = (interviewTime - now) / (1000 * 60); // difference in minutes
 
-        if (timeDiff > 5) {
-            alert(`Interview starts in ${Math.round(timeDiff)} minutes. You can join 5 minutes before the scheduled time.`);
+        // If status is scheduled, we allow joining even if time is a bit off, 
+        // assuming recruiter started it. But let's keep the logic sane.
+        // Actually, if recruiter click "Start Now", the time is updated to NOW.
+        // So the existing logic SHOULD work, but let's relax it slightly.
+
+        if (timeDiff > 10) { // Increased from 5 to 10 mins buffer
+            alert(`Interview starts in ${Math.round(timeDiff)} minutes. You can join 10 minutes before the scheduled time.`);
             return;
         }
 
@@ -76,7 +81,8 @@ const InterviewsPage = () => {
         const interviewTime = new Date(scheduledAt);
         const now = new Date();
         const timeDiff = (interviewTime - now) / (1000 * 60);
-        return timeDiff <= 5 && timeDiff >= -60; // Can join 5 min before and up to 1 hour after
+        // Relaxed constraint: can join 15 min before and up to 2 hours after
+        return timeDiff <= 15 && timeDiff >= -120;
     };
 
     if (loading) {

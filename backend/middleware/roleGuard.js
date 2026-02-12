@@ -5,6 +5,11 @@
  * @returns {Function} Express middleware function
  */
 const roleGuard = (allowedRoles) => {
+    // Ensure allowedRoles is an array
+    if (typeof allowedRoles === 'string') {
+        allowedRoles = [allowedRoles];
+    }
+
     return (req, res, next) => {
         // Ensure user is authenticated (auth middleware should run first)
         if (!req.user) {

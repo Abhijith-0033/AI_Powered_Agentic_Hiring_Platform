@@ -1,5 +1,5 @@
 import pkg from 'agora-access-token';
-const { RtcTokenBuilder, RtcRole } = pkg;
+const { RtcTokenBuilder, RtcRole } = pkg.default || pkg;
 import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
 
