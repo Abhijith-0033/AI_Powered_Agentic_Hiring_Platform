@@ -100,14 +100,15 @@ router.get('/', async (req, res) => {
         // 1. Exclude 'external' source (Adzuna/Jooble)
         // 2. Ensure company_id is present (Recruiter jobs)
         // 3. source IS DISTINCT FROM 'external' handles NULLs correctly (Postgres)
-        conditions.push("source IS DISTINCT FROM 'external'");
-        conditions.push("company_id IS NOT NULL");
+        // RELAXED FILTER: Allow external jobs too
+        // conditions.push("source IS DISTINCT FROM 'external'");
+        // conditions.push("company_id IS NOT NULL");
 
         // By default, show only open jobs unless 'all' is requested
-        if (status !== 'all') {
-            params.push('Open');
-            conditions.push(`status = $${params.length}`);
-        }
+        // if (status !== 'all') {
+        //    params.push('Open');
+        //    // conditions.push(`status = $${params.length}`); // External jobs might not have status 'Open', they might be null or 'active'
+        // }
 
         if (conditions.length > 0) {
             query += ' WHERE ' + conditions.join(' AND ');

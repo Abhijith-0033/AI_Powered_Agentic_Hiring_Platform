@@ -297,7 +297,7 @@ const Landing = () => {
                                 Ready to Transform Your Hiring?
                             </h2>
                             <p className="text-lg md:text-xl text-primary-50 mb-10 max-w-2xl mx-auto">
-                                Join thousands of companies and job seekers who are already using HireAI to find their perfect match.
+                                Join thousands of companies and job seekers who are already using HireX to find their perfect match.
                             </p>
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                                 <Link to="/login">

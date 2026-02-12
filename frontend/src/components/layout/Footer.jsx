@@ -43,7 +43,7 @@ const Footer = () => {
                                 <Sparkles className="w-5 h-5 text-white" />
                             </div>
                             <span className="text-xl font-bold text-neutral-900">
-                                Hire<span className="text-primary-600">AI</span>
+                                Hire<span className="text-primary-600">X</span>
                             </span>
                         </Link>
                         <p className="text-neutral-500 text-sm mb-4 max-w-xs">
@@ -129,7 +129,7 @@ const Footer = () => {
                 {/* Copyright */}
                 <div className="mt-12 pt-8 border-t border-neutral-200">
                     <p className="text-center text-sm text-neutral-500">
-                        © {new Date().getFullYear()} HireAI. All rights reserved.
+                        © {new Date().getFullYear()} HireX. All rights reserved.
                     </p>
                 </div>
             </div>

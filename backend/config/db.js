@@ -81,3 +81,7 @@ export const closePool = async () => {
 };
 
 export default pool;
+// CommonJS backward compatibility for migration scripts
+// if (typeof module !== 'undefined' && module.exports) {
+//     module.exports = pool;
+// }

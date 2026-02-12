@@ -6,7 +6,8 @@ import {
     FileText,
     Sparkles,
     Target,
-    Zap
+    Zap,
+    Settings
 } from 'lucide-react';
 import { useState } from 'react';
 import { DashboardLayout } from '../../components/layout';
@@ -17,13 +18,22 @@ import Card, { CardContent, CardDescription, CardHeader, CardTitle } from '../..
  * AI Actions page
  * Auto-apply, cover letter generation, resume optimization
  */
+
+import CoverLetterModal from '../../components/shared/CoverLetterModal';
+import OptimizeResumeModal from '../../components/shared/OptimizeResumeModal';
+import MatchAnalysisModal from '../../components/shared/MatchAnalysisModal';
+import SkillGapModal from '../../components/shared/SkillGapModal';
+import AutoApplyModal from '../../components/shared/AutoApplyModal';
+
 const AIActions = () => {
-    const [autoApply, setAutoApply] = useState(false);
-    const [autoApplySettings, setAutoApplySettings] = useState({
-        minMatchScore: 80,
-        dailyLimit: 10,
-        requireApproval: true,
-    });
+    const [autoApplyActive, setAutoApplyActive] = useState(false);
+
+    // Modal States
+    const [isCoverLetterModalOpen, setIsCoverLetterModalOpen] = useState(false);
+    const [isOptimizeResumeModalOpen, setIsOptimizeResumeModalOpen] = useState(false);
+    const [isMatchAnalysisModalOpen, setIsMatchAnalysisModalOpen] = useState(false);
+    const [isSkillGapModalOpen, setIsSkillGapModalOpen] = useState(false);
+    const [isAutoApplyModalOpen, setIsAutoApplyModalOpen] = useState(false);
 
     const aiActions = [
         {
@@ -33,6 +43,7 @@ const AIActions = () => {
             description: 'Create a tailored cover letter for a specific job',
             status: 'ready',
             color: 'primary',
+            action: () => setIsCoverLetterModalOpen(true)
         },
         {
             id: 'optimize-resume',
@@ -41,6 +52,7 @@ const AIActions = () => {
             description: 'Improve your resume for better ATS compatibility',
             status: 'ready',
             color: 'secondary',
+            action: () => setIsOptimizeResumeModalOpen(true)
         },
         {
             id: 'match-analysis',
@@ -49,6 +61,7 @@ const AIActions = () => {
             description: 'Get detailed analysis of job matches',
             status: 'ready',
             color: 'success',
+            action: () => setIsMatchAnalysisModalOpen(true)
         },
         {
             id: 'skill-gap',
@@ -57,155 +70,88 @@ const AIActions = () => {
             description: 'Identify skills to improve for target roles',
             status: 'beta',
             color: 'warning',
-        },
-    ];
-
-    const recentActions = [
-        {
-            id: 1,
-            action: 'Cover Letter Generated',
-            target: 'Senior Frontend Developer at TechCorp',
-            timestamp: '2 hours ago',
-            status: 'completed',
-        },
-        {
-            id: 2,
-            action: 'Resume Optimized',
-            target: 'Full Stack Engineer at StartupXYZ',
-            timestamp: '5 hours ago',
-            status: 'completed',
-        },
-        {
-            id: 3,
-            action: 'Auto-Applied',
-            target: 'React Developer at WebAgency',
-            timestamp: 'Yesterday',
-            status: 'pending',
-        },
-    ];
-
-    const matchScoreOptions = [
-        { value: 70, label: '70% and above' },
-        { value: 80, label: '80% and above' },
-        { value: 90, label: '90% and above' },
-    ];
-
-    const dailyLimitOptions = [
-        { value: 5, label: '5 applications per day' },
-        { value: 10, label: '10 applications per day' },
-        { value: 15, label: '15 applications per day' },
-        { value: 20, label: '20 applications per day' },
+            action: () => setIsSkillGapModalOpen(true)
+        }
     ];
 
     return (
         <DashboardLayout type="user" title="AI Actions">
-            <div className="max-w-6xl mx-auto">
-                {/* Header */}
-                <div className="mb-8">
-                    <h2 className="text-2xl font-bold text-neutral-900 mb-2">
-                        AI-Powered Actions
-                    </h2>
-                    <p className="text-neutral-500">
-                        Let AI assist you in your job search journey.
-                    </p>
-                </div>
+            <div className="max-w-6xl mx-auto space-y-8">
 
-                {/* Auto-Apply Section */}
-                <Card className="mb-8 bg-white border-neutral-200 shadow-sm">
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="p-3 rounded-xl bg-gradient-to-br from-primary-500 to-indigo-600 shadow-lg shadow-primary-500/20">
-                                    <Bot className="w-6 h-6 text-white" />
-                                </div>
-                                <div>
-                                    <CardTitle>Auto-Apply Agent</CardTitle>
-                                    <CardDescription>
-                                        Automatically apply to matching jobs based on your criteria
-                                    </CardDescription>
-                                </div>
+                {/* Auto-Apply Agent Card */}
+                <Card className="border-neutral-200 shadow-sm overflow-hidden relative">
+                    <div className={`absolute top-0 left-0 w-1 h-full ${autoApplyActive ? 'bg-blue-600' : 'bg-neutral-300'}`} />
+                    <CardContent className="p-6 flex items-center justify-between">
+                        <div className="flex items-center gap-5">
+                            <div className={`p-4 rounded-2xl ${autoApplyActive ? 'bg-blue-100' : 'bg-neutral-100'} transition-colors`}>
+                                <Bot className={`w-8 h-8 ${autoApplyActive ? 'text-blue-600' : 'text-neutral-500'}`} />
                             </div>
-                            <Toggle
-                                checked={autoApply}
-                                onChange={setAutoApply}
-                            />
+                            <div>
+                                <h2 className="text-xl font-bold text-neutral-900 flex items-center gap-3">
+                                    Auto-Apply Agent
+                                    {autoApplyActive && <span className="flex h-3 w-3 relative">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                                    </span>}
+                                </h2>
+                                <p className="text-neutral-500 max-w-lg mt-1">
+                                    Automatically apply to matching jobs based on your criteria. The agent runs in the background.
+                                </p>
+                            </div>
                         </div>
-                    </CardHeader>
-
-                    {autoApply && (
-                        <CardContent className="border-t border-neutral-100 pt-6">
-                            <div className="grid md:grid-cols-3 gap-6 mb-6">
-                                <Select
-                                    label="Minimum Match Score"
-                                    options={matchScoreOptions}
-                                    value={autoApplySettings.minMatchScore}
-                                    onChange={(e) => setAutoApplySettings(prev => ({
-                                        ...prev,
-                                        minMatchScore: parseInt(e.target.value)
-                                    }))}
+                        <div className="flex items-center gap-4">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setIsAutoApplyModalOpen(true)}
+                                className="hidden md:flex"
+                            >
+                                <Settings className="w-4 h-4 mr-2" /> Configure
+                            </Button>
+                            <div className="flex items-center gap-3 bg-neutral-50 px-4 py-2 rounded-lg border border-neutral-200">
+                                <span className={`text-sm font-semibold ${autoApplyActive ? 'text-blue-700' : 'text-neutral-500'}`}>
+                                    {autoApplyActive ? 'Active' : 'Disabled'}
+                                </span>
+                                <Toggle
+                                    enabled={autoApplyActive}
+                                    onChange={setAutoApplyActive}
                                 />
-                                <Select
-                                    label="Daily Limit"
-                                    options={dailyLimitOptions}
-                                    value={autoApplySettings.dailyLimit}
-                                    onChange={(e) => setAutoApplySettings(prev => ({
-                                        ...prev,
-                                        dailyLimit: parseInt(e.target.value)
-                                    }))}
-                                />
-                                <div className="flex items-end">
-                                    <Toggle
-                                        label="Require Approval"
-                                        description="Get notified before each application"
-                                        checked={autoApplySettings.requireApproval}
-                                        onChange={(checked) => setAutoApplySettings(prev => ({
-                                            ...prev,
-                                            requireApproval: checked
-                                        }))}
-                                    />
-                                </div>
                             </div>
-
-                            <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                                <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                                <div>
-                                    <p className="text-sm font-medium text-amber-800">Auto-Apply is Active</p>
-                                    <p className="text-sm text-amber-600/90">
-                                        The agent will automatically apply to jobs matching your criteria.
-                                        You can pause this at any time.
-                                    </p>
-                                </div>
-                            </div>
-                        </CardContent>
-                    )}
+                        </div>
+                    </CardContent>
                 </Card>
 
                 {/* Quick Actions Grid */}
-                <div className="grid md:grid-cols-2 gap-6 mb-8">
+                <div className="grid md:grid-cols-2 gap-6">
                     {aiActions.map((action) => {
                         const Icon = action.icon;
                         return (
-                            <Card key={action.id} hover className="group border-neutral-200">
+                            <Card key={action.id} hover className="group border-neutral-200 shadow-sm hover:shadow-md transition-all">
                                 <CardContent className="flex items-start gap-4 p-6">
                                     <div className={`
-                    p-3 rounded-xl 
-                    ${action.color === 'primary' ? 'bg-primary-50 text-primary-600' :
+                                        p-3 rounded-xl 
+                                        ${action.color === 'primary' ? 'bg-indigo-50 text-indigo-600' :
                                             action.color === 'secondary' ? 'bg-purple-50 text-purple-600' :
                                                 action.color === 'success' ? 'bg-emerald-50 text-emerald-600' :
                                                     'bg-amber-50 text-amber-600'}
-                    group-hover:scale-110 transition-transform
-                  `}>
-                                        <Icon className="w-6 h-6" />
+                                        group-hover:scale-110 transition-transform duration-300
+                                    `}>
+                                        <Icon className="w-8 h-8" />
                                     </div>
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <h3 className="font-semibold text-neutral-900">{action.title}</h3>
+                                            <h3 className="text-lg font-bold text-neutral-900">{action.title}</h3>
                                             {action.status === 'beta' && (
-                                                <Badge variant="warning" size="sm">Beta</Badge>
+                                                <Badge variant="warning" size="sm" className="ml-2">Beta</Badge>
                                             )}
                                         </div>
-                                        <p className="text-sm text-neutral-500 mb-4">{action.description}</p>
-                                        <Button size="sm" variant="outline" className="border-neutral-200 hover:bg-neutral-50 hover:text-neutral-900">
+                                        <p className="text-sm text-neutral-500 mb-6 leading-relaxed">{action.description}</p>
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="border-neutral-200 hover:bg-neutral-50 hover:text-neutral-900 font-medium"
+                                            onClick={action.action}
+                                        >
                                             Run Action
                                         </Button>
                                     </div>
@@ -215,44 +161,33 @@ const AIActions = () => {
                     })}
                 </div>
 
-                {/* Recent Actions */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Recent AI Actions</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            {recentActions.map((action) => (
-                                <div
-                                    key={action.id}
-                                    className="flex items-center justify-between p-4 bg-white rounded-lg border border-neutral-200 hover:border-neutral-300 transition-colors"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        {action.status === 'completed' ? (
-                                            <div className="p-2 bg-emerald-50 rounded-lg">
-                                                <CheckCircle className="w-4 h-4 text-emerald-600" />
-                                            </div>
-                                        ) : (
-                                            <div className="p-2 bg-amber-50 rounded-lg">
-                                                <Clock className="w-4 h-4 text-amber-600" />
-                                            </div>
-                                        )}
-                                        <div>
-                                            <p className="font-medium text-neutral-900">{action.action}</p>
-                                            <p className="text-sm text-neutral-500">{action.target}</p>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <Badge variant={action.status === 'completed' ? 'success' : 'warning'} size="sm">
-                                            {action.status === 'completed' ? 'Completed' : 'Pending'}
-                                        </Badge>
-                                        <p className="text-xs text-neutral-400 mt-1">{action.timestamp}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
+                {/* Modals */}
+                <CoverLetterModal
+                    isOpen={isCoverLetterModalOpen}
+                    onClose={() => setIsCoverLetterModalOpen(false)}
+                />
+
+                <OptimizeResumeModal
+                    isOpen={isOptimizeResumeModalOpen}
+                    onClose={() => setIsOptimizeResumeModalOpen(false)}
+                />
+
+                <MatchAnalysisModal
+                    isOpen={isMatchAnalysisModalOpen}
+                    onClose={() => setIsMatchAnalysisModalOpen(false)}
+                />
+
+                <SkillGapModal
+                    isOpen={isSkillGapModalOpen}
+                    onClose={() => setIsSkillGapModalOpen(false)}
+                />
+
+                <AutoApplyModal
+                    isOpen={isAutoApplyModalOpen}
+                    active={autoApplyActive}
+                    onToggle={() => setAutoApplyActive(!autoApplyActive)}
+                    onClose={() => setIsAutoApplyModalOpen(false)}
+                />
             </div>
         </DashboardLayout>
     );

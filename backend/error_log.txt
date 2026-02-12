@@ -1,0 +1,19 @@
+Error: insert or update on table "generated_cover_letters" violates foreign key constraint "generated_cover_letters_candidate_id_fkey"
+Stack: error: insert or update on table "generated_cover_letters" violates foreign key constraint "generated_cover_letters_candidate_id_fkey"
+    at E:\Main Project\AI_Powered_Agentic_Hiring_Platform\backend\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async generateCoverLetter (file:///E:/Main%20Project/AI_Powered_Agentic_Hiring_Platform/backend/services/aiCoverLetterService.js:134:25)
+    at async verifyAgent (file:///E:/Main%20Project/AI_Powered_Agentic_Hiring_Platform/backend/scripts/verify_ai_agent.js:35:24)
+Full: {
+  "length": 369,
+  "name": "error",
+  "severity": "ERROR",
+  "code": "23503",
+  "detail": "Key (candidate_id)=(f5519df8-fdd9-4682-a651-050d75933492) is not present in table \"candidates\".",
+  "schema": "public",
+  "table": "generated_cover_letters",
+  "constraint": "generated_cover_letters_candidate_id_fkey",
+  "file": "ri_triggers.c",
+  "line": "2599",
+  "routine": "ri_ReportViolation"
+}

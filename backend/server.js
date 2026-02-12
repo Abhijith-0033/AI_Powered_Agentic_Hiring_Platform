@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
+import aiCoverLetterRoutes from './routes/aiCoverLetterRoutes.js';
 import jobsRoutes from './routes/jobs.js';
 import candidatesRoutes from './routes/candidates.js';
 import applicationsRoutes from './routes/applications.js';
@@ -45,6 +46,10 @@ app.use((req, res, next) => {
     next();
 });
 
+// Serve static files (Uploaded PDFs)
+import path from 'path';
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
 // ============================================================
 // ROUTES
 // ============================================================
@@ -69,6 +74,9 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/companies', companiesRoutes);
 app.use('/api/ai-tools', aiToolsRoutes);
 app.use('/api/interviews', interviewRoutes);
+app.use('/api/ai/cover-letter', aiCoverLetterRoutes);
+import aiResumeRoutes from './routes/aiResumeRoutes.js';
+app.use('/api/ai/resume', aiResumeRoutes);
 
 // 404 handler
 app.use((req, res) => {

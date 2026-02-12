@@ -78,7 +78,7 @@ const Sidebar = ({ type = 'user' }) => {
                     </div>
                     {!isCollapsed && (
                         <span className="text-xl font-bold text-neutral-900 tracking-tight">
-                            Hire<span className="text-primary-600">AI</span>
+                            Hire<span className="text-primary-600">X</span>
                         </span>
                     )}
                 </Link>
