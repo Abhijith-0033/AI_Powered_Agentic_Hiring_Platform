@@ -143,6 +143,47 @@ const InterviewsPage = () => {
         }
     };
 
+    const handleStartNow = async (candidate) => {
+        if (!confirm(`Start interview with ${candidate.candidate_name} immediately?`)) return;
+
+        try {
+            // calculated times
+            const now = new Date();
+            const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
+
+            const interviewDate = now.toISOString().split('T')[0];
+            const startTime = now.toTimeString().substring(0, 5);
+            const endTime = oneHourLater.toTimeString().substring(0, 5);
+
+            await axios.post('/interviews/create-and-schedule', {
+                jobId: interviewJobId,
+                applicationId: candidate.id,
+                candidateId: candidate.candidate_id,
+                interviewDate,
+                startTime,
+                endTime
+            });
+
+            // Refresh list to get the channel name
+            const res = await axios.get(`/recruiter/jobs/${interviewJobId}/applications`);
+            const updatedCandidates = res.data?.data || [];
+            setCandidatesForSection(updatedCandidates, setInterviewCandidates);
+
+            // Find the candidate to get channel name
+            const updatedCandidate = updatedCandidates.find(c => c.id === candidate.id);
+            if (updatedCandidate && updatedCandidate.channel_name) {
+                // Redirect to video call
+                window.location.href = `/interview/${updatedCandidate.channel_name}`;
+            } else {
+                alert('Interview started, but could not redirect automatically. Please check the list.');
+            }
+
+        } catch (error) {
+            console.error('Error starting interview:', error);
+            alert('Failed to start interview: ' + (error.response?.data?.message || error.message));
+        }
+    };
+
     // Auto-Schedule State & Handlers
     const [showAutoScheduleModal, setShowAutoScheduleModal] = useState(false);
     const [autoConfig, setAutoConfig] = useState({
@@ -324,6 +365,13 @@ const InterviewsPage = () => {
                                                     >
                                                         <Calendar className="w-3 h-3" />
                                                         Schedule
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleStartNow(candidate)}
+                                                        className="px-2.5 py-1 rounded-md text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors flex items-center gap-1"
+                                                    >
+                                                        <Video className="w-3 h-3" />
+                                                        Start Now
                                                     </button>
                                                     <button
                                                         onClick={() => handleStatusUpdate(candidate.id, 'accepted', section)}
