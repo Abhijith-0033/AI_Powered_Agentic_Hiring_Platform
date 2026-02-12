@@ -9,8 +9,7 @@ const AGORA_APP_ID = process.env.AGORA_APP_ID;
 const AGORA_APP_CERTIFICATE = process.env.AGORA_APP_CERTIFICATE;
 
 if (!AGORA_APP_ID || !AGORA_APP_CERTIFICATE) {
-    console.error('❌ Missing Agora credentials in .env file');
-    throw new Error('AGORA_APP_ID and AGORA_APP_CERTIFICATE must be set in environment variables');
+    console.warn('⚠️ Missing Agora credentials in .env file. Video calls will not work.');
 }
 
 /**
@@ -21,6 +20,9 @@ if (!AGORA_APP_ID || !AGORA_APP_CERTIFICATE) {
  * @returns {string} Agora RTC token valid for 1 hour
  */
 export const generateAgoraToken = (channelName, uid = 0, role = 'publisher') => {
+    if (!AGORA_APP_ID || !AGORA_APP_CERTIFICATE) {
+        throw new Error('Agora credentials are not configured in environment variables');
+    }
     try {
         // Token expiry time (1 hour from now)
         const expirationTimeInSeconds = 3600;
