@@ -4,6 +4,7 @@ import auth from '../middleware/auth.js';
 import roleGuard from '../middleware/roleGuard.js';
 import { generateAgoraToken, generateChannelName } from '../utils/agoraToken.js';
 import { sendInterviewEmail } from '../utils/emailService.js';
+import { scheduleInterviewsWithRoundRobin } from '../services/schedulingAlgorithm.js';
 
 const router = express.Router();
 
@@ -217,6 +218,155 @@ router.post('/create-and-schedule', auth, roleGuard('recruiter'), async (req, re
         res.status(500).json({
             success: false,
             message: 'Failed to create and schedule interview',
+            error: error.message
+        });
+    } finally {
+        client.release();
+    }
+});
+
+/**
+ * POST /api/interviews/auto-schedule
+ * Automatically schedule interviews for all eligible candidates using Round-Robin algorithm
+ * Accessible by: Recruiter only
+ */
+router.post('/auto-schedule', auth, roleGuard('recruiter'), async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const userId = req.user.userId;
+        const { jobId, config, interviewers } = req.body;
+
+        if (!jobId || !config || !interviewers || !Array.isArray(interviewers)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required fields: jobId, config, interviewers (array)'
+            });
+        }
+
+        console.log('[Auto-Schedule] Request:', { jobId, config, interviewersCount: interviewers.length });
+
+        // Verify recruiter owns the job
+        const ownershipQuery = `
+            SELECT jp.job_id
+            FROM job_postings jp
+            JOIN companies c ON jp.company_id = c.id
+            WHERE jp.job_id = $1 AND c.created_by = $2
+        `;
+        const ownershipResult = await client.query(ownershipQuery, [jobId, userId]);
+        if (ownershipResult.rows.length === 0) {
+            return res.status(403).json({ success: false, message: 'Access denied or job not found' });
+        }
+
+        // Fetch eligible candidates (status: pending, shortlisted_for_test, interview, applied)
+        // Exclude rejected/hired/hired_candidate
+        const candidatesQuery = `
+            SELECT 
+                ja.id as application_id, 
+                c.id as candidate_id, 
+                c.name as candidate_name, 
+                c.email as candidate_email,
+                c.user_id as candidate_user_id
+            FROM job_applications ja
+            JOIN candidates c ON ja.candidate_id = c.id
+            WHERE ja.job_id = $1 
+            AND ja.status NOT IN ('rejected', 'hired', 'hired_candidate')
+            AND NOT EXISTS (
+                SELECT 1 FROM interviews i 
+                WHERE i.application_id = ja.id 
+                AND i.status IN ('scheduled', 'completed')
+            )
+        `;
+        const candidatesResult = await client.query(candidatesQuery, [jobId]);
+        const candidates = candidatesResult.rows;
+
+        if (candidates.length === 0) {
+            return res.json({ success: true, message: 'No eligible candidates found for scheduling', data: [] });
+        }
+
+        console.log(`[Auto-Schedule] Found ${candidates.length} eligible candidates`);
+
+        // Run Scheduling Algorithm
+        const scheduledInterviews = scheduleInterviewsWithRoundRobin(candidates, interviewers, config);
+
+        console.log(`[Auto-Schedule] Algorithm returned ${scheduledInterviews.length} schedules`);
+
+        await client.query('BEGIN');
+
+        const results = [];
+
+        for (const interview of scheduledInterviews) {
+            const { applicationId, candidateId, startTime, endTime, interviewDate } = interview;
+
+            // Create channel name
+            const channelName = `interview_${applicationId}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+            const meetingLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/interview/${channelName}`;
+            const scheduledAt = `${interviewDate} ${startTime}`;
+
+            // Check if interview record exists
+            const existingQuery = 'SELECT id FROM interviews WHERE application_id = $1';
+            const existingRes = await client.query(existingQuery, [applicationId]);
+
+            let interviewId;
+
+            if (existingRes.rows.length > 0) {
+                // Update existing
+                interviewId = existingRes.rows[0].id;
+                const updateQuery = `
+                    UPDATE interviews
+                    SET 
+                        interview_date = $1, start_time = $2, end_time = $3,
+                        scheduled_at = $4, meeting_link = $5, channel_name = $6,
+                        status = 'scheduled', updated_at = NOW(), recruiter_id = $7
+                    WHERE id = $8
+                    RETURNING id
+                `;
+                await client.query(updateQuery, [
+                    interviewDate, startTime, endTime,
+                    scheduledAt, meetingLink, channelName,
+                    userId, interviewId
+                ]);
+            } else {
+                // Insert new
+                const insertQuery = `
+                    INSERT INTO interviews (
+                        job_id, application_id, candidate_id, recruiter_id,
+                        channel_name, status, interview_date, start_time, end_time,
+                        scheduled_at, meeting_link, created_at, updated_at
+                    )
+                    VALUES ($1, $2, $3, $4, $5, 'scheduled', $6, $7, $8, $9, $10, NOW(), NOW())
+                    RETURNING id
+                `;
+                const insertRes = await client.query(insertQuery, [
+                    jobId, applicationId, candidateId, userId,
+                    channelName, interviewDate, startTime, endTime,
+                    scheduledAt, meetingLink
+                ]);
+                interviewId = insertRes.rows[0].id;
+            }
+
+            // Update application status
+            await client.query(
+                'UPDATE job_applications SET status = $1 WHERE id = $2',
+                ['interview', applicationId]
+            );
+
+            results.push({ ...interview, interviewId });
+        }
+
+        await client.query('COMMIT');
+
+        res.json({
+            success: true,
+            message: `Successfully scheduled ${results.length} interviews`,
+            data: results
+        });
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Error in auto-schedule:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to auto-schedule interviews',
             error: error.message
         });
     } finally {

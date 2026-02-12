@@ -143,6 +143,74 @@ const InterviewsPage = () => {
         }
     };
 
+    // Auto-Schedule State & Handlers
+    const [showAutoScheduleModal, setShowAutoScheduleModal] = useState(false);
+    const [autoConfig, setAutoConfig] = useState({
+        interviewDate: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0],
+        startTime: '10:00',
+        slotDuration: 30,
+        interviewers: [{ name: '', email: '' }]
+    });
+
+    const handleAddInterviewer = () => {
+        setAutoConfig(prev => ({
+            ...prev,
+            interviewers: [...prev.interviewers, { name: '', email: '' }]
+        }));
+    };
+
+    const handleInterviewerChange = (index, field, value) => {
+        const newInterviewers = [...autoConfig.interviewers];
+        newInterviewers[index][field] = value;
+        setAutoConfig(prev => ({ ...prev, interviewers: newInterviewers }));
+    };
+
+    const handleRemoveInterviewer = (index) => {
+        if (autoConfig.interviewers.length === 1) return;
+        const newInterviewers = autoConfig.interviewers.filter((_, i) => i !== index);
+        setAutoConfig(prev => ({ ...prev, interviewers: newInterviewers }));
+    };
+
+    const handleAutoScheduleSubmit = async (e) => {
+        e.preventDefault();
+        if (!interviewJobId) {
+            alert('Please select a job first');
+            return;
+        }
+
+        const validInterviewers = autoConfig.interviewers.filter(i => i.name && i.email);
+        if (validInterviewers.length === 0) {
+            alert('Please add at least one interviewer with name and email');
+            return;
+        }
+
+        try {
+            setLoadingInterview(true);
+            const res = await axios.post('/interviews/auto-schedule', {
+                jobId: interviewJobId,
+                config: {
+                    interviewDate: autoConfig.interviewDate,
+                    startTime: autoConfig.startTime,
+                    slotDuration: parseInt(autoConfig.slotDuration)
+                },
+                interviewers: validInterviewers
+            });
+
+            alert(res.data.message);
+            setShowAutoScheduleModal(false);
+
+            // Refresh
+            const candidatesRes = await axios.get(`/recruiter/jobs/${interviewJobId}/applications`);
+            setCandidatesForSection(candidatesRes.data?.data || [], setInterviewCandidates);
+
+        } catch (error) {
+            console.error('Error auto-scheduling:', error);
+            alert('Failed to auto-schedule: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setLoadingInterview(false);
+        }
+    };
+
     const getStatusBadge = (status) => {
         const s = (status || 'applied').toLowerCase();
         const config = {
@@ -368,7 +436,19 @@ const InterviewsPage = () => {
                                 </h3>
                                 <p className="text-sm text-neutral-500 mt-1">Manage candidates for interviews — schedule, accept, or reject</p>
                             </div>
-                            <JobSelector value={interviewJobId} onChange={setInterviewJobId} id="interview-job-select" />
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => {
+                                        if (!interviewJobId) { alert('Please select a job first'); return; }
+                                        setShowAutoScheduleModal(true);
+                                    }}
+                                    className="px-3 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors text-sm font-medium flex items-center gap-1.5"
+                                >
+                                    <Clock className="w-4 h-4" />
+                                    Auto Schedule
+                                </button>
+                                <JobSelector value={interviewJobId} onChange={setInterviewJobId} id="interview-job-select" />
+                            </div>
                         </div>
                     </div>
 
@@ -457,6 +537,134 @@ const InterviewsPage = () => {
                                     className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
                                 >
                                     Schedule Interview
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* ============== AUTO SCHEDULE MODAL ============== */}
+            {showAutoScheduleModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-xl p-8 max-w-lg w-full mx-4 shadow-xl max-h-[90vh] overflow-y-auto">
+                        <div className="flex items-center justify-between mb-6">
+                            <div>
+                                <h2 className="text-xl font-bold text-neutral-900">Auto-Schedule Interviews</h2>
+                                <p className="text-sm text-neutral-500 mt-1">Automatically assign time slots to pending candidates</p>
+                            </div>
+                            <button onClick={() => setShowAutoScheduleModal(false)} className="text-neutral-400 hover:text-neutral-600">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleAutoScheduleSubmit}>
+                            <div className="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-neutral-700 mb-2">Date</label>
+                                    <input
+                                        type="date"
+                                        className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                        value={autoConfig.interviewDate}
+                                        onChange={(e) => setAutoConfig({ ...autoConfig, interviewDate: e.target.value })}
+                                        required
+                                        min={new Date().toISOString().split('T')[0]}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-neutral-700 mb-2">Start Time</label>
+                                    <input
+                                        type="time"
+                                        className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                        value={autoConfig.startTime}
+                                        onChange={(e) => setAutoConfig({ ...autoConfig, startTime: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-neutral-700 mb-2">Slot Duration (Minutes)</label>
+                                <select
+                                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                    value={autoConfig.slotDuration}
+                                    onChange={(e) => setAutoConfig({ ...autoConfig, slotDuration: parseInt(e.target.value) })}
+                                >
+                                    <option value={15}>15 Minutes</option>
+                                    <option value={30}>30 Minutes</option>
+                                    <option value={45}>45 Minutes</option>
+                                    <option value={60}>1 Hour</option>
+                                </select>
+                            </div>
+
+                            <div className="mb-6">
+                                <div className="flex items-center justify-between mb-2">
+                                    <label className="block text-sm font-medium text-neutral-700">Interviewers</label>
+                                    <button
+                                        type="button"
+                                        onClick={handleAddInterviewer}
+                                        className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+                                    >
+                                        + Add Interviewer
+                                    </button>
+                                </div>
+                                <div className="space-y-3">
+                                    {autoConfig.interviewers.map((interviewer, idx) => (
+                                        <div key={idx} className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                placeholder="Name"
+                                                className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                                                value={interviewer.name}
+                                                onChange={(e) => handleInterviewerChange(idx, 'name', e.target.value)}
+                                                required
+                                            />
+                                            <input
+                                                type="email"
+                                                placeholder="Email"
+                                                className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                                                value={interviewer.email}
+                                                onChange={(e) => handleInterviewerChange(idx, 'email', e.target.value)}
+                                                required
+                                            />
+                                            {autoConfig.interviewers.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveInterviewer(idx)}
+                                                    className="text-red-500 hover:text-red-700 px-1"
+                                                >
+                                                    <XCircle className="w-5 h-5" />
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                                <p className="text-xs text-neutral-500 mt-2">
+                                    Adding multiple interviewers allows concurrent interview slots.
+                                </p>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowAutoScheduleModal(false)}
+                                    className="flex-1 px-4 py-2 border border-neutral-300 text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors font-medium"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={loadingInterview}
+                                    className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium flex items-center justify-center gap-2"
+                                >
+                                    {loadingInterview ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                            Scheduling...
+                                        </>
+                                    ) : (
+                                        'Run Auto-Schedule'
+                                    )}
                                 </button>
                             </div>
                         </form>
