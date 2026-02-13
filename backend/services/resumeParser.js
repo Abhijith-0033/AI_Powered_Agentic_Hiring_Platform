@@ -1,9 +1,12 @@
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-import { PDFParse } from 'pdf-parse';
-const mammoth = require('mammoth');
+const fs = require('fs');
+const path = require('path');
+const { spawn } = require('child_process');
+const os = require('os');
+const { v4: uuidv4 } = require('uuid');
+
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { PDFDocument } from 'pdf-lib';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -13,57 +16,78 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
  */
 
 /**
- * Extract text from PDF or DOCX file
+ * Extract text using Python script (PyMuPDF / python-docx)
  */
-export const extractText = async (buffer, mimeType) => {
-    try {
-        if (mimeType === 'application/pdf' || mimeType.includes('pdf')) {
-            const parser = new PDFParse({ data: buffer });
-            const result = await parser.getText();
-            return result.text;
-        } else if (mimeType.includes('word') || mimeType.includes('document')) {
-            const result = await mammoth.extractRawText({ buffer });
-            return result.value;
+const extractTextWithPython = (buffer, mimeType) => {
+    return new Promise((resolve, reject) => {
+        // Create a temporary file
+        const tempDir = os.tmpdir();
+        const ext = mimeType.includes('pdf') ? '.pdf' : '.docx';
+        const tempFilePath = path.join(tempDir, `resume_${uuidv4()}${ext}`);
+
+        try {
+            fs.writeFileSync(tempFilePath, buffer);
+        } catch (err) {
+            return reject(new Error('Failed to write temporary file'));
         }
-        return buffer.toString('utf-8');
-    } catch (error) {
-        console.error('Text extraction error:', error);
-        throw new Error('Failed to extract text from resume');
-    }
-};
 
-/**
- * Extract images from PDF using pdf-lib
- * Returns the first valid image found as a base64 string
- */
-const extractPhotoFromPDF = async (buffer, mimeType) => {
-    if (!mimeType.includes('pdf')) return null;
+        const pythonScriptPath = path.join(process.cwd(), 'scripts', 'extract_resume_text.py');
 
-    try {
-        const pdfDoc = await PDFDocument.load(buffer);
-        const pages = pdfDoc.getPages();
+        // Spawn Python process
+        const pythonProcess = spawn('python', [pythonScriptPath, tempFilePath]);
 
-        // Iterate through pages (usually photo is on first page)
-        for (let i = 0; i < Math.min(pages.length, 2); i++) {
-            const page = pages[i];
+        let stdoutData = '';
+        let stderrData = '';
 
-            // This is a simplified approach. pdf-lib doesn't directly support 
-            // extracting images easily without knowing object IDs.
-            // For a robust solution, we might need 'pdf-image' or similar, 
-            // but those require ImageMagick which might not be installed.
+        pythonProcess.stdout.on('data', (data) => {
+            stdoutData += data.toString();
+        });
 
-            // ALTERNATIVE: Use Gemini Vision if we convert PDF page to image.
-            // But for now, let's skip complex image extraction and focus on text 
-            // unless we add a heavy dependency.
+        pythonProcess.stderr.on('data', (data) => {
+            stderrData += data.toString();
+        });
 
-            // However, the user explicitly asked for this.
-            // Let's try a heuristic: if we can't extract, we return null.
-        }
-        return null;
-    } catch (error) {
-        console.warn('Photo extraction warning:', error);
-        return null;
-    }
+        pythonProcess.on('close', (code) => {
+            // Cleanup temp file
+            try {
+                if (fs.existsSync(tempFilePath)) {
+                    fs.unlinkSync(tempFilePath);
+                }
+            } catch (e) {
+                console.error('Failed to delete temp file:', e);
+            }
+
+            if (code !== 0) {
+                // Try to parse error from stdout if available (custom JSON error)
+                try {
+                    const jsonOutput = JSON.parse(stdoutData);
+                    if (jsonOutput.error) {
+                        return reject(new Error(jsonOutput.error));
+                    }
+                } catch (e) {
+                    // Ignore, proceed to stderr
+                }
+                return reject(new Error(stderrData || 'Python script failed'));
+            }
+
+            try {
+                const jsonOutput = JSON.parse(stdoutData);
+                if (jsonOutput.success) {
+                    resolve(jsonOutput.text);
+                } else {
+                    reject(new Error(jsonOutput.error || 'Unknown extraction error'));
+                }
+            } catch (err) {
+                reject(new Error('Failed to parse Python output: ' + err.message));
+            }
+        });
+
+        // Timeout handling (10 seconds)
+        setTimeout(() => {
+            pythonProcess.kill();
+            reject(new Error('Text extraction timed out'));
+        }, 10000);
+    });
 };
 
 /**
@@ -152,15 +176,13 @@ const extractDataWithGemini = async (text) => {
 export const parseResume = async (buffer, mimeType) => {
     try {
         // 1. Extract Text
-        const text = await extractText(buffer, mimeType);
+        // const text = await extractText(buffer, mimeType);
+        const text = await extractTextWithPython(buffer, mimeType);
 
         // 2. Extract Data with Gemini
         const extractedData = await extractDataWithGemini(text);
 
-        // 3. TODO: Photo extraction (Needs robust library or Gemini Vision)
-        // For now, we focus on high-accuracy text. Photo extraction from PDF 
-        // purely in Node.js without system dependencies (like ImageMagick) is tricky.
-        // We will return null for photo for now to ensure stability.
+        // 3. Photo functionality deprecated for now as per plan
         const photo = null;
 
         return {

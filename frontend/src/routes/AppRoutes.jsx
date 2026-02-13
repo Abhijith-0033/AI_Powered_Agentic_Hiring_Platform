@@ -12,6 +12,7 @@ import {
     ProviderDashboard,
     InterviewsPage as ProviderInterviewsPage,
     TestsPage as ProviderTestsPage,
+    CodingTestsPage as ProviderCodingTestsPage,
 } from '../pages/provider';
 import {
     AIActions,
@@ -23,6 +24,9 @@ import {
     InterviewsPage as UserInterviewsPage,
     MyTestsPage,
     TestResultPage,
+    CandidateCodingDashboard,
+    CodingTestAttempt,
+    CodingResultPage,
 } from '../pages/user';
 import TestAttemptPage from '../pages/user/TestAttemptPage';
 
@@ -60,6 +64,9 @@ const AppRoutes = () => {
                     <Route path="tests" element={<MyTestsPage />} />
                     <Route path="tests/:id/attempt" element={<TestAttemptPage />} />
                     <Route path="tests/:id/results" element={<TestResultPage />} />
+                    <Route path="coding-tests" element={<CandidateCodingDashboard />} />
+                    <Route path="coding-tests/:id/attempt" element={<CodingTestAttempt />} />
+                    <Route path="coding-tests/:id/results" element={<CodingResultPage />} />
                 </Route>
             </Route>
 
@@ -76,6 +83,7 @@ const AppRoutes = () => {
                     <Route path="company" element={<CompanyProfile />} />
                     <Route path="interviews" element={<ProviderInterviewsPage />} />
                     <Route path="tests" element={<ProviderTestsPage />} />
+                    <Route path="coding-tests" element={<ProviderCodingTestsPage />} />
                 </Route>
             </Route>
 

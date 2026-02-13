@@ -14,7 +14,8 @@ import {
     User,
     Users,
     Globe,
-    Video
+    Video,
+    Code
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -48,6 +49,7 @@ const Sidebar = ({ type = 'user' }) => {
         { icon: ClipboardList, label: 'Applications', path: '/user/applications' },
         { icon: Video, label: 'Interviews', path: '/user/interviews' },
         { icon: FileText, label: 'Tests', path: '/user/tests' },
+        { icon: Code, label: 'Coding Tests', path: '/user/coding-tests' },
     ];
 
     // Provider navigation items
@@ -58,6 +60,7 @@ const Sidebar = ({ type = 'user' }) => {
         { icon: Sparkles, label: 'AI Tools', path: '/provider/ai-tools' },
         { icon: Video, label: 'Interviews', path: '/provider/interviews' },
         { icon: FileText, label: 'Tests', path: '/provider/tests' },
+        { icon: Code, label: 'Coding Tests', path: '/provider/coding-tests' },
         { icon: Building2, label: 'Company', path: '/provider/company' },
     ];
 

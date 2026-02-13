@@ -8,4 +8,7 @@ export { default as UserDashboard } from './UserDashboard';
 export { default as InterviewsPage } from './InterviewsPage';
 export { default as MyTestsPage } from './MyTestsPage';
 export { default as TestResultPage } from './TestResultPage';
+export { default as CandidateCodingDashboard } from './CandidateCodingDashboard';
+export { default as CodingTestAttempt } from './CodingTestAttempt';
+export { default as CodingResultPage } from './CodingResultPage';
 
