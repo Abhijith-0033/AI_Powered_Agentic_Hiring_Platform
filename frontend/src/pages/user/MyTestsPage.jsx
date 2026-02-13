@@ -59,7 +59,7 @@ const MyTestsPage = () => {
         const scorePercentage = test.max_score > 0 ? Math.round((test.total_score / test.max_score) * 100) : null;
 
         return (
-            <div key={test.id} className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-md transition-shadow">
+            <div key={`${test.id}-${section}`} className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-md transition-shadow">
                 <div className="flex items-start justify-between">
                     <div className="flex-1">
                         <h3 className="text-lg font-semibold text-neutral-900 mb-1">{test.title}</h3>
@@ -164,8 +164,8 @@ const MyTestsPage = () => {
                                     key={s.key}
                                     onClick={() => setActiveSection(s.key)}
                                     className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 ${activeSection === s.key
-                                            ? 'bg-white text-neutral-900 shadow-sm'
-                                            : 'text-neutral-500 hover:text-neutral-700'
+                                        ? 'bg-white text-neutral-900 shadow-sm'
+                                        : 'text-neutral-500 hover:text-neutral-700'
                                         }`}
                                 >
                                     {s.label}

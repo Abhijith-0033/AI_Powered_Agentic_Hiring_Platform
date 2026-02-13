@@ -70,17 +70,30 @@ router.post('/jobs/:id/apply', auth, roleGuard('job_seeker'), async (req, res) =
 
         await client.query('BEGIN');
 
+        // Check if there's a published test for this job
+        const testCheckQuery = `
+            SELECT id FROM tests 
+            WHERE job_id = $1 AND status = 'published' 
+            ORDER BY created_at DESC 
+            LIMIT 1
+        `;
+        const testCheckResult = await client.query(testCheckQuery, [jobId]);
+        const testId = testCheckResult.rows.length > 0 ? testCheckResult.rows[0].id : null;
+
         // 5. Insert Application
         const appQuery = `
             INSERT INTO job_applications (
                 job_id, candidate_id, company_id, 
                 resume_id, resume_name, resume_data, 
-                status
+                status, test_id, test_status
             )
-            VALUES ($1, $2, $3, $4, $5, $6, 'applied')
+            VALUES ($1, $2, $3, $4, $5, $6, 'applied', $7, $8)
             RETURNING id
         `;
-        const appValues = [jobId, candidateId, company_id, resume_id, resume_name, file_url];
+        const appValues = [
+            jobId, candidateId, company_id, resume_id, resume_name, file_url,
+            testId, testId ? 'pending' : null
+        ];
         const appResult = await client.query(appQuery, appValues);
         const applicationId = appResult.rows[0].id;
 

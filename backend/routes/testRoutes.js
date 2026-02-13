@@ -102,7 +102,11 @@ router.get('/', auth, roleGuard('recruiter'), async (req, res) => {
         const userId = req.user.userId;
 
         const query = `
-            SELECT t.*, jp.job_title, 
+            SELECT t.id, t.job_id, t.recruiter_id, t.title, t.description, t.instructions,
+                   TO_CHAR(t.start_date, 'YYYY-MM-DD') as start_date, t.start_time,
+                   TO_CHAR(t.end_date, 'YYYY-MM-DD') as end_date, t.end_time,
+                   t.duration_minutes, t.status, t.created_at, t.updated_at, t.results_published,
+                   jp.job_title, 
                    (SELECT COUNT(*) FROM test_questions tq WHERE tq.test_id = t.id) as question_count,
                    (SELECT COUNT(*) FROM test_attempts ta WHERE ta.test_id = t.id AND ta.status IN ('submitted', 'evaluated')) as submission_count
             FROM tests t
@@ -136,23 +140,27 @@ router.get('/my-tests', auth, roleGuard('job_seeker'), async (req, res) => {
         }
         const candidateId = candidateRes.rows[0].id;
 
-        // Fetch all tests assigned to candidate via job_applications
+        // Fetch all published tests for jobs the candidate has applied to
+        // We join on job_id to get ALL tests for the job, not just the assigned one
         const query = `
             SELECT t.id, t.title, t.description, t.instructions,
-                   t.start_date, t.start_time, t.end_date, t.end_time,
+                   TO_CHAR(t.start_date, 'YYYY-MM-DD') as start_date, t.start_time,
+                   TO_CHAR(t.end_date, 'YYYY-MM-DD') as end_date, t.end_time,
                    t.duration_minutes, t.status as test_status, t.results_published,
                    jp.job_title, comp.name as company_name,
-                   ja.id as application_id, ja.test_status as my_test_status,
+                   ja.id as application_id, 
+                   COALESCE(ta.status, 'pending') as my_test_status,
                    ta.id as attempt_id, ta.status as attempt_status,
                    ta.total_score, ta.max_score, ta.submitted_at
             FROM job_applications ja
-            JOIN tests t ON ja.test_id = t.id
+            JOIN tests t ON ja.job_id = t.job_id
             JOIN job_postings jp ON ja.job_id = jp.job_id
-            JOIN companies comp ON jp.company_id = comp.id
-            LEFT JOIN test_attempts ta ON ta.test_id = t.id AND ta.candidate_id = $1
+            LEFT JOIN companies comp ON jp.company_id = comp.id
+            LEFT JOIN test_attempts ta ON t.id = ta.test_id AND ta.candidate_id = $1
             WHERE ja.candidate_id = $1 AND t.status = 'published'
             ORDER BY t.start_date ASC, t.start_time ASC
         `;
+
         const result = await pool.query(query, [candidateId]);
 
         // Categorize tests
@@ -196,7 +204,11 @@ router.get('/:id', auth, roleGuard('recruiter'), async (req, res) => {
         const testId = req.params.id;
 
         const testQuery = `
-            SELECT t.*, jp.job_title
+            SELECT t.id, t.job_id, t.recruiter_id, t.title, t.description, t.instructions,
+                   TO_CHAR(t.start_date, 'YYYY-MM-DD') as start_date, t.start_time,
+                   TO_CHAR(t.end_date, 'YYYY-MM-DD') as end_date, t.end_time,
+                   t.duration_minutes, t.status, t.created_at, t.updated_at, t.results_published,
+                   jp.job_title
             FROM tests t
             JOIN job_postings jp ON t.job_id = jp.job_id
             WHERE t.id = $1 AND t.recruiter_id = $2
@@ -362,12 +374,8 @@ router.post('/:id/publish', auth, roleGuard('recruiter'), async (req, res) => {
             [testId]
         );
 
-        // Update all applications for this job with test assignment
-        await client.query(`
-            UPDATE job_applications 
-            SET test_id = $1, test_status = 'pending'
-            WHERE job_id = $2 AND test_id IS NULL
-        `, [testId, test.job_id]);
+        // NOTE: We no longer update job_applications.test_id because we now support multiple tests per job.
+        // Candidates will see all published tests for their applied jobs via the /my-tests endpoint.
 
         // Create notification entries for candidates
         const candidatesQuery = `
@@ -406,6 +414,51 @@ router.post('/:id/publish', auth, roleGuard('recruiter'), async (req, res) => {
         await client.query('ROLLBACK');
         console.error('Error publishing test:', error);
         res.status(500).json({ success: false, message: 'Failed to publish test' });
+    } finally {
+        client.release();
+    }
+});
+
+/**
+ * POST /api/tests/sync-all
+ * Sync published tests to all applications missing test assignments
+ * Auth: Recruiter only
+ * TEMPORARY FIX ENDPOINT
+ */
+router.post('/sync-all', auth, roleGuard('recruiter'), async (req, res) => {
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        const result = await client.query(`
+            UPDATE job_applications ja
+            SET test_id = (
+                SELECT id FROM tests 
+                WHERE job_id = ja.job_id 
+                AND status = 'published' 
+                ORDER BY created_at DESC 
+                LIMIT 1
+            ),
+            test_status = 'pending'
+            WHERE test_id IS NULL
+            AND EXISTS (
+                SELECT 1 FROM tests 
+                WHERE job_id = ja.job_id 
+                AND status = 'published'
+            )
+        `);
+
+        await client.query('COMMIT');
+
+        res.json({
+            success: true,
+            message: `Synced ${result.rowCount} applications with published tests`
+        });
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Error syncing tests:', error);
+        res.status(500).json({ success: false, message: 'Failed to sync tests' });
     } finally {
         client.release();
     }
@@ -534,7 +587,8 @@ router.get('/:id/attempt', auth, roleGuard('job_seeker'), async (req, res) => {
         // Get test details
         const testQuery = `
             SELECT t.id, t.title, t.description, t.instructions, 
-                   t.start_date, t.start_time, t.end_date, t.end_time,
+                   TO_CHAR(t.start_date, 'YYYY-MM-DD') as start_date, t.start_time,
+                   TO_CHAR(t.end_date, 'YYYY-MM-DD') as end_date, t.end_time,
                    t.duration_minutes
             FROM tests t WHERE t.id = $1 AND t.status = 'published'
         `;
