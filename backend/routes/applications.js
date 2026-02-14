@@ -268,11 +268,14 @@ router.get('/recruiter/jobs/:id/applications', auth, roleGuard('recruiter'), asy
 
         // Fetch Applications with Candidate Details & Answers (including expected_answer for recruiters)
         // Using JSON logic to bundle answers might be cleaner, but simple join is fine for now
+        // Use DISTINCT ON to ensure one row per application, picking the latest interview if multiple exist
         const appsQuery = `
-            SELECT 
+            SELECT DISTINCT ON (ja.id)
                 ja.id, ja.status, ja.applied_at, ja.resume_id, ja.resume_name,
                 c.name as candidate_name, c.email as candidate_email, c.experience_years,
                 c.id as candidate_id,
+                i.channel_name,
+                i.meeting_link,
                 json_agg(DISTINCT jsonb_build_object(
                     'question', jq.question_text,
                     'answer', jaa.answer,
@@ -292,12 +295,18 @@ router.get('/recruiter/jobs/:id/applications', auth, roleGuard('recruiter'), asy
             LEFT JOIN job_questions jq ON jaa.question_id = jq.id
             LEFT JOIN job_application_education jae ON ja.id = jae.application_id
             LEFT JOIN job_application_skills jas ON ja.id = jas.application_id
+            LEFT JOIN interviews i ON ja.id = i.application_id AND i.status != 'cancelled'
             WHERE ja.job_id = $1
-            GROUP BY ja.id, c.id
-            ORDER BY ja.applied_at DESC
+            GROUP BY ja.id, c.id, i.channel_name, i.meeting_link, i.updated_at
+            ORDER BY ja.id, i.updated_at DESC
         `;
 
         const { rows } = await pool.query(appsQuery, [jobId]);
+
+        // Post-process sort by applied_at since we can't do it in the main query easily with DISTINCT ON behavior
+        rows.sort((a, b) => new Date(b.applied_at) - new Date(a.applied_at));
+
+        console.log(`[GET /recruiter/jobs/${jobId}/applications] Found ${rows.length} apps. Example 1st app channel_name: ${rows[0]?.channel_name}`);
 
         res.json({ success: true, data: rows });
 

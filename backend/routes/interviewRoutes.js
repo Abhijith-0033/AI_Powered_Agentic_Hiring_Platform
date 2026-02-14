@@ -151,15 +151,17 @@ router.post('/create-and-schedule', auth, roleGuard('recruiter'), async (req, re
 
         // Check if interview record already exists
         let interviewId;
-        const existingQuery = 'SELECT id FROM interviews WHERE application_id = $1';
+        let channelName;
+        const existingQuery = 'SELECT id, channel_name FROM interviews WHERE application_id = $1';
         const existing = await client.query(existingQuery, [applicationId]);
 
         if (existing.rows.length > 0) {
             interviewId = existing.rows[0].id;
+            channelName = existing.rows[0].channel_name;
             console.log('[CreateAndSchedule] Using existing interview:', interviewId);
         } else {
             // Create interview record
-            const channelName = `interview_${applicationId}_${Date.now()}`;
+            channelName = `interview_${applicationId}_${Date.now()}`;
             const insertQuery = `
                 INSERT INTO interviews (
                     job_id, application_id, candidate_id, recruiter_id,
@@ -175,9 +177,15 @@ router.post('/create-and-schedule', auth, roleGuard('recruiter'), async (req, re
             console.log('[CreateAndSchedule] Created new interview:', interviewId);
         }
 
+        // Ensure channelName exists (handle legacy records where it might be null)
+        if (!channelName) {
+            channelName = `interview_${applicationId}_${Date.now()}`;
+        }
+
         // Schedule the interview
-        const scheduledAt = `${interviewDate} ${startTime}`;
-        const meetingLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/interview/interview_${applicationId}_${Date.now()}`;
+        // Use explicit ISO timestamp if provided (for Start Now), otherwise construct from date/time strings
+        const scheduledAt = req.body.scheduledAtISO || `${interviewDate} ${startTime}`;
+        const meetingLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/interview/${channelName}`;
 
         const updateQuery = `
             UPDATE interviews
@@ -187,13 +195,15 @@ router.post('/create-and-schedule', auth, roleGuard('recruiter'), async (req, re
                 end_time = $3,
                 scheduled_at = $4,
                 meeting_link = $5,
+                channel_name = $6,
                 status = 'scheduled',
+                recruiter_id = $8,
                 updated_at = NOW()
-            WHERE id = $6
-            RETURNING id, interview_date, start_time, end_time, meeting_link, status
+            WHERE id = $7
+            RETURNING id, interview_date, start_time, end_time, meeting_link, channel_name, status
         `;
         const result = await client.query(updateQuery, [
-            interviewDate, startTime, endTime, scheduledAt, meetingLink, interviewId
+            interviewDate, startTime, endTime, scheduledAt, meetingLink, channelName, interviewId, userId
         ]);
 
         // Also update the application status to 'interview'
@@ -204,7 +214,7 @@ router.post('/create-and-schedule', auth, roleGuard('recruiter'), async (req, re
 
         await client.query('COMMIT');
 
-        console.log('[CreateAndSchedule] Success! Interview', interviewId, 'scheduled');
+        console.log('[CreateAndSchedule] Success! Interview', interviewId, 'scheduled. Data:', result.rows[0]);
 
         res.json({
             success: true,

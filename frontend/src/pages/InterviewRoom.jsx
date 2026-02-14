@@ -28,13 +28,27 @@ const InterviewRoom = () => {
         };
     }, []);
 
+    const joinLock = useRef(false);
+
     const joinChannel = async () => {
+        if (joinLock.current || client.connectionState !== 'DISCONNECTED') {
+            console.log('Join already in progress or connected');
+            return;
+        }
+
+        joinLock.current = true;
+
         try {
             setLoading(true);
 
             // Get Agora token from backend
             const response = await joinInterview(channelName);
             const { appId, token, uid } = response.data;
+
+            // Double check before actual join call
+            if (client.connectionState !== 'DISCONNECTED') {
+                return;
+            }
 
             // Join the channel
             await client.join(appId, channelName, token, uid);
@@ -62,8 +76,13 @@ const InterviewRoom = () => {
 
         } catch (err) {
             console.error('Failed to join channel:', err);
-            setError(err.message || 'Failed to join interview. Please check your permissions and try again.');
+            // Only set error if we're not just "already joined"
+            if (err.code !== 'INVALID_OPERATION') {
+                setError(err.message || 'Failed to join interview. Please check your permissions and try again.');
+            }
             setLoading(false);
+        } finally {
+            joinLock.current = false;
         }
     };
 
@@ -259,8 +278,8 @@ const InterviewRoom = () => {
                     <button
                         onClick={toggleAudio}
                         className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-lg ${isAudioEnabled
-                                ? 'bg-gray-700 hover:bg-gray-600'
-                                : 'bg-red-600 hover:bg-red-700'
+                            ? 'bg-gray-700 hover:bg-gray-600'
+                            : 'bg-red-600 hover:bg-red-700'
                             }`}
                         title={isAudioEnabled ? "Mute" : "Unmute"}
                     >
@@ -275,8 +294,8 @@ const InterviewRoom = () => {
                     <button
                         onClick={toggleVideo}
                         className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-lg ${isVideoEnabled
-                                ? 'bg-gray-700 hover:bg-gray-600'
-                                : 'bg-red-600 hover:bg-red-700'
+                            ? 'bg-gray-700 hover:bg-gray-600'
+                            : 'bg-red-600 hover:bg-red-700'
                             }`}
                         title={isVideoEnabled ? "Turn off camera" : "Turn on camera"}
                     >

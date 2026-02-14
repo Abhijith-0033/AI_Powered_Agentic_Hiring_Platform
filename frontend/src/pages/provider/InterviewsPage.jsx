@@ -151,7 +151,12 @@ const InterviewsPage = () => {
             const now = new Date();
             const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
 
-            const interviewDate = now.toISOString().split('T')[0];
+            // Use local date parts to avoid UTC shift
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const interviewDate = `${year}-${month}-${day}`;
+
             const startTime = now.toTimeString().substring(0, 5);
             const endTime = oneHourLater.toTimeString().substring(0, 5);
 
@@ -161,7 +166,8 @@ const InterviewsPage = () => {
                 candidateId: candidate.candidate_id,
                 interviewDate,
                 startTime,
-                endTime
+                endTime,
+                scheduledAtISO: now.toISOString() // Pass absolute time for DB
             });
 
             // Refresh list to get the channel name
@@ -170,10 +176,20 @@ const InterviewsPage = () => {
             setCandidatesForSection(updatedCandidates, setInterviewCandidates);
 
             // Find the candidate to get channel name
+            // Find the candidate to get channel name
             const updatedCandidate = updatedCandidates.find(c => c.id === candidate.id);
-            if (updatedCandidate && updatedCandidate.channel_name) {
+
+            let channelName = updatedCandidate?.channel_name;
+
+            // Fallback: Extract from meeting link if channel_name is missing but link exists
+            if (!channelName && updatedCandidate?.meeting_link) {
+                const parts = updatedCandidate.meeting_link.split('/');
+                channelName = parts[parts.length - 1];
+            }
+
+            if (channelName) {
                 // Redirect to video call
-                window.location.href = `/interview/${updatedCandidate.channel_name}`;
+                window.location.href = `/interview/${channelName}`;
             } else {
                 alert('Interview started, but could not redirect automatically. Please check the list.');
             }

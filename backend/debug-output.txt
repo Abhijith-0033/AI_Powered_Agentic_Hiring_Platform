@@ -1,0 +1,7 @@
+--- LATEST INTERVIEW ---
+Interview ID: f0ea879f-accf-48e9-85f3-02fbdc555208
+Channel Name: interview_85c18295-7a21-49b7-bf7f-860d6db5fcb4_1771085604377
+Recruiter ID: null
+Candidate ID: 1bdcbd5d-95ce-438d-b160-70be10053735
+Meeting Link: http://localhost:5173/interview/interview_85c18295-7a21-49b7-bf7f-860d6db5fcb4_1771085604377
+------------------------
