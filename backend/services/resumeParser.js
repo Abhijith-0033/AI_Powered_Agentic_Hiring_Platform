@@ -1,197 +1,128 @@
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-const fs = require('fs');
-const path = require('path');
-const { spawn } = require('child_process');
-const os = require('os');
-const { v4: uuidv4 } = require('uuid');
+const pdf = require('pdf-parse');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+/**
+ * Gemini-Driven Agentic Resume Parser
+ * Uses Gemini Pro/Flash to extract structured data from raw PDF text
+ */
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Using Flash Lite for better quota/speed
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
 
 /**
- * Gemini AI Resume Parser
- * Extracts structured data and photo from PDF/DOCX resumes
- */
-
-/**
- * Extract text using Python script (PyMuPDF / python-docx)
- */
-const extractTextWithPython = (buffer, mimeType) => {
-    return new Promise((resolve, reject) => {
-        // Create a temporary file
-        const tempDir = os.tmpdir();
-        const ext = mimeType.includes('pdf') ? '.pdf' : '.docx';
-        const tempFilePath = path.join(tempDir, `resume_${uuidv4()}${ext}`);
-
-        try {
-            fs.writeFileSync(tempFilePath, buffer);
-        } catch (err) {
-            return reject(new Error('Failed to write temporary file'));
-        }
-
-        const pythonScriptPath = path.join(process.cwd(), 'scripts', 'extract_resume_text.py');
-
-        // Spawn Python process
-        const pythonProcess = spawn('python', [pythonScriptPath, tempFilePath]);
-
-        let stdoutData = '';
-        let stderrData = '';
-
-        pythonProcess.stdout.on('data', (data) => {
-            stdoutData += data.toString();
-        });
-
-        pythonProcess.stderr.on('data', (data) => {
-            stderrData += data.toString();
-        });
-
-        pythonProcess.on('close', (code) => {
-            // Cleanup temp file
-            try {
-                if (fs.existsSync(tempFilePath)) {
-                    fs.unlinkSync(tempFilePath);
-                }
-            } catch (e) {
-                console.error('Failed to delete temp file:', e);
-            }
-
-            if (code !== 0) {
-                // Try to parse error from stdout if available (custom JSON error)
-                try {
-                    const jsonOutput = JSON.parse(stdoutData);
-                    if (jsonOutput.error) {
-                        return reject(new Error(jsonOutput.error));
-                    }
-                } catch (e) {
-                    // Ignore, proceed to stderr
-                }
-                return reject(new Error(stderrData || 'Python script failed'));
-            }
-
-            try {
-                const jsonOutput = JSON.parse(stdoutData);
-                if (jsonOutput.success) {
-                    resolve(jsonOutput.text);
-                } else {
-                    reject(new Error(jsonOutput.error || 'Unknown extraction error'));
-                }
-            } catch (err) {
-                reject(new Error('Failed to parse Python output: ' + err.message));
-            }
-        });
-
-        // Timeout handling (10 seconds)
-        setTimeout(() => {
-            pythonProcess.kill();
-            reject(new Error('Text extraction timed out'));
-        }, 10000);
-    });
-};
-
-/**
- * Extract data using Gemini 1.5 Flash
- */
-const extractDataWithGemini = async (text) => {
-    try {
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
-        const prompt = `
-        You are an expert resume parser. Extract the following information from the resume text below and return it in strictly valid JSON format.
-        
-        JSON Schema:
-        {
-            "personal_info": {
-                "name": "Full Name",
-                "email": "Email Address",
-                "phone_number": "Phone Number",
-                "location": "City, Country",
-                "linkedin_url": "URL",
-                "github_url": "URL",
-                "portfolio_url": "URL",
-                "profile_description": "Summary or About Me section (max 500 chars)",
-                "is_fresher": boolean (true if less than 1 year experience)
-            },
-            "skills": ["Skill 1", "Skill 2", ...],
-            "experience": [
-                {
-                    "company": "Company Name",
-                    "title": "Job Title",
-                    "location": "Location",
-                    "startDate": "YYYY-MM-DD or MM/YYYY",
-                    "endDate": "YYYY-MM-DD or MM/YYYY or Present",
-                    "current": boolean,
-                    "description": "Key responsibilities and achievements"
-                }
-            ],
-            "education": [
-                {
-                    "school": "Institution Name",
-                    "degree": "Degree Name",
-                    "fieldOfStudy": "Major/Field",
-                    "startDate": "YYYY",
-                    "endDate": "YYYY",
-                    "grade": "CGPA or Percentage"
-                }
-            ],
-            "projects": [
-                {
-                    "title": "Project Title",
-                    "description": "Project description",
-                    "technologies": ["Tech 1", "Tech 2"],
-                    "link": "Project URL"
-                }
-            ],
-            "achievements": [
-                {
-                    "title": "Achievement/Certification Name",
-                    "date": "Date",
-                    "description": "Details"
-                }
-            ]
-        }
-
-        RESUME TEXT:
-        ${text}
-        `;
-
-        const result = await model.generateContent(prompt);
-        const response = result.response;
-        const textResponse = response.text();
-
-        // Clean markdown code blocks if present
-        const jsonString = textResponse.replace(/^```json\n|\n```$/g, '').trim();
-
-        return JSON.parse(jsonString);
-    } catch (error) {
-        console.error('Gemini extraction error:', error);
-        throw new Error('AI parsing failed');
-    }
-};
-
-/**
- * Main parse function
+ * Main parse function using Gemini
  */
 export const parseResume = async (buffer, mimeType) => {
     try {
-        // 1. Extract Text
-        // const text = await extractText(buffer, mimeType);
-        const text = await extractTextWithPython(buffer, mimeType);
+        // 1. Convert Buffer to Base64 for Gemini (Inline Data)
+        const base64Data = buffer.toString('base64');
+        const filePart = {
+            inlineData: {
+                data: base64Data,
+                mimeType: "application/pdf"
+            }
+        };
 
-        // 2. Extract Data with Gemini
-        const extractedData = await extractDataWithGemini(text);
+        // 2. Prepare Gemini Prompt
+        const promptText = `
+            You are an expert recruitment AI. Extract structured information from the provided resume document.
+            Return ONLY a valid JSON object following this exact schema:
+            {
+                "personal_info": {
+                    "name": "string",
+                    "email": "string",
+                    "phone_number": "string",
+                    "location": "string",
+                    "linkedin_url": "string",
+                    "github_url": "string",
+                    "portfolio_url": "string",
+                    "profile_description": "string (max 100 words summary)",
+                    "is_fresher": boolean
+                },
+                "skills": ["string"],
+                "experience": [
+                    {
+                        "company": "string",
+                        "title": "string",
+                        "location": "string",
+                        "startDate": "string",
+                        "endDate": "string",
+                        "current": boolean,
+                        "description": "string"
+                    }
+                ],
+                "education": [
+                    {
+                        "school": "string",
+                        "degree": "string",
+                        "fieldOfStudy": "string",
+                        "startDate": "string",
+                        "endDate": "string (format: YYYY or graduation year as string)",
+                        "grade": "string"
+                    }
+                ],
+                "projects": [
+                    {
+                        "title": "string",
+                        "description": "string",
+                        "technologies": ["string"],
+                        "link": "string"
+                    }
+                ],
+                "achievements": [
+                    {
+                        "title": "string",
+                        "description": "string",
+                        "date": "string"
+                    }
+                ]
+            }
+        `;
 
-        // 3. Photo functionality deprecated for now as per plan
-        const photo = null;
+        console.log('DEBUG: Sending PDF to Gemini...');
+
+        // 3. Call Gemini with Retry Logic
+        let result;
+        const maxRetries = 3;
+        for (let i = 0; i < maxRetries; i++) {
+            try {
+                result = await model.generateContent([promptText, filePart]);
+                break;
+            } catch (e) {
+                if (e.message.includes('429') || e.message.includes('Too Many Requests')) {
+                    console.warn(`Gemini API Rate Limit hit. Retrying in ${(i + 1) * 2} seconds...`);
+                    await new Promise(resolve => setTimeout(resolve, (i + 1) * 2000));
+                } else {
+                    throw e;
+                }
+            }
+        }
+
+        if (!result) {
+            throw new Error('Failed to get response from Gemini after retries.');
+        }
+
+        const response = await result.response;
+        let text = response.text();
+
+        // Clean up response (sometimes Gemini adds json ... )
+        text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+
+        const extractedData = JSON.parse(text);
+
+        console.log('DEBUG: Gemini Extracted Data:', JSON.stringify(extractedData, null, 2));
 
         return {
             ...extractedData,
-            rawText: text, // Keep for debugging
-            photo: photo
+            rawText: '', // No raw text available in this mode
+            photo: null
         };
     } catch (error) {
-        console.error('Resume parsing error:', error);
-        throw error;
+        console.error('Gemini Resume parsing error:', error);
+        throw new Error('Failed to parse resume with AI. Please ensure your API key is valid and the file is a standard PDF.');
     }
 };
+

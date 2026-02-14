@@ -1,0 +1,40 @@
+{
+  "data": {
+    "college_name": "2016 - 2020",
+    "degree": [
+      {
+        "degree": "Bachelor of Technology",
+        "duration": "",
+        "school": ""
+      },
+      {
+        "degree": "IIT Madras",
+        "duration": "",
+        "school": "2016 - 2020"
+      }
+    ],
+    "email": "abhijith@example.com",
+    "experience": [
+      {
+        "company": "Built a recruitment portal using React and Node.js.",
+        "description": "",
+        "duration": "Jan 2022 - Present",
+        "title": "Senior Software Engineer"
+      }
+    ],
+    "mobile_number": "+91 9876543210",
+    "name": "Abhijith S",
+    "skills": [
+      "Docker",
+      "Java",
+      "JavaScript",
+      "Node.js",
+      "Python",
+      "React",
+      "SQL"
+    ],
+    "summary": "Experienced Full Stack Developer with 3 years of expertise in Node.js, React, and Python. Passionate about building scalable AI-powered applications.",
+    "total_experience": 0
+  },
+  "success": true
+}

@@ -118,7 +118,7 @@ router.post('/parse-resume', auth, upload.single('resume'), async (req, res) => 
                 candidateId = checkRes.rows[0].id;
             }
 
-            // Update personal info
+            // Update personal info and save resume
             await client.query(`
                 UPDATE candidates SET
                     name = COALESCE($2, name),
@@ -127,8 +127,14 @@ router.post('/parse-resume', auth, upload.single('resume'), async (req, res) => 
                     github_url = COALESCE($5, github_url),
                     linkedin_url = COALESCE($6, linkedin_url),
                     skills = COALESCE($7, skills),
-                    bio = COALESCE($8, bio),
+                    profile_description = COALESCE($8, profile_description),
                     portfolio_url = COALESCE($9, portfolio_url),
+                    resume_pdf = $10,
+                    degree = COALESCE($11, degree),
+                    institution = COALESCE($12, institution),
+                    graduation_year = COALESCE($13, graduation_year),
+                    job_title = COALESCE($14, job_title),
+                    company_name = COALESCE($15, company_name),
                     updated_at = NOW()
                 WHERE id = $1
             `, [
@@ -140,50 +146,17 @@ router.post('/parse-resume', auth, upload.single('resume'), async (req, res) => 
                 extractedData.personal_info.linkedin_url,
                 extractedData.personal_info.skills,
                 extractedData.personal_info.profile_description,
-                extractedData.personal_info.portfolio_url
+                extractedData.personal_info.portfolio_url,
+                req.file.buffer.toString('base64'),
+                extractedData.education[0]?.degree || null,
+                extractedData.education[0]?.school || null,
+                extractedData.education[0]?.endDate || null,
+                extractedData.experience[0]?.title || null,
+                extractedData.experience[0]?.company || null
             ]);
 
-            // Save education
-            for (const edu of extractedData.education) {
-                if (edu.degree && edu.school) {
-                    await client.query(`
-                        INSERT INTO candidate_education (candidate_id, institution, degree, field_of_study, start_date, end_date, grade_or_cgpa, description)
-                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-                    `, [candidateId, edu.school, edu.degree, edu.fieldOfStudy, edu.startDate, edu.endDate, edu.grade, '']);
-                }
-            }
-
-            // Save experience
-            for (const exp of extractedData.experience) {
-                if (exp.company) {
-                    await client.query(`
-                        INSERT INTO candidate_experience (candidate_id, company_name, job_title, employment_type, location, start_date, end_date, is_current, description)
-                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-                    `, [candidateId, exp.company, exp.title, '', exp.location, exp.startDate, exp.endDate, exp.current, exp.description]);
-                }
-            }
-
-            // Save projects
-            for (const proj of extractedData.projects) {
-                if (proj.title) {
-                    await client.query(`
-                        INSERT INTO candidate_projects (candidate_id, project_title, project_description, technologies_used, project_link, start_date, end_date)
-                        VALUES ($1, $2, $3, $4, $5, $6, $7)
-                    `, [candidateId, proj.title, proj.description, proj.technologies, proj.link, '', '']);
-                }
-            }
-
-            // Save achievements
-            if (extractedData.achievements) {
-                for (const ach of extractedData.achievements) {
-                    if (ach.title) {
-                        await client.query(`
-                            INSERT INTO candidate_achievements (candidate_id, title, description, date_earned)
-                            VALUES ($1, $2, $3, $4)
-                        `, [candidateId, ach.title, ach.description, ach.date]);
-                    }
-                }
-            }
+            // Unified schema: Education and Experience are now stored directly in 'candidates' table.
+            // Multiple entries are not supported in this simplified unified schema.
 
             // Sync primary data
             await syncPrimaryData(client, candidateId);
