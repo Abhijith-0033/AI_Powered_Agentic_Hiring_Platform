@@ -64,7 +64,16 @@ const Sidebar = ({ type = 'user' }) => {
         { icon: Building2, label: 'Company', path: '/provider/company' },
     ];
 
-    const navItems = type === 'user' ? userNavItems : providerNavItems;
+    // Admin navigation items
+    const adminNavItems = [
+        { icon: LayoutDashboard, label: 'Dashboard', path: '/admin/dashboard' },
+        { icon: Users, label: 'User Management', path: '/admin/users' },
+        { icon: Building2, label: 'Jobs', path: '/admin/jobs' },
+        { icon: FileText, label: 'Applications', path: '/admin/applications' },
+        { icon: Bot, label: 'System Overview', path: '/admin/dashboard' },
+    ];
+
+    const navItems = type === 'user' ? userNavItems : (type === 'admin' ? adminNavItems : providerNavItems);
 
     const isActive = (path) => location.pathname === path;
 

@@ -42,7 +42,7 @@ export const generatePDF = async (content, candidate, job) => {
             doc.moveDown(0.5);
 
             doc.font('Times-Roman').fontSize(10);
-            const contactInfo = [candidate.email, candidate.phone, candidate.location].filter(Boolean).join(' | ');
+            const contactInfo = [candidate.email, candidate.phone || candidate.phone_number, candidate.location].filter(Boolean).join(' | ');
             doc.text(contactInfo, { align: 'center' });
             doc.moveDown(2);
 
@@ -110,7 +110,7 @@ export const generateResumePDF = async (content, candidate) => {
             doc.moveDown(0.3);
 
             doc.font('Times-Roman').fontSize(10);
-            const contact = [candidate.email, candidate.phone, candidate.location].filter(Boolean).join(' | ');
+            const contact = [candidate.email, candidate.phone || candidate.phone_number, candidate.location].filter(Boolean).join(' | ');
             doc.text(contact, { align: 'center' });
             doc.moveDown(1.5);
 

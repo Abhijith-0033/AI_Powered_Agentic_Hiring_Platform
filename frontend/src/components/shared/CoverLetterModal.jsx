@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, FileText, Download, RefreshCw, Copy, Check, Loader2, AlertCircle } from 'lucide-react';
 import { Button, Badge } from '../ui'; // Adjust imports based on your UI library
-import axios from 'axios';
+import axios from '../../api/axios';
 
 const CoverLetterModal = ({ isOpen, onClose, candidateId }) => { // candidateId might come from context
     const [jobs, setJobs] = useState([]);
@@ -28,7 +28,7 @@ const CoverLetterModal = ({ isOpen, onClose, candidateId }) => { // candidateId 
         try {
             // In a real scenario, we might want jobs the user has applied to, or starred.
             // For now, let's fetch all active jobs for demonstration
-            const res = await axios.get('http://localhost:3000/api/jobs'); // Adjust URL
+            const res = await axios.get('/jobs');
             if (res.data.success) {
                 setJobs(res.data.data);
             }
@@ -47,12 +47,9 @@ const CoverLetterModal = ({ isOpen, onClose, candidateId }) => { // candidateId 
         setAnalysis(null);
 
         try {
-            const token = localStorage.getItem('token'); // Simplistic auth
-            const res = await axios.post('http://localhost:3000/api/ai/cover-letter/generate', {
+            const res = await axios.post('/ai/cover-letter/generate', {
                 jobId: selectedJob,
                 tone
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
             });
 
             if (res.data.success) {
@@ -78,9 +75,11 @@ const CoverLetterModal = ({ isOpen, onClose, candidateId }) => { // candidateId 
 
     const handleDownload = () => {
         if (pdfUrl) {
-            // Construct full URL
-            const url = `http://localhost:3000${pdfUrl}`;
-            window.open(url, '_blank');
+            // Construct full URL using baseURL from axios instance helper logic if needed, 
+            // but usually we can just use the provided path if it's absolute from root.
+            // The pdfUrl likely starts with /uploads/...
+            const baseUrl = axios.defaults.baseURL.replace('/api', '');
+            window.open(`${baseUrl}${pdfUrl}`, '_blank');
         }
     };
 

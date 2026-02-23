@@ -28,6 +28,14 @@ const InterviewRoom = () => {
         };
     }, []);
 
+    // Effect to play local video - cleaner and more reliable
+    // Added loading to dependency array to ensure ref is ready
+    useEffect(() => {
+        if (!loading && localVideoTrack && localVideoRef.current) {
+            localVideoTrack.play(localVideoRef.current);
+        }
+    }, [localVideoTrack, loading]);
+
     const joinLock = useRef(false);
 
     const joinChannel = async () => {
@@ -50,26 +58,22 @@ const InterviewRoom = () => {
                 return;
             }
 
+            // Setup event listeners BEFORE joining to ensure we don't miss existing users
+            client.on('user-published', handleUserPublished);
+            client.on('user-unpublished', handleUserUnpublished);
+            client.on('user-left', handleUserLeft);
+
             // Join the channel
             await client.join(appId, channelName, token, uid);
 
-            // Create and publish local tracks
+            // Create tracks
             const [audioTrack, videoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
             setLocalAudioTrack(audioTrack);
             setLocalVideoTrack(videoTrack);
 
-            // Play local video
-            if (localVideoRef.current) {
-                videoTrack.play(localVideoRef.current);
-            }
-
             // Publish local tracks
             await client.publish([audioTrack, videoTrack]);
-
-            // Subscribe to remote users
-            client.on('user-published', handleUserPublished);
-            client.on('user-unpublished', handleUserUnpublished);
-            client.on('user-left', handleUserLeft);
+            console.log('Successfully published local tracks');
 
             setIsJoined(true);
             setLoading(false);

@@ -28,6 +28,7 @@ import {
     CodingTestAttempt,
     CodingResultPage,
 } from '../pages/user';
+import { AdminDashboard, UserManagement } from '../pages/admin';
 import TestAttemptPage from '../pages/user/TestAttemptPage';
 
 // Auth components
@@ -70,6 +71,17 @@ const AppRoutes = () => {
                 </Route>
             </Route>
 
+            {/* Admin Routes - Protected */}
+            <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+                <Route path="/admin">
+                    <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                    <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="users" element={<UserManagement />} />
+                    <Route path="jobs" element={<AdminDashboard />} />
+                    <Route path="applications" element={<AdminDashboard />} />
+                </Route>
+            </Route>
+
             {/* Provider (Recruiter) Routes - Protected */}
             <Route element={<ProtectedRoute allowedRoles={['recruiter']} />}>
                 <Route path="/provider">
@@ -88,7 +100,7 @@ const AppRoutes = () => {
             </Route>
 
             {/* Shared Interview Room Route (accessible by both roles) */}
-            <Route element={<ProtectedRoute allowedRoles={['recruiter', 'job_seeker']} />}>
+            <Route element={<ProtectedRoute allowedRoles={['recruiter', 'job_seeker', 'admin']} />}>
                 <Route path="/interview/:channelName" element={<InterviewRoom />} />
             </Route>
 

@@ -7,7 +7,7 @@ import mammoth from 'mammoth';
 import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
-const { PDFParse } = require('pdf-parse');
+const pdf = require('pdf-parse');
 
 dotenv.config();
 
@@ -29,8 +29,7 @@ const cleanText = (text) => {
 export const extractTextFromBuffer = async (buffer, mimeType) => {
     try {
         if (mimeType === 'application/pdf') {
-            const parser = new PDFParse({ data: buffer });
-            const data = await parser.getText();
+            const data = await pdf(buffer);
             return cleanText(data.text);
         } else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
             const result = await mammoth.extractRawText({ buffer: buffer });
@@ -39,8 +38,8 @@ export const extractTextFromBuffer = async (buffer, mimeType) => {
             throw new Error('Unsupported file type. Only PDF and DOCX are supported.');
         }
     } catch (error) {
-        console.error('Text Extraction Error:', error);
-        throw new Error('Failed to extract text from file.');
+        console.error('Text Extraction Error Details:', error);
+        throw new Error(`Failed to extract text from file: ${error.message}`);
     }
 };
 

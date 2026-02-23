@@ -14,6 +14,8 @@ import interviewRoutes from './routes/interviewRoutes.js';
 import profileImageRoutes from './routes/profileImage.js';
 import testRoutes from './routes/testRoutes.js';
 import codingRoutes from './routes/codingRoutes.js';
+import careerRoadmapRoutes from './routes/careerRoadmapRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 import pool from './config/db.js'; // Initialize PostgreSQL connection
 import dns from 'dns';
 
@@ -89,6 +91,7 @@ app.use('/api/coding', codingRoutes);
 app.use('/api/ai/cover-letter', aiCoverLetterRoutes);
 import aiResumeRoutes from './routes/aiResumeRoutes.js';
 app.use('/api/ai/resume', aiResumeRoutes);
+app.use('/api/admin', adminRoutes);
 
 // 404 handler
 app.use((req, res) => {

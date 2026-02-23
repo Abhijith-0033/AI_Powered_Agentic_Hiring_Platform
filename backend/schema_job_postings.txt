@@ -1,0 +1,23 @@
+company_id: uuid
+created_at: timestamp without time zone
+department: character varying
+experience_level: character varying
+external_company_name: character varying
+external_job_id: character varying
+job_description: text
+job_id: bigint
+job_title: character varying
+job_type: character varying
+last_synced_at: timestamp without time zone
+location: character varying
+require_education: boolean
+require_skills: boolean
+required_education: text
+required_skills: text
+salary_max: integer
+salary_min: integer
+source: character varying
+source_name: character varying
+source_url: text
+status: character varying
+updated_at: timestamp without time zone

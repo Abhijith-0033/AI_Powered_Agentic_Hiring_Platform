@@ -1,4 +1,5 @@
 import pg from 'pg';
+import fs from 'fs';
 import dotenv from 'dotenv';
 import path from 'path';
 
@@ -18,11 +19,8 @@ async function checkSchema() {
             WHERE table_name = 'job_postings'
             ORDER BY column_name;
         `);
-        console.log('--- Table Schema: job_postings ---');
-        res.rows.forEach(row => {
-            console.log(`${row.column_name}: ${row.data_type}`);
-        });
-        console.log('-----------------------------------');
+        const schema = res.rows.map(row => `${row.column_name}: ${row.data_type}`).join('\n');
+        fs.writeFileSync('schema_job_postings.txt', schema);
         process.exit(0);
     } catch (err) {
         console.error('Database Error:', err);
