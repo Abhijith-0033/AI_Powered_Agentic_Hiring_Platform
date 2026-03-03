@@ -32,11 +32,10 @@ const CandidateProfileContent = ({ data, resumeUrl, onViewResume, isSnapshot, sn
                 )}
                 <div>
                     <h3 className="text-xl font-bold text-neutral-900">{info.name || 'Candidate Name'}</h3>
-                    <p className="text-neutral-600">{info.title || 'Job Title'}</p>
+                    <p className="text-neutral-600">{info.title || info.job_title || 'Job Title'}</p>
                 </div>
             </div>
 
-            {/* Contact Info */}
             <div className="grid grid-cols-2 gap-3 text-sm">
                 {info.email && (
                     <div className="flex items-center gap-2 text-neutral-600">
@@ -44,10 +43,10 @@ const CandidateProfileContent = ({ data, resumeUrl, onViewResume, isSnapshot, sn
                         <a href={`mailto:${info.email}`} className="hover:text-primary-600 truncate" title={info.email}>{info.email}</a>
                     </div>
                 )}
-                {info.phone && (
+                {(info.phone || info.phone_number) && (
                     <div className="flex items-center gap-2 text-neutral-600">
                         <Phone className="w-4 h-4" />
-                        <span>{info.phone}</span>
+                        <span>{info.phone || info.phone_number}</span>
                     </div>
                 )}
                 {info.location && (
@@ -56,25 +55,25 @@ const CandidateProfileContent = ({ data, resumeUrl, onViewResume, isSnapshot, sn
                         <span>{info.location}</span>
                     </div>
                 )}
-                {info.linkedin && (
+                {(info.linkedin || info.linkedin_url) && (
                     <div className="flex items-center gap-2 text-neutral-600">
                         <Linkedin className="w-4 h-4" />
-                        <a href={info.linkedin} target="_blank" rel="noreferrer" className="hover:text-primary-600 truncate" title={info.linkedin}>LinkedIn</a>
+                        <a href={info.linkedin || info.linkedin_url} target="_blank" rel="noreferrer" className="hover:text-primary-600 truncate" title={info.linkedin || info.linkedin_url}>LinkedIn</a>
                     </div>
                 )}
-                {info.github && (
+                {(info.github || info.github_url) && (
                     <div className="flex items-center gap-2 text-neutral-600">
                         <Github className="w-4 h-4" />
-                        <a href={info.github} target="_blank" rel="noreferrer" className="hover:text-primary-600 truncate" title={info.github}>GitHub</a>
+                        <a href={info.github || info.github_url} target="_blank" rel="noreferrer" className="hover:text-primary-600 truncate" title={info.github || info.github_url}>GitHub</a>
                     </div>
                 )}
             </div>
 
             {/* About */}
-            {info.about && (
+            {(info.about || info.profile_description) && (
                 <div>
                     <h4 className="font-semibold text-neutral-800 mb-2">About</h4>
-                    <p className="text-sm text-neutral-600 whitespace-pre-line">{info.about}</p>
+                    <p className="text-sm text-neutral-600 whitespace-pre-line">{info.about || info.profile_description}</p>
                 </div>
             )}
 
@@ -109,12 +108,12 @@ const CandidateProfileContent = ({ data, resumeUrl, onViewResume, isSnapshot, sn
                     <div className="space-y-4">
                         {data.experience.map((exp, i) => (
                             <div key={i} className="p-3 bg-neutral-50 rounded-lg border border-neutral-200">
-                                <p className="font-medium text-neutral-900">{exp.job_title}</p>
-                                <p className="text-sm text-neutral-600">{exp.company}</p>
+                                <p className="font-medium text-neutral-900">{exp.job_title || exp.title}</p>
+                                <p className="text-sm text-neutral-600">{exp.company || exp.company_name}</p>
                                 <p className="text-xs text-neutral-500">
-                                    {exp.start_date} - {exp.is_current ? 'Present' : exp.end_date}
+                                    {exp.start_date || exp.startDate} - {exp.is_current || exp.current ? 'Present' : (exp.end_date || exp.endDate)}
                                 </p>
-                                {exp.description && (
+                                {(exp.description) && (
                                     <p className="text-sm text-neutral-600 mt-2">{exp.description}</p>
                                 )}
                             </div>
@@ -133,9 +132,11 @@ const CandidateProfileContent = ({ data, resumeUrl, onViewResume, isSnapshot, sn
                         {data.education.map((edu, i) => (
                             <div key={i} className="p-3 bg-neutral-50 rounded-lg border border-neutral-200">
                                 <p className="font-medium text-neutral-900">{edu.degree}</p>
-                                <p className="text-sm text-neutral-600">{edu.institution}</p>
-                                <p className="text-xs text-neutral-500">{edu.graduation_year}</p>
-                                {edu.gpa && <p className="text-xs text-neutral-500">GPA: {edu.gpa}</p>}
+                                <p className="text-sm text-neutral-600">{edu.institution || edu.school}</p>
+                                <p className="text-xs text-neutral-500">
+                                    {edu.start_date || edu.startDate} - {edu.end_date || edu.endDate || edu.graduation_year}
+                                </p>
+                                {(edu.gpa || edu.grade) && <p className="text-xs text-neutral-500">GPA: {edu.gpa || edu.grade}</p>}
                             </div>
                         ))}
                     </div>
@@ -152,15 +153,15 @@ const CandidateProfileContent = ({ data, resumeUrl, onViewResume, isSnapshot, sn
                         {data.projects.map((proj, i) => (
                             <div key={i} className="p-3 bg-neutral-50 rounded-lg border border-neutral-200">
                                 <div className="flex justify-between items-start">
-                                    <p className="font-medium text-neutral-900">{proj.title}</p>
-                                    {proj.link && (
-                                        <a href={proj.link} target="_blank" rel="noreferrer" className="text-primary-600 hover:text-primary-700">
+                                    <p className="font-medium text-neutral-900">{proj.project_title || proj.title}</p>
+                                    {(proj.project_link || proj.link) && (
+                                        <a href={proj.project_link || proj.link} target="_blank" rel="noreferrer" className="text-primary-600 hover:text-primary-700">
                                             <ExternalLink className="w-4 h-4" />
                                         </a>
                                     )}
                                 </div>
-                                {proj.description && (
-                                    <p className="text-sm text-neutral-600 mt-1">{proj.description}</p>
+                                {(proj.project_description || proj.description) && (
+                                    <p className="text-sm text-neutral-600 mt-1">{proj.project_description || proj.description}</p>
                                 )}
                             </div>
                         ))}

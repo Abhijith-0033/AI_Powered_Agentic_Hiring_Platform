@@ -3,6 +3,7 @@ import { Plus, Trash2, ChevronDown, ClipboardCheck, Eye, Send, CheckCircle, X, G
 import { DashboardLayout } from '../../components/layout';
 import { createTest, getRecruiterTests, publishTest, deleteTest, updateTest, getTestById, getTestResults, publishTestResults } from '../../services/testService';
 import axios from '../../api/axios';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 const TestsPage = () => {
     const [activeTab, setActiveTab] = useState('list'); // list | create | edit | results
@@ -293,9 +294,7 @@ const TestsPage = () => {
             </div>
 
             {loading ? (
-                <div className="flex items-center justify-center py-20">
-                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-violet-600"></div>
-                </div>
+                <LoadingSpinner size="lg" color="text-violet-600" className="py-20" />
             ) : tests.length === 0 ? (
                 <div className="bg-white rounded-xl border border-neutral-200 p-12 text-center">
                     <ClipboardCheck className="w-16 h-16 text-neutral-200 mx-auto mb-4" />
@@ -683,9 +682,7 @@ const TestsPage = () => {
             </div>
 
             {loadingResults ? (
-                <div className="flex items-center justify-center py-20">
-                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-violet-600"></div>
-                </div>
+                <LoadingSpinner size="lg" color="text-violet-600" className="py-20" />
             ) : !results || results.results.length === 0 ? (
                 <div className="bg-white rounded-xl border border-neutral-200 p-12 text-center">
                     <Users className="w-16 h-16 text-neutral-200 mx-auto mb-4" />

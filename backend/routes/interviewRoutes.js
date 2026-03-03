@@ -269,24 +269,31 @@ router.post('/auto-schedule', auth, roleGuard('recruiter'), async (req, res) => 
 
         // Fetch eligible candidates (status: pending, shortlisted_for_test, interview, applied)
         // Exclude rejected/hired/hired_candidate
+        // Enforce candidate limit based on match_score
+        const limit = req.body.candidateCount === 0 ? 1000 : (req.body.candidateCount || 10);
+
         const candidatesQuery = `
             SELECT 
                 ja.id as application_id, 
                 c.id as candidate_id, 
                 c.name as candidate_name, 
                 c.email as candidate_email,
-                c.user_id as candidate_user_id
+                c.user_id as candidate_user_id,
+                ja.match_score
             FROM job_applications ja
             JOIN candidates c ON ja.candidate_id = c.id
             WHERE ja.job_id = $1 
             AND ja.status NOT IN ('rejected', 'hired', 'hired_candidate')
+            AND ja.shortlisted_by_ai = true
             AND NOT EXISTS (
                 SELECT 1 FROM interviews i 
                 WHERE i.application_id = ja.id 
                 AND i.status IN ('scheduled', 'completed')
             )
+            ORDER BY ja.match_score DESC NULLS LAST, ja.id ASC
+            LIMIT $2
         `;
-        const candidatesResult = await client.query(candidatesQuery, [jobId]);
+        const candidatesResult = await client.query(candidatesQuery, [jobId, limit]);
         const candidates = candidatesResult.rows;
 
         if (candidates.length === 0) {

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 const OAuthSuccess = () => {
     const [searchParams] = useSearchParams();
@@ -28,7 +29,7 @@ const OAuthSuccess = () => {
     return (
         <div className="min-h-screen bg-dark-950 flex items-center justify-center">
             <div className="text-center">
-                <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <LoadingSpinner size="xl" color="text-primary-500" className="mb-4" />
                 <h2 className="text-xl font-semibold text-dark-100">Authenticating...</h2>
             </div>
         </div>

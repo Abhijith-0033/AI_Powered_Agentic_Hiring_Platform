@@ -168,3 +168,96 @@ export const analyzeMatchWithGroq = async (resumeText, jobData) => {
     throw new Error('Failed to analyze match: ' + error.message);
   }
 };
+
+/**
+ * Groq-Driven Agentic Resume Parser
+ * Uses Dedicated Resume API Key to extract structured data from PDF text
+ */
+export const parseResumeWithGroq = async (resumeText) => {
+  try {
+    const groqResume = new Groq({
+      apiKey: process.env.GROQ_API_KEY_RESUME,
+    });
+
+    const systemPrompt = "You are an expert recruitment AI. Extract structured information from the provided resume text. Return ONLY valid JSON.";
+
+    const userPrompt = `
+        Extract structured information from the resume text below.
+        Return ONLY a valid JSON object matching this exact schema:
+        {
+            "personal_info": {
+                "name": "string",
+                "email": "string",
+                "phone_number": "string",
+                "location": "string",
+                "linkedin_url": "string",
+                "github_url": "string",
+                "portfolio_url": "string",
+                "profile_description": "string (max 100 words summary)",
+                "is_fresher": boolean
+            },
+            "skills": ["string"],
+            "experience": [
+                {
+                    "company": "string",
+                    "title": "string",
+                    "location": "string",
+                    "startDate": "string",
+                    "endDate": "string",
+                    "current": boolean,
+                    "description": "string"
+                }
+            ],
+            "education": [
+                {
+                    "school": "string",
+                    "degree": "string",
+                    "fieldOfStudy": "string",
+                    "startDate": "string",
+                    "endDate": "string",
+                    "grade": "string"
+                }
+            ],
+            "projects": [
+                {
+                    "title": "string",
+                    "description": "string",
+                    "technologies": ["string"],
+                    "link": "string"
+                }
+            ],
+            "achievements": [
+                {
+                    "title": "string",
+                    "description": "string",
+                    "date": "string",
+                    "issuer": "string"
+                }
+            ]
+        }
+
+        RESUME TEXT:
+        ${resumeText}
+
+        Return ONLY the JSON object.
+    `;
+
+    const chatCompletion = await groqResume.chat.completions.create({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      model: 'llama-3.3-70b-versatile',
+      response_format: { type: 'json_object' },
+      temperature: 0.1,
+    });
+
+    const content = chatCompletion.choices[0]?.message?.content;
+    if (!content) throw new Error('Empty response from Groq');
+
+    return JSON.parse(content);
+  } catch (error) {
+    console.error('Groq Resume Parsing Error:', error);
+    throw new Error('Failed to parse resume with Groq: ' + error.message);
+  }
+};

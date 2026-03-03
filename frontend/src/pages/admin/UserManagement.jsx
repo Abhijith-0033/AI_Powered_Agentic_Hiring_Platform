@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, UserMinus, UserCheck, Shield, ExternalLink, Trash2, Ghost } from 'lucide-react';
+import { Search, Trash2, Ghost } from 'lucide-react';
 import { DashboardLayout } from '../../components/layout';
 import { Button, Badge, Input, Table } from '../../components/ui';
 import api from '../../api/axios';
@@ -13,7 +13,7 @@ const UserManagement = () => {
         try {
             setLoading(true);
             const response = await api.get('/admin/users');
-            if (response.data.success) {
+            if (response.data?.success) {
                 setUsers(response.data.data);
             }
         } catch (error) {
@@ -28,11 +28,11 @@ const UserManagement = () => {
     }, []);
 
     const handleSoftDelete = async (userId) => {
-        if (!window.confirm('Are you sure you want to soft-delete this user? They will no longer be visible in seeker/recruiter lists.')) return;
+        if (!window.confirm('Are you sure you want to soft-delete this user?')) return;
 
         try {
             const response = await api.delete(`/admin/users/${userId}`);
-            if (response.data.success) {
+            if (response.data?.success) {
                 alert('User soft-deleted successfully');
                 fetchUsers();
             }
@@ -44,14 +44,12 @@ const UserManagement = () => {
     const handleImpersonate = async (userId) => {
         try {
             const response = await api.post(`/admin/impersonate/${userId}`);
-            if (response.data.success) {
+            if (response.data?.success) {
                 const { token, user } = response.data;
-                // Store original admin token to allow "back to admin" (Optional enhancement)
-                // For now, just replace token and redirect
                 localStorage.setItem('token', token);
+                // Also update user in localstorage based on AuthContext logic if needed
                 localStorage.setItem('user', JSON.stringify(user));
 
-                // Redirect based on role
                 const redirectPath = user.role === 'recruiter' ? '/provider/dashboard' : '/user/dashboard';
                 window.location.href = redirectPath;
             }
@@ -82,7 +80,7 @@ const UserManagement = () => {
             accessor: 'role',
             render: (role) => (
                 <Badge variant={role === 'admin' ? 'secondary' : (role === 'recruiter' ? 'primary' : 'success')}>
-                    {role.replace('_', ' ')}
+                    {role?.replace('_', ' ')}
                 </Badge>
             )
         },
@@ -98,7 +96,7 @@ const UserManagement = () => {
         {
             header: 'Joined',
             accessor: 'created_at',
-            render: (date) => new Date(date).toLocaleDateString()
+            render: (date) => date ? new Date(date).toLocaleDateString() : 'N/A'
         },
         {
             header: 'Actions',

@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import LoadingSpinner from './../../components/ui/LoadingSpinner';
 
 /**
  * Protected Route Component
@@ -9,12 +10,11 @@ import { useAuth } from '../../contexts/AuthContext';
 const ProtectedRoute = ({ allowedRoles = [] }) => {
     const { user, loading, isAuthenticated } = useAuth();
 
-    // Show loading spinner while checking authentication
     if (loading) {
         return (
             <div className="min-h-screen bg-dark-950 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <LoadingSpinner size="xl" color="text-primary-500" className="mb-4" />
                     <p className="text-dark-400">Loading...</p>
                 </div>
             </div>
@@ -29,7 +29,9 @@ const ProtectedRoute = ({ allowedRoles = [] }) => {
     // Check role authorization
     if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
         // User doesn't have required role - redirect to their correct dashboard
-        const redirectPath = user.role === 'job_seeker' ? '/user/dashboard' : '/provider/dashboard';
+        let redirectPath = '/user/dashboard';
+        if (user.role === 'recruiter') redirectPath = '/provider/dashboard';
+        if (user.role === 'admin') redirectPath = '/admin/dashboard';
         return <Navigate to={redirectPath} replace />;
     }
 

@@ -1,0 +1,600 @@
+[
+    {
+        "id": 1,
+        "category": "Account Management",
+        "question": "How do I create a new account?",
+        "answer": "To create an account, click the 'Sign Up' button in the top right corner. Choose whether you are a Job Seeker or an Employer, fill in your basic details (name, email, password), and click 'Register'. Verify your email address through the link sent to your inbox to complete the process.",
+        "keywords": [
+            "sign up",
+            "register",
+            "new account",
+            "join"
+        ]
+    },
+    {
+        "id": 2,
+        "category": "Account Management",
+        "question": "I forgot my password. How can I reset it?",
+        "answer": "Go to the login page and click 'Forgot Password?'. Enter the email address associated with your account and click 'Send Reset Link'. Check your email for a secure link to create a new password.",
+        "keywords": [
+            "forgot password",
+            "reset password",
+            "login issue"
+        ]
+    },
+    {
+        "id": 3,
+        "category": "Account Management",
+        "question": "How can I edit my profile information?",
+        "answer": "Log into your account, click on your profile picture or name in the top right corner, and select 'My Profile'. Click the 'Edit Profile' button to update your personal details, contact information, and professional summary. Save changes when done.",
+        "keywords": [
+            "edit profile",
+            "update details",
+            "change information"
+        ]
+    },
+    {
+        "id": 4,
+        "category": "Account Management",
+        "question": "How do I change my registered email address?",
+        "answer": "Navigate to 'Account Settings' from your user dashboard. Under the 'Personal Information' section, click 'Change Email'. Enter your new email address and current password to verify. A confirmation link will be sent to the new email address.",
+        "keywords": [
+            "change email",
+            "update email",
+            "new email"
+        ]
+    },
+    {
+        "id": 5,
+        "category": "Account Management",
+        "question": "How can I delete my account permanently?",
+        "answer": "To delete your account, go to 'Account Settings', scroll to the bottom of the page, and click 'Delete Account'. You will be asked to provide a reason and enter your password to confirm. Note that this action is irreversible and all your data will be permanently removed.",
+        "keywords": [
+            "delete account",
+            "remove account",
+            "close account",
+            "cancel account"
+        ]
+    },
+    {
+        "id": 6,
+        "category": "Job Applications (Job Seekers)",
+        "question": "How do I apply for a job?",
+        "answer": "Once you find a job you're interested in, click on the job title to view the full description. Click the 'Apply Now' button. You can choose to apply with your saved profile and resume, or upload a new resume specifically for this position.",
+        "keywords": [
+            "apply",
+            "submit application",
+            "how to apply"
+        ]
+    },
+    {
+        "id": 7,
+        "category": "Job Applications (Job Seekers)",
+        "question": "How do I upload or update my resume?",
+        "answer": "Go to 'My Profile' and navigate to the 'Documents' or 'Resume' section. Click 'Upload Resume' to select a file from your device (PDF or Word format recommended). If you already have one, you can click 'Replace' or 'Delete' next to your current resume.",
+        "keywords": [
+            "upload resume",
+            "add cv",
+            "update resume",
+            "document upload"
+        ]
+    },
+    {
+        "id": 8,
+        "category": "Job Applications (Job Seekers)",
+        "question": "How can I track the status of my job applications?",
+        "answer": "Log into your account and navigate to the 'My Applications' tab on your dashboard. Here, you will see a list of all jobs you've applied for, along with their current status (e.g., Applied, Under Review, Interviewing, Rejected).",
+        "keywords": [
+            "track status",
+            "application status",
+            "check application",
+            "under review"
+        ]
+    },
+    {
+        "id": 9,
+        "category": "Job Applications (Job Seekers)",
+        "question": "Can I save a job to apply later?",
+        "answer": "Yes! When viewing a job card or full job description, click the 'Bookmark' or 'Heart' icon. You can access all your saved jobs later by going to the 'Saved Jobs' section in your dashboard.",
+        "keywords": [
+            "save job",
+            "bookmark job",
+            "apply later",
+            "favorites"
+        ]
+    },
+    {
+        "id": 10,
+        "category": "Job Applications (Job Seekers)",
+        "question": "How do I set up job alert notifications?",
+        "answer": "Perform a job search with your desired keywords, location, and filters. At the top of the search results, toggle the 'Set Job Alert' switch. You will receive email notifications when new jobs matching your exact criteria are posted.",
+        "keywords": [
+            "job alerts",
+            "notifications",
+            "email alerts",
+            "new jobs"
+        ]
+    },
+    {
+        "id": 11,
+        "category": "Job Posting (Employers)",
+        "question": "How do I post a new job opening?",
+        "answer": "Log into your Employer dashboard and click 'Post a Job'. Fill out the job details including title, description, requirements, location, and salary range. Review the preview, select your posting plan, and click 'Publish Job'.",
+        "keywords": [
+            "post job",
+            "new opening",
+            "create job",
+            "publish job"
+        ]
+    },
+    {
+        "id": 12,
+        "category": "Job Posting (Employers)",
+        "question": "Can I edit a job posting after it has been published?",
+        "answer": "Yes, go to 'Manage Jobs' in your employer dashboard. Find the job you want to edit, click the three dots icon (options), and select 'Edit'. Make your desired changes and click 'Update Job'. Note that major changes might require a brief re-review by our moderation team.",
+        "keywords": [
+            "edit job",
+            "modify posting",
+            "update job",
+            "change description"
+        ]
+    },
+    {
+        "id": 13,
+        "category": "Job Posting (Employers)",
+        "question": "How do I view candidates who applied to my job?",
+        "answer": "Navigate to 'Manage Jobs' and click on the specific job title to open its dashboard. Go to the 'Applicants' tab to view all candidates. You can view their profiles, download resumes, and see their match scores.",
+        "keywords": [
+            "view applicants",
+            "see candidates",
+            "check applications",
+            "review resumes"
+        ]
+    },
+    {
+        "id": 14,
+        "category": "Job Posting (Employers)",
+        "question": "How does the AI shortlisting feature work?",
+        "answer": "Our AI analyzes applicant resumes against the requirements specified in your job description. It calculates a 'Match Score' based on skills, experience, and keywords, instantly highlighting the most qualified candidates at the top of your applicant list.",
+        "keywords": [
+            "ai shortlisting",
+            "match score",
+            "candidate ranking",
+            "filter applicants"
+        ]
+    },
+    {
+        "id": 15,
+        "category": "Job Posting (Employers)",
+        "question": "How can I contact an applicant?",
+        "answer": "Open the applicant's profile from your dashboard. Click the 'Message' button to send them a direct message through our platform, or use the 'Schedule Interview' feature to propose meeting times.",
+        "keywords": [
+            "contact applicant",
+            "message candidate",
+            "schedule interview",
+            "reach out"
+        ]
+    },
+    {
+        "id": 16,
+        "category": "Search & Filters",
+        "question": "How do I search for jobs in a specific location?",
+        "answer": "Use the search bar at the top of the page. Enter your job title or keywords in the first field, and your desired city, state, or zip code in the 'Location' field. You can also use the 'Remote only' toggle if you are looking for work-from-home positions.",
+        "keywords": [
+            "location search",
+            "find jobs near me",
+            "remote jobs",
+            "city search"
+        ]
+    },
+    {
+        "id": 17,
+        "category": "Search & Filters",
+        "question": "Can I filter job search results by salary?",
+        "answer": "Yes. After performing a search, look at the filter panel on the left side of the screen. Under 'Salary Range', use the slider or select predefined salary brackets to only show jobs that meet your compensation expectations.",
+        "keywords": [
+            "salary filter",
+            "pay range",
+            "compensation search",
+            "filter by pay"
+        ]
+    },
+    {
+        "id": 18,
+        "category": "Search & Filters",
+        "question": "How do I use advanced search filters?",
+        "answer": "Click on 'All Filters' next to the main search bar. This opens advanced options allowing you to filter by Experience Level, Job Type (Full-time, Contract, etc.), Industry, Company Size, and Posted Date.",
+        "keywords": [
+            "advanced search",
+            "filter jobs",
+            "experience level",
+            "job type"
+        ]
+    },
+    {
+        "id": 19,
+        "category": "Search & Filters",
+        "question": "How can I sort my job search results?",
+        "answer": "At the top right of the job search results list, click the 'Sort by' dropdown menu. You can choose to order results by 'Most Relevant' (default) or 'Date Posted' (newest first).",
+        "keywords": [
+            "sort jobs",
+            "newest jobs",
+            "most relevant",
+            "order results"
+        ]
+    },
+    {
+        "id": 20,
+        "category": "Search & Filters",
+        "question": "What does the 'Match Percentage' on a job posting mean?",
+        "answer": "The Match Percentage is calculated by our AI based on how well your profile skills, experience, and uploaded resume align with the specific requirements of the job posting. A higher percentage indicates a stronger fit.",
+        "keywords": [
+            "match percentage",
+            "ai match",
+            "fit score",
+            "compatibility"
+        ]
+    },
+    {
+        "id": 21,
+        "category": "Profile Features",
+        "question": "How can I make my profile visible to recruiters?",
+        "answer": "Go to 'Account Settings' and find the 'Privacy' section. Toggle the 'Profile Visibility' switch to 'Public'. This allows verified employers to find your profile when searching for candidates with your skills.",
+        "keywords": [
+            "make profile public",
+            "visible to recruiters",
+            "privacy settings",
+            "be discovered"
+        ]
+    },
+    {
+        "id": 22,
+        "category": "Profile Features",
+        "question": "How do I add or update my skills?",
+        "answer": "Navigate to 'My Profile' and scroll down to the 'Skills' section. Click 'Add Skill', start typing a skill name, and select from the dropdown. You can also click the 'x' next to existing skills to remove them.",
+        "keywords": [
+            "add skills",
+            "update skills",
+            "manage skills",
+            "competencies"
+        ]
+    },
+    {
+        "id": 23,
+        "category": "Profile Features",
+        "question": "Can I link my personal portfolio or GitHub repository?",
+        "answer": "Yes! In 'My Profile', go to the 'Websites & Links' section. Click 'Add Link', choose the type of link (Portfolio, GitHub, LinkedIn, etc.), paste the URL, and click 'Save'.",
+        "keywords": [
+            "add portfolio",
+            "link github",
+            "personal website",
+            "add links"
+        ]
+    },
+    {
+        "id": 24,
+        "category": "Profile Features",
+        "question": "What is the 'Profile Strength' indicator?",
+        "answer": "The Profile Strength indicator shows how complete your profile is. A 100% complete profile (including resume, skills, work history, and education) is 3x more likely to be noticed by recruiters. Click the indicator for tips on what to add next.",
+        "keywords": [
+            "profile strength",
+            "complete profile",
+            "profile meter",
+            "improve profile"
+        ]
+    },
+    {
+        "id": 25,
+        "category": "Profile Features",
+        "question": "How do I add certifications to my profile?",
+        "answer": "Go to 'My Profile', scroll to the 'Licenses & Certifications' section, and click 'Add'. Fill in the certification name, issuing organization, issue date, and credential URL if available, then save.",
+        "keywords": [
+            "add certifications",
+            "licenses",
+            "credentials",
+            "qualifications"
+        ]
+    },
+    {
+        "id": 26,
+        "category": "Notifications",
+        "question": "How do I stop receiving promotional emails?",
+        "answer": "Go to 'Account Settings' and click on 'Notifications'. Under the 'Email Notifications' section, uncheck the box for 'Marketing and Promotional Offers' and click 'Save Preferences'.",
+        "keywords": [
+            "stop emails",
+            "unsubscribe",
+            "promotional emails",
+            "email settings"
+        ]
+    },
+    {
+        "id": 27,
+        "category": "Notifications",
+        "question": "Will I be notified when an employer views my application?",
+        "answer": "Yes, if you have 'Application Updates' enabled in your notification settings, you will receive an email and an in-app alert exactly when an employer first opens and reviews your application.",
+        "keywords": [
+            "employer viewed application",
+            "review notification",
+            "application update"
+        ]
+    },
+    {
+        "id": 28,
+        "category": "Notifications",
+        "question": "How do I enable push notifications on my browser or phone?",
+        "answer": "Navigate to 'Account Settings' > 'Notifications'. Toggle the 'Push Notifications' switch to 'On'. Your browser or device will then ask you for permission; click 'Allow' to start receiving instant alerts.",
+        "keywords": [
+            "push notifications",
+            "browser alerts",
+            "enable notifications",
+            "mobile alerts"
+        ]
+    },
+    {
+        "id": 29,
+        "category": "Notifications",
+        "question": "Can I get notified only for direct messages?",
+        "answer": "Yes, in the 'Notifications' settings page, you can customize exactly what triggers an alert. You can turn off all notifications except for 'Direct Messages from Employers' to keep your inbox clean.",
+        "keywords": [
+            "message notifications",
+            "direct messages",
+            "chat alerts",
+            "customize notifications"
+        ]
+    },
+    {
+        "id": 30,
+        "category": "Payments",
+        "question": "What payment methods are accepted for employer subscriptions?",
+        "answer": "We accept all major credit and debit cards (Visa, MasterCard, American Express, Discover), PayPal, and Google/Apple Pay. For enterprise annual billing, we also support bank wire transfers.",
+        "keywords": [
+            "payment methods",
+            "accepted cards",
+            "how to pay",
+            "billing options"
+        ]
+    },
+    {
+        "id": 31,
+        "category": "Payments",
+        "question": "How do I upgrade my employer subscription plan?",
+        "answer": "Go to your 'Billing Profile' from the dashboard dropdown, click 'View Plans', select the premium tier you wish to upgrade to, and confirm your payment details. You will be prorated for any time remaining on your current plan.",
+        "keywords": [
+            "upgrade plan",
+            "premium subscription",
+            "buy plan",
+            "change subscription"
+        ]
+    },
+    {
+        "id": 32,
+        "category": "Payments",
+        "question": "How can I cancel my subscription?",
+        "answer": "Navigate to 'Billing Profile' > 'Subscription Settings' and click 'Cancel Subscription'. Follow the prompts. Your plan will remain active until the end of your current billing cycle, after which you won't be charged again.",
+        "keywords": [
+            "cancel subscription",
+            "stop billing",
+            "cancel plan",
+            "end subscription"
+        ]
+    },
+    {
+        "id": 33,
+        "category": "Payments",
+        "question": "Where can I find my past invoices?",
+        "answer": "Go to 'Billing Profile' and click on the 'Billing History' tab. Here you can view, download as PDF, or print all your past invoices and payment receipts.",
+        "keywords": [
+            "find invoice",
+            "billing history",
+            "receipts",
+            "download invoice"
+        ]
+    },
+    {
+        "id": 34,
+        "category": "Payments",
+        "question": "What is the refund policy?",
+        "answer": "We offer a 7-day money-back guarantee for initial subscription purchases if you are unsatisfied. Renewals are non-refundable. Please contact our support team to request a refund within the eligible window.",
+        "keywords": [
+            "refund policy",
+            "money back",
+            "request refund",
+            "get money back"
+        ]
+    },
+    {
+        "id": 35,
+        "category": "Platform Features",
+        "question": "How do I use the AI Career Roadmap generator?",
+        "answer": "Navigate to the 'AI Tools' section and select 'Career Roadmap'. Enter your current role and your dream target role. The AI will generate a step-by-step personalized learning and experience path to help you reach that goal.",
+        "keywords": [
+            "career roadmap",
+            "ai tools",
+            "learning path",
+            "career goal"
+        ]
+    },
+    {
+        "id": 36,
+        "category": "Platform Features",
+        "question": "Is there a mobile app available?",
+        "answer": "Currently, our platform is fully mobile-responsive and works perfectly on your smartphone's web browser. A dedicated native mobile app (iOS and Android) is presently in development and launching soon.",
+        "keywords": [
+            "mobile app",
+            "phone app",
+            "ios app",
+            "android app",
+            "download app"
+        ]
+    },
+    {
+        "id": 37,
+        "category": "Platform Features",
+        "question": "What does the employer dashboard analytics cover?",
+        "answer": "Employer analytics provide real-time data on job posting views, application conversion rates, candidate demographics, time-to-hire metrics, and sourcing channel effectiveness.",
+        "keywords": [
+            "employer dashboard",
+            "analytics",
+            "hiring metrics",
+            "data reports"
+        ]
+    },
+    {
+        "id": 38,
+        "category": "Platform Features",
+        "question": "How does the AI interview scheduler work?",
+        "answer": "Employers can select multiple shortlisted candidates and click 'Auto-Schedule'. The system references the recruiter's calendar availability and sends automated calendar booking links to the candidates, eliminating back-and-forth emails.",
+        "keywords": [
+            "interview scheduler",
+            "book interview",
+            "calendar scheduling",
+            "automated interviews"
+        ]
+    },
+    {
+        "id": 39,
+        "category": "Troubleshooting",
+        "question": "Why am I getting a 'File too large' error when uploading my resume?",
+        "answer": "The maximum file size for resume uploads is 5MB. Please compress your PDF file or remove large images from your Word document and try uploading again.",
+        "keywords": [
+            "file too large",
+            "upload error",
+            "resume size",
+            "compress resume"
+        ]
+    },
+    {
+        "id": 40,
+        "category": "Troubleshooting",
+        "question": "I am not receiving the password reset email. What should I do?",
+        "answer": "First, check your Spam or Junk folder. Ensure you entered the exact email address used during registration. If you still haven't received it after 15 minutes, please try whitelisting 'support@hiringplatform.com' or contact our support team.",
+        "keywords": [
+            "no reset email",
+            "password email missing",
+            "not receiving email",
+            "spam folder"
+        ]
+    },
+    {
+        "id": 41,
+        "category": "Troubleshooting",
+        "question": "Why is the website loading slowly or not displaying correctly?",
+        "answer": "This is often caused by cached browser data. Try doing a hard refresh (Ctrl+F5 on Windows, Cmd+Shift+R on Mac). If the issue persists, try clearing your browser cookies/cache or accessing the site in Incognito Mode.",
+        "keywords": [
+            "slow website",
+            "loading issue",
+            "clear cache",
+            "display error"
+        ]
+    },
+    {
+        "id": 42,
+        "category": "Troubleshooting",
+        "question": "My account was locked. How do I unlock it?",
+        "answer": "Accounts are temporarily locked after 5 consecutive failed login attempts for security purposes. The lock automatically expires after 30 minutes. Alternatively, you can reset your password to regain immediate access.",
+        "keywords": [
+            "account locked",
+            "login failed",
+            "unlock account",
+            "security lock"
+        ]
+    },
+    {
+        "id": 43,
+        "category": "Troubleshooting",
+        "question": "How do I contact customer support?",
+        "answer": "You can reach our support team by clicking the 'Help & Support' link in the footer, using the Chatbot widget in the bottom right corner, or by emailing 'support@hiringplatform.com'. We aim to respond within 24 hours.",
+        "keywords": [
+            "contact support",
+            "help desk",
+            "customer service",
+            "reach support"
+        ]
+    },
+    {
+        "id": 44,
+        "category": "Policies",
+        "question": "Where can I read the Terms of Service?",
+        "answer": "Our complete Terms of Service can be found by clicking the 'Terms of Service' link located in the footer at the very bottom of any page on our platform.",
+        "keywords": [
+            "terms of service",
+            "tos",
+            "legal terms",
+            "agreements"
+        ]
+    },
+    {
+        "id": 45,
+        "category": "Policies",
+        "question": "How is my personal data protected?",
+        "answer": "We take data privacy seriously. Your data is encrypted at rest and in transit. We comply with GDPR and CCPA regulations. You can detailed information in our Privacy Policy, linked in the site footer.",
+        "keywords": [
+            "privacy policy",
+            "data protection",
+            "security",
+            "gdpr",
+            "is my data safe"
+        ]
+    },
+    {
+        "id": 46,
+        "category": "Policies",
+        "question": "Does the platform censor or moderate job postings?",
+        "answer": "Yes, all job postings must adhere to our Community Guidelines. We prohibit discriminatory language, MLM schemes, unpaid probationary 'internships' disguised as jobs, and fraudulent listings. Violating posts are removed.",
+        "keywords": [
+            "job moderation",
+            "censorship",
+            "community guidelines",
+            "banned jobs"
+        ]
+    },
+    {
+        "id": 47,
+        "category": "Policies",
+        "question": "Can I have multiple accounts?",
+        "answer": "Our policy permits one Job Seeker account and one Employer account per individual. Creating duplicate accounts to circumvent blocks or manipulate applications violates our Terms of Service and may result in a permanent ban.",
+        "keywords": [
+            "multiple accounts",
+            "duplicate account",
+            "two accounts",
+            "account policy"
+        ]
+    },
+    {
+        "id": 48,
+        "category": "Job Posting (Employers)",
+        "question": "Can I pause a job posting without deleting it?",
+        "answer": "Yes. If you have received enough applicants but haven't made a final decision, go to 'Manage Jobs', click the options menu for the job, and select 'Pause'. This hides it from search results but keeps all applicant data intact.",
+        "keywords": [
+            "pause job",
+            "hide job",
+            "stop applications",
+            "temporary close"
+        ]
+    },
+    {
+        "id": 49,
+        "category": "Platform Features",
+        "question": "Does the platform support integration with internal ATS systems?",
+        "answer": "Yes, our Enterprise plans include API support and native integrations for popular Applicant Tracking Systems (ATS) like Workday, Greenhouse, and Lever, allowing seamless data synchronization.",
+        "keywords": [
+            "ats integration",
+            "api support",
+            "workday",
+            "greenhouse",
+            "sync data"
+        ]
+    },
+    {
+        "id": 50,
+        "category": "Search & Filters",
+        "question": "Can I search for jobs requiring specific visa sponsorship?",
+        "answer": "Yes, under the 'Advanced Filters', you can check the box for 'Visa Sponsorship Available' to only view roles where employers have explicitly indicated they provide work visa sponsorship.",
+        "keywords": [
+            "visa sponsorship",
+            "h1b jobs",
+            "filter visa",
+            "work permit"
+        ]
+    }
+]

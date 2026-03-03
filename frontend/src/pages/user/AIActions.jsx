@@ -7,9 +7,12 @@ import {
     Sparkles,
     Target,
     Zap,
-    Settings
+    Settings,
+    Map,
+    Briefcase
 } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../../components/layout';
 import { Badge, Button, Select, Toggle } from '../../components/ui';
 import Card, { CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card';
@@ -22,20 +25,30 @@ import Card, { CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import CoverLetterModal from '../../components/shared/CoverLetterModal';
 import OptimizeResumeModal from '../../components/shared/OptimizeResumeModal';
 import MatchAnalysisModal from '../../components/shared/MatchAnalysisModal';
-import SkillGapModal from '../../components/shared/SkillGapModal';
+import CareerRoadmapModal from '../../components/shared/CareerRoadmapModal';
 import AutoApplyModal from '../../components/shared/AutoApplyModal';
 
 const AIActions = () => {
+    const navigate = useNavigate();
     const [autoApplyActive, setAutoApplyActive] = useState(false);
 
     // Modal States
     const [isCoverLetterModalOpen, setIsCoverLetterModalOpen] = useState(false);
     const [isOptimizeResumeModalOpen, setIsOptimizeResumeModalOpen] = useState(false);
     const [isMatchAnalysisModalOpen, setIsMatchAnalysisModalOpen] = useState(false);
-    const [isSkillGapModalOpen, setIsSkillGapModalOpen] = useState(false);
+    const [isCareerRoadmapModalOpen, setIsCareerRoadmapModalOpen] = useState(false);
     const [isAutoApplyModalOpen, setIsAutoApplyModalOpen] = useState(false);
 
     const aiActions = [
+        {
+            id: 'recommended-jobs',
+            icon: Briefcase,
+            title: 'Recommended Jobs',
+            description: 'AI-powered external job suggestions tailored to your professional profile',
+            status: 'ready',
+            color: 'info',
+            action: () => navigate('/user/ai-actions/recommended-jobs')
+        },
         {
             id: 'cover-letter',
             icon: FileText,
@@ -64,13 +77,13 @@ const AIActions = () => {
             action: () => setIsMatchAnalysisModalOpen(true)
         },
         {
-            id: 'skill-gap',
-            icon: Zap,
-            title: 'Skill Gap Analysis',
-            description: 'Identify skills to improve for target roles',
-            status: 'beta',
+            id: 'career-roadmap',
+            icon: Map,
+            title: 'AI Career Roadmap',
+            description: 'Visualize your path to mastering any skill',
+            status: 'ready',
             color: 'warning',
-            action: () => setIsSkillGapModalOpen(true)
+            action: () => setIsCareerRoadmapModalOpen(true)
         }
     ];
 
@@ -177,9 +190,9 @@ const AIActions = () => {
                     onClose={() => setIsMatchAnalysisModalOpen(false)}
                 />
 
-                <SkillGapModal
-                    isOpen={isSkillGapModalOpen}
-                    onClose={() => setIsSkillGapModalOpen(false)}
+                <CareerRoadmapModal
+                    isOpen={isCareerRoadmapModalOpen}
+                    onClose={() => setIsCareerRoadmapModalOpen(false)}
                 />
 
                 <AutoApplyModal

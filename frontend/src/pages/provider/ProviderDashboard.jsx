@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { DashboardLayout } from '../../components/layout';
-import { Button, Badge } from '../../components/ui';
+import { Button, Badge, LoadingSpinner } from '../../components/ui';
 import Card, { CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import api from '../../api/axios';
 import { MetricCard } from '../../components/shared';
@@ -49,9 +49,7 @@ const ProviderDashboard = () => {
     if (loading) {
         return (
             <DashboardLayout type="provider" title="Dashboard">
-                <div className="flex justify-center items-center h-64">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-                </div>
+                <LoadingSpinner size="md" color="text-primary-600" className="h-64" />
             </DashboardLayout>
         );
     }
@@ -60,24 +58,8 @@ const ProviderDashboard = () => {
     const user = dashboardData?.user;
     const stats = dashboardData?.stats;
     const recentJobs = dashboardData?.recentJobs || [];
-
-    // Mock data for charts (since historical data table missing)
-    const applicationTrendData = [
-        { name: 'Mon', apps: 4 },
-        { name: 'Tue', apps: 7 },
-        { name: 'Wed', apps: 5 },
-        { name: 'Thu', apps: 12 },
-        { name: 'Fri', apps: 9 },
-        { name: 'Sat', apps: 3 },
-        { name: 'Sun', apps: 2 },
-    ];
-
-    const jobsPostedData = [
-        { name: 'Jan', jobs: 2 },
-        { name: 'Feb', jobs: 5 },
-        { name: 'Mar', jobs: 3 },
-        { name: 'Apr', jobs: stats?.jobsPosted || 4 }, // Use real total for current month conceptually
-    ];
+    const applicationTrendData = dashboardData?.applicationTrendData || [];
+    const jobsPostedData = dashboardData?.jobsPostedData || [];
 
     return (
         <DashboardLayout type="provider" title="Dashboard">

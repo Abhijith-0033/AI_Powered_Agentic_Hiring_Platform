@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { DashboardLayout } from '../../components/layout';
 import codingService from '../../services/codingService';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 const CodingResultPage = () => {
     const { id } = useParams();
@@ -35,7 +36,7 @@ const CodingResultPage = () => {
     if (loading) return (
         <DashboardLayout type="job_seeker" title="Coding Test Results">
             <div className="flex flex-col items-center justify-center py-20 gap-4">
-                <div className="w-12 h-12 border-4 border-violet-600/20 border-t-violet-600 rounded-full animate-spin"></div>
+                <LoadingSpinner size="lg" color="text-violet-600" />
                 <p className="text-neutral-500 font-bold uppercase tracking-widest text-xs">Retrieving performance data...</p>
             </div>
         </DashboardLayout>

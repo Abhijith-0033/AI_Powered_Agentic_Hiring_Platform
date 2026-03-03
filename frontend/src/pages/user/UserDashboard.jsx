@@ -1,18 +1,18 @@
 import {
     Briefcase,
     Calendar,
-    Clock,
     Eye,
     Send,
     Target
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../../components/layout';
 import { JobCard, MetricCard } from '../../components/shared';
 import JobApplyModal from '../../components/shared/JobApplyModal';
 import Card, { CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
-import { getDashboardStats, getUserActivity } from '../../api/users';
+import { getDashboardStats } from '../../api/users';
 import { getJobs } from '../../api/jobs';
 
 /**
@@ -27,9 +27,10 @@ const UserDashboard = () => {
         interviewsScheduled: 0,
         profileCompletion: 0
     });
-    const [activity, setActivity] = useState([]);
+
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     const [selectedJob, setSelectedJob] = useState(null);
     const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
@@ -37,18 +38,15 @@ const UserDashboard = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [statsData, activityData, jobsData] = await Promise.all([
+                const [statsData, jobsData] = await Promise.all([
                     getDashboardStats(),
-                    getUserActivity(),
                     getJobs({ status: 'Open' }) // Fetch some jobs for recommendation
                 ]);
 
                 if (statsData.success) {
                     setStats(statsData.data);
                 }
-                if (activityData.success && Array.isArray(activityData.data)) {
-                    setActivity(activityData.data);
-                }
+
                 if (jobsData.success && Array.isArray(jobsData.data)) {
                     setJobs(jobsData.data);
                 }
@@ -62,37 +60,7 @@ const UserDashboard = () => {
         fetchData();
     }, []);
 
-    const getActivityIcon = (type) => {
-        switch (type) {
-            case 'application': return Send;
-            case 'match': return Target;
-            case 'interview': return Calendar;
-            case 'view': return Eye;
-            default: return Briefcase;
-        }
-    };
 
-    const getActivityColor = (type) => {
-        switch (type) {
-            case 'application': return 'primary';
-            case 'match': return 'success';
-            case 'interview': return 'warning';
-            case 'view': return 'info';
-            default: return 'default';
-        }
-    };
-
-    const formatTime = (timestamp) => {
-        const date = new Date(timestamp);
-        const now = new Date();
-        const diff = now - date;
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-        if (days === 0) return 'Today';
-        if (days === 1) return 'Yesterday';
-        if (days < 7) return `${days} days ago`;
-        return date.toLocaleDateString();
-    };
 
     if (loading) {
         return (
@@ -173,64 +141,17 @@ const UserDashboard = () => {
                 </CardContent>
             </Card>
 
-            <div className="grid lg:grid-cols-3 gap-8">
-                {/* Activity Timeline */}
-                <Card className="lg:col-span-1">
-                    <CardHeader>
-                        <CardTitle>Recent Activity</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        {activity.length > 0 ? (
-                            <div className="space-y-4">
-                                {activity.map((item, index) => {
-                                    const Icon = getActivityIcon(item.type);
-                                    const color = getActivityColor(item.type);
-
-                                    return (
-                                        <div
-                                            key={item.id}
-                                            className="flex gap-3 animate-slide-in-right group p-2 hover:bg-neutral-50 rounded-lg transition-colors border border-transparent hover:border-neutral-100"
-                                            style={{ animationDelay: `${index * 50}ms` }}
-                                        >
-                                            <div className={`
-                                                p-2 rounded-lg flex-shrink-0
-                                                ${color === 'primary' ? 'bg-primary-50 text-primary-600' :
-                                                    color === 'success' ? 'bg-success-50 text-success-600' :
-                                                        color === 'warning' ? 'bg-warning-50 text-warning-600' :
-                                                            'bg-info-50 text-info-600'}
-                                                `}>
-                                                <Icon className="w-4 h-4" />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-medium text-neutral-900 truncate">{item.title}</p>
-                                                <p className="text-xs text-neutral-500">{item.company}</p>
-                                                <p className="text-xs text-neutral-400 mt-1 flex items-center gap-1">
-                                                    <Clock className="w-3 h-3" />
-                                                    {formatTime(item.timestamp)}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        ) : (
-                            <div className="text-center py-8 text-neutral-400 text-sm">
-                                No recent activity
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
-
+            <div className="grid grid-cols-1 gap-8">
                 {/* Recommended Jobs */}
-                <div className="lg:col-span-2">
+                <div>
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-semibold text-neutral-900">Recommended Jobs</h3>
                         <Badge variant="primary" dot>
                             {jobs.length} Available
                         </Badge>
                     </div>
-                    <div className="space-y-4">
-                        {jobs.slice(0, 3).map((job, index) => (
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        {jobs.slice(0, 6).map((job, index) => (
                             <div
                                 key={job.job_id}
                                 className="animate-slide-up"

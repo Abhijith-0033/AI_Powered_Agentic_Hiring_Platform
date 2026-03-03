@@ -3,6 +3,7 @@ import { Users, Briefcase, FileText, Activity } from 'lucide-react';
 import { DashboardLayout } from '../../components/layout';
 import { MetricCard } from '../../components/shared';
 import api from '../../api/axios';
+import { LoadingSpinner } from '../../components/ui';
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState({
@@ -15,16 +16,17 @@ const AdminDashboard = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
+                // Fetch stats from backend if available, or just mock for now until backend is re-added
                 const [usersRes, jobsRes, appsRes] = await Promise.all([
-                    api.get('/admin/users'),
-                    api.get('/admin/jobs'),
-                    api.get('/admin/applications')
+                    api.get('/admin/users').catch(() => ({ data: { count: 0 } })),
+                    api.get('/admin/jobs').catch(() => ({ data: { count: 0 } })),
+                    api.get('/admin/applications').catch(() => ({ data: { count: 0 } }))
                 ]);
 
                 setStats({
-                    users: usersRes.data.count || 0,
-                    jobs: jobsRes.data.count || 0,
-                    applications: appsRes.data.count || 0
+                    users: usersRes?.data?.count || 0,
+                    jobs: jobsRes?.data?.count || 0,
+                    applications: appsRes?.data?.count || 0
                 });
             } catch (error) {
                 console.error('Error fetching admin stats:', error);
@@ -38,9 +40,7 @@ const AdminDashboard = () => {
     if (loading) {
         return (
             <DashboardLayout type="admin" title="Admin Dashboard">
-                <div className="flex justify-center items-center h-64">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-                </div>
+                <LoadingSpinner size="md" color="text-primary-600" className="h-64" />
             </DashboardLayout>
         );
     }
@@ -99,11 +99,6 @@ const AdminDashboard = () => {
                                 Impersonate users for debugging purposes
                             </li>
                         </ul>
-                    </div>
-
-                    <div className="bg-neutral-50 rounded-xl p-6 border border-neutral-100 italic text-neutral-500 text-sm">
-                        "The power to manage the platform comes with the responsibility to ensure data integrity and user privacy.
-                        Always log impersonation activities and use soft-delete with caution."
                     </div>
                 </div>
             </div>

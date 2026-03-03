@@ -56,9 +56,12 @@ const AuthPage = () => {
             }
 
             // Redirect based on role
-            const redirectPath = userData.role === 'job_seeker'
-                ? '/user/dashboard'
-                : '/provider/dashboard';
+            let redirectPath = '/user/dashboard';
+            if (userData.role === 'recruiter') {
+                redirectPath = '/provider/dashboard';
+            } else if (userData.role === 'admin') {
+                redirectPath = '/admin/dashboard';
+            }
 
             navigate(redirectPath, { replace: true });
         } catch (err) {

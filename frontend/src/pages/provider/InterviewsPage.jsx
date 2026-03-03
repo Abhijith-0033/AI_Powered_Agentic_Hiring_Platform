@@ -1,18 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Clock, Mail, Video, User, Briefcase, ClipboardCheck, ChevronDown, Search, CheckCircle, XCircle, X } from 'lucide-react';
+import { Calendar, Clock, Mail, Video, User, Briefcase, ChevronDown, Search, CheckCircle, XCircle, X } from 'lucide-react';
 import { DashboardLayout } from '../../components/layout';
 import { scheduleInterview, sendInterviewEmail, cancelInterview, selectCandidateForInterview } from '../../services/interviewService';
 import axios from '../../api/axios';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 const InterviewsPage = () => {
     // Jobs
     const [jobs, setJobs] = useState([]);
     const [loadingJobs, setLoadingJobs] = useState(true);
 
-    // Test section
-    const [testJobId, setTestJobId] = useState('');
-    const [testCandidates, setTestCandidates] = useState([]);
-    const [loadingTest, setLoadingTest] = useState(false);
 
     // Interview section
     const [interviewJobId, setInterviewJobId] = useState('');
@@ -45,22 +42,6 @@ const InterviewsPage = () => {
         fetchJobs();
     }, []);
 
-    // Fetch candidates for test section when job changes
-    useEffect(() => {
-        if (!testJobId) { setTestCandidates([]); return; }
-        const fetchTestCandidates = async () => {
-            try {
-                setLoadingTest(true);
-                const res = await axios.get(`/recruiter/jobs/${testJobId}/applications`);
-                setCandidatesForSection(res.data?.data || [], setTestCandidates);
-            } catch (error) {
-                console.error('Error fetching test candidates:', error);
-            } finally {
-                setLoadingTest(false);
-            }
-        };
-        fetchTestCandidates();
-    }, [testJobId]);
 
     // Fetch candidates for interview section when job changes
     useEffect(() => {
@@ -89,10 +70,7 @@ const InterviewsPage = () => {
             await axios.patch(`/recruiter/applications/${applicationId}/status`, { status: newStatus });
 
             // Refresh the section
-            if (section === 'test' && testJobId) {
-                const res = await axios.get(`/recruiter/jobs/${testJobId}/applications`);
-                setCandidatesForSection(res.data?.data || [], setTestCandidates);
-            } else if (section === 'interview' && interviewJobId) {
+            if (section === 'interview' && interviewJobId) {
                 const res = await axios.get(`/recruiter/jobs/${interviewJobId}/applications`);
                 setCandidatesForSection(res.data?.data || [], setInterviewCandidates);
             }
@@ -287,7 +265,7 @@ const InterviewsPage = () => {
         if (loading) {
             return (
                 <div className="flex items-center justify-center py-12">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                    <LoadingSpinner size="md" color="text-primary-600" />
                 </div>
             );
         }
@@ -320,8 +298,8 @@ const InterviewsPage = () => {
                                 <tr key={candidate.id} className="hover:bg-neutral-50 transition-colors">
                                     <td className="px-4 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center border ${section === 'test' ? 'bg-amber-50 border-amber-200' : 'bg-indigo-50 border-indigo-200'}`}>
-                                                <User className={`w-5 h-5 ${section === 'test' ? 'text-amber-600' : 'text-indigo-600'}`} />
+                                            <div className={"w-10 h-10 rounded-full flex items-center justify-center border bg-indigo-50 border-indigo-200"}>
+                                                <User className={"w-5 h-5 text-indigo-600"} />
                                             </div>
                                             <div>
                                                 <p className="font-medium text-neutral-900">{candidate.candidate_name || 'Unknown'}</p>
@@ -340,31 +318,6 @@ const InterviewsPage = () => {
                                     </td>
                                     <td className="px-4 py-4">
                                         <div className="flex flex-wrap gap-1.5">
-                                            {section === 'test' && (
-                                                <>
-                                                    <button
-                                                        onClick={() => handleStatusUpdate(candidate.id, 'shortlisted_for_test', section)}
-                                                        disabled={s === 'shortlisted_for_test'}
-                                                        className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${s === 'shortlisted_for_test' ? 'bg-amber-200 text-amber-900 cursor-default' : 'bg-amber-100 text-amber-700 hover:bg-amber-200'}`}
-                                                    >
-                                                        Shortlist for Test
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleStatusUpdate(candidate.id, 'interview', section)}
-                                                        disabled={s === 'interview'}
-                                                        className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${s === 'interview' ? 'bg-indigo-200 text-indigo-900 cursor-default' : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'}`}
-                                                    >
-                                                        Move to Interview
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleStatusUpdate(candidate.id, 'rejected', section)}
-                                                        disabled={s === 'rejected'}
-                                                        className="px-2.5 py-1 rounded-md text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
-                                                    >
-                                                        Reject
-                                                    </button>
-                                                </>
-                                            )}
 
                                             {section === 'interview' && (
                                                 <>
@@ -439,9 +392,7 @@ const InterviewsPage = () => {
     if (loadingJobs) {
         return (
             <DashboardLayout type="provider" title="Tests & Interviews">
-                <div className="flex items-center justify-center h-64">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-                </div>
+                <LoadingSpinner size="lg" color="text-primary-600" className="h-64" />
             </DashboardLayout>
         );
     }
@@ -453,40 +404,6 @@ const InterviewsPage = () => {
                 <div className="mb-8">
                     <h2 className="text-2xl font-bold text-neutral-900">Tests & Interviews</h2>
                     <p className="text-neutral-500 mt-1">Select a job to view and manage candidates for tests and interviews</p>
-                </div>
-
-                {/* ============== SECTION 1: TESTS ============== */}
-                <div className="bg-white rounded-xl border border-neutral-200 shadow-sm mb-8">
-                    <div className="p-6 border-b border-neutral-100">
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                            <div>
-                                <h3 className="text-lg font-semibold text-neutral-900 flex items-center gap-2">
-                                    <ClipboardCheck className="w-5 h-5 text-amber-600" />
-                                    Test Section
-                                </h3>
-                                <p className="text-sm text-neutral-500 mt-1">Manage candidates for assessments and tests</p>
-                            </div>
-                            <JobSelector value={testJobId} onChange={setTestJobId} id="test-job-select" />
-                        </div>
-                    </div>
-
-                    <div className="p-6">
-                        {!testJobId ? (
-                            <div className="text-center py-10">
-                                <Briefcase className="w-14 h-14 text-neutral-200 mx-auto mb-3" />
-                                <p className="text-neutral-500 font-medium">Select a job to view candidates</p>
-                                <p className="text-sm text-neutral-400 mt-1">Use the dropdown above to pick a job posting</p>
-                            </div>
-                        ) : (
-                            <CandidateTable
-                                candidates={testCandidates}
-                                loading={loadingTest}
-                                section="test"
-                                emptyIcon={<ClipboardCheck className="w-14 h-14 text-neutral-200 mx-auto" />}
-                                emptyText="No candidates applied for this job yet"
-                            />
-                        )}
-                    </div>
                 </div>
 
                 {/* ============== SECTION 2: INTERVIEWS ============== */}

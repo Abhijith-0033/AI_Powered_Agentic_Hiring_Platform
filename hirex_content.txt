@@ -1,0 +1,891 @@
+
+============================================================
+PAGE 1
+============================================================
+HireX
+AIPowered Recruitment and
+Hiring Platform
+Guided by :
+Group Members :
+Abhijith Binosh
+Mrs Joby Anu Mathew
+Jose Martin Binu
+R Jayadev
+Suryanarayanan N J
+1
+
+============================================================
+PAGE 2
+============================================================
+Motivation
+Recruitment platforms receive a high volume of applications for each job
+posting, making manual screening inefficient.
+Recruiters spend significant time reviewing resumes, leading to delayed
+hiring decisions.
+Traditional recruitment systems rely heavily on keyword-based filtering,
+resulting in poor candidate–job matching.
+Skill mismatch between candidates and job requirements reduces hiring
+quality.
+Manual evaluation processes are prone to bias and inconsistency.
+There is a growing need for intelligent systems that automate screening,
+ensure fairness, and improve recruitment accuracy.
+2
+
+============================================================
+PAGE 3
+============================================================
+Objectives
+01 02
+Intelligent Candidate–Job Matching
+Automated Recruitment Platform
+Design and develop HireX as an AI-powered system that Improve matching accuracy by analyzing resumes and job
+automates key recruitment activities from job posting to candidate requirements using skill extraction and AI-based matching
+shortlisting. techniques.
+03 04
+Efficiency and Time Optimization
+Strategic Recruitment Management
+Reduce recruiter workload and hiring time by automating System
+resume screening, ranking, and interview-related processes.
+Enable efficient recruitment through intelligent automation,
+structured workflows, and data-driven decision support to
+improve hiring outcomes.
+3
+
+============================================================
+PAGE 4
+============================================================
+Scope of the Project
+User and Role Management
+1
+Support multiple user roles, including job seekers,
+recruiters, and administrators, with secure authentication
+and role-based access.
+AI-Based Candidate Evaluation
+2
+Apply resume parsing, skill extraction, matching, ranking,
+and shortlisting to improve candidate evaluation
+accuracy.
+Recruitment Workflow Automation
+3
+Manage the complete application lifecycle, from job
+search and application submission to screening and
+interview scheduling.
+Scalable and Extensible Architecture
+4
+Design the system to support ATS automation, analytics,
+and advanced AI enhancements without major
+architectural changes.
+4
+
+--- TABLES ---
+Table 1:
+ | Scope of the Project User and Role Management 1 Support multiple user roles, including job seekers, recruiters, and administrators, with secure authentication and role-based access. AI-Based Candidate Evaluation 2 Apply resume parsing, skill extraction, matching, ranking, and shortlisting to improve candidate evaluation accuracy. Recruitment Workflow Automation 3 Manage the complete application lifecycle, from job search and application submission to screening and interview scheduling. Scalable and Extensible Architecture 4 Design the system to support ATS automation, analytics, and advanced AI enhancements without major architectural changes. 4 | 
+
+
+============================================================
+PAGE 5
+============================================================
+Literature Survey
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Person-job fit estimation... with 1.mashRNN Encoding: Captures Recruitment High Computational Cost:
+Co-Attention Neural Networks Hierarchical RNNs extract History: Utilizes past successful GNNs and hierarchical RNNs
+[1] semantic features from long-form hires to guide current require significant processing
+documents at multiple levels. predictions, modeling recruiter power and training time.
+2.Co-Attention Mechanism: Aligns intuition. Data Dependency: Requires a
+specific job requirements with Handles Long Documents: large dataset of historical
+resume experiences to quantify mashRNN effectively processes successful matches to build
+matching contribution. lengthy resumes unlike effective graphs.
+3.Graph Neural Networks (GNN): standard RNNs. Inference Latency: Slower
+Models "global recruiter High Interpretability: Co- real-time performance
+experience" by aggregating attention highlights exactly compared to simpler models
+historical successful recruitment which skills matched which due to complex graph
+records. requirements. operations.
+4.BiLSTM with Attention:
+Computes similarity to construct
+edges in job-resume graphs.
+5
+
+--- TABLES ---
+Table 1:
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Person-job fit estimation... with 1.mashRNN Encoding: Captures Recruitment High Computational Cost: Co-Attention Neural Networks Hierarchical RNNs extract History: Utilizes past successful GNNs and hierarchical RNNs [1] semantic features from long-form hires to guide current require significant processing documents at multiple levels. predictions, modeling recruiter power and training time. 2.Co-Attention Mechanism: Aligns intuition. Data Dependency: Requires a specific job requirements with Handles Long Documents: large dataset of historical resume experiences to quantify mashRNN effectively processes successful matches to build matching contribution. lengthy resumes unlike effective graphs. 3.Graph Neural Networks (GNN): standard RNNs. Inference Latency: Slower Models "global recruiter High Interpretability: Co- real-time performance experience" by aggregating attention highlights exactly compared to simpler models historical successful recruitment which skills matched which due to complex graph records. requirements. operations. 4.BiLSTM with Attention: Computes similarity to construct edges in job-resume graphs.
+
+
+============================================================
+PAGE 6
+============================================================
+Literature Survey
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+AI-Powered Resume Screening 1.Grid-Search Tuned SVM: High Classification Accuracy: Lacks Semantic Context: TF-
+System using NLP and Machine Linear Support Vector Achieved 91.3% accuracy IDF ignores word order and
+Learning [2] Machine with hyperparameter through rigorous context, missing nuances in
+optimization (C/Kernel) via hyperparameter tuning. similar skills.
+cross-validation. Computational Efficiency: Sparse Feature Matrix: High-
+2.TF-IDF Vectorization: TF-IDF and Linear SVM are dimensional sparse data can
+Converts text into a sparse less resource-intensive than lead to memory inefficiencies.
+matrix of 5000 features based deep learning models. Fixed Categories: Limited to
+on term importance weights. Strong Generalization: Cross- predicting predefined job roles;
+3.NLP Preprocessing: validation ensures the model struggles with interdisciplinary
+Standardizes text via performs well on unseen data. profiles.
+tokenization, stopword
+removal, and lemmatization.
+6
+
+--- TABLES ---
+Table 1:
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+AI-Powered Resume Screening 1.Grid-Search Tuned SVM: High Classification Accuracy: Lacks Semantic Context: TF- System using NLP and Machine Linear Support Vector Achieved 91.3% accuracy IDF ignores word order and Learning [2] Machine with hyperparameter through rigorous context, missing nuances in optimization (C/Kernel) via hyperparameter tuning. similar skills. cross-validation. Computational Efficiency: Sparse Feature Matrix: High- 2.TF-IDF Vectorization: TF-IDF and Linear SVM are dimensional sparse data can Converts text into a sparse less resource-intensive than lead to memory inefficiencies. matrix of 5000 features based deep learning models. Fixed Categories: Limited to on term importance weights. Strong Generalization: Cross- predicting predefined job roles; 3.NLP Preprocessing: validation ensures the model struggles with interdisciplinary Standardizes text via performs well on unseen data. profiles. tokenization, stopword removal, and lemmatization.
+
+
+============================================================
+PAGE 7
+============================================================
+Literature Survey
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Intelligent Resume Evaluation 1.Weighted Resume Scoring: Actionable Feedback: Static Dependencies: Relies
+Tool Based on Machine Assigns quantifiable scores Provides specific scores and on predefined skill lists which
+Learning [3] based on defined weights (e.g., course recommendations to may become outdated quickly.
+Skills: 30, Education: 20). improve candidate profiles. Subjective Weighting: Manual
+2.Skill Gap Analysis Quantifiable Quality: assignment of scoring weights
+(PhraseMatcher): Uses spaCy Converts qualitative resume may not reflect actual market
+to compare extracted skills content into a comparable value.
+against predefined industry numerical score. Format Sensitivity: Parsing
+lists. High Precision Extraction: failures occur if resume
+3.Regex & Entity Extraction: Regex and PhraseMatcher are formatting deviates from
+patterns to clean text and highly accurate for structured standard layouts.
+extract structured entities data.
+(email, phone).
+7
+
+--- TABLES ---
+Table 1:
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Intelligent Resume Evaluation 1.Weighted Resume Scoring: Actionable Feedback: Static Dependencies: Relies Tool Based on Machine Assigns quantifiable scores Provides specific scores and on predefined skill lists which Learning [3] based on defined weights (e.g., course recommendations to may become outdated quickly. Skills: 30, Education: 20). improve candidate profiles. Subjective Weighting: Manual 2.Skill Gap Analysis Quantifiable Quality: assignment of scoring weights (PhraseMatcher): Uses spaCy Converts qualitative resume may not reflect actual market to compare extracted skills content into a comparable value. against predefined industry numerical score. Format Sensitivity: Parsing lists. High Precision Extraction: failures occur if resume 3.Regex & Entity Extraction: Regex and PhraseMatcher are formatting deviates from patterns to clean text and highly accurate for structured standard layouts. extract structured entities data. (email, phone).
+
+
+============================================================
+PAGE 8
+============================================================
+Literature Survey
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Resume Ranker: AI-Based Skill 1.Contextual Keyword Semantic Understanding: High Computational
+Analysis and Skill Matching Extraction (KeyBERT): Uses Captures context and nuances, Overhead: BERT-based models
+System [4] BERT embeddings to extract outperforming simple keyword require significant resources
+context-aware keywords rather matching. for inference.
+than simple frequency. Handles Synonyms: Complex Implementation:
+2.Synonym Generation Word2Vec ensures candidates Requires integrating and
+(Word2Vec): Identifies aren't penalized for using maintaining multiple NLP
+semantic relationships to different terminology for the models (BERT, Word2Vec).
+capture synonyms and related same skill. Corpus Dependent: Quality of
+terms. Visual Ranking: Provides clear synonyms depends heavily on
+3.Cosine Similarity Matching: percentage-based matching the size and domain of the
+Measures geometric alignment scores for easy comparison. training corpus.
+between candidate vectors and
+job descriptions.
+8
+
+--- TABLES ---
+Table 1:
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Resume Ranker: AI-Based Skill 1.Contextual Keyword Semantic Understanding: High Computational Analysis and Skill Matching Extraction (KeyBERT): Uses Captures context and nuances, Overhead: BERT-based models System [4] BERT embeddings to extract outperforming simple keyword require significant resources context-aware keywords rather matching. for inference. than simple frequency. Handles Synonyms: Complex Implementation: 2.Synonym Generation Word2Vec ensures candidates Requires integrating and (Word2Vec): Identifies aren't penalized for using maintaining multiple NLP semantic relationships to different terminology for the models (BERT, Word2Vec). capture synonyms and related same skill. Corpus Dependent: Quality of terms. Visual Ranking: Provides clear synonyms depends heavily on 3.Cosine Similarity Matching: percentage-based matching the size and domain of the Measures geometric alignment scores for easy comparison. training corpus. between candidate vectors and job descriptions.
+
+
+============================================================
+PAGE 9
+============================================================
+Literature Survey
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Streamlining Talent 1.Encrypted Data Processing: High Data Security: Ensures Processing Overhead:
+Acquisition: A Machine Secures sensitive applicant compliance with privacy laws Encryption/decryption steps
+Learning Approach [5] data using AES-256 (GDPR) and protects applicant add latency to the data
+encryption protocols. identity. pipeline.
+2.Bias-Reduced Matching: Uses Fair Assessment: Reduces Key Management
+data-driven skill criteria rather unconscious human bias by Complexity: Requires robust
+than demographic identifiers focusing purely on data points. infrastructure to manage
+for ranking. Scalability: Can handle encryption keys securely.
+3.NLP Parsing: Automates the fluctuating volumes of Parsing Limitations: Accuracy
+extraction of structured fields applications without depends heavily on the
+from unstructured resume compromising processing structure of input documents
+text. speed. (PDF/Docx).
+9
+
+--- TABLES ---
+Table 1:
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Streamlining Talent 1.Encrypted Data Processing: High Data Security: Ensures Processing Overhead: Acquisition: A Machine Secures sensitive applicant compliance with privacy laws Encryption/decryption steps Learning Approach [5] data using AES-256 (GDPR) and protects applicant add latency to the data encryption protocols. identity. pipeline. 2.Bias-Reduced Matching: Uses Fair Assessment: Reduces Key Management data-driven skill criteria rather unconscious human bias by Complexity: Requires robust than demographic identifiers focusing purely on data points. infrastructure to manage for ranking. Scalability: Can handle encryption keys securely. 3.NLP Parsing: Automates the fluctuating volumes of Parsing Limitations: Accuracy extraction of structured fields applications without depends heavily on the from unstructured resume compromising processing structure of input documents text. speed. (PDF/Docx).
+
+
+============================================================
+PAGE 10
+============================================================
+Literature Survey
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Recruiter’s perception of 1.Extended UTAUT Framework: Holistic Prediction: The Limited Generalizability: The
+artificial intelligence (AI)-based
+Adapted the Unified Theory of extended UTAUT model study relies on specific
+tools in recruitment [6]
+Acceptance and Use of effectively identifies performance variables, potentially excluding
+Technology by adding expectancy as the strongest factors like trust, security, or
+frequency of use and education. predictor of behavioral intention. legal issues (GDPR).
+2.Mixed Methods Approach: Data Quality: Using Prolific Self-Report Bias: Survey data
+Combined quantitative survey Academic ensures high reflects perception rather than
+data with qualitative coding of transparency and internal objective system performance
+open-ended responses. reliability of psychometric scales. or actual usage logs.
+3.Web-based Survey (Prolific Nuanced Insight: The mixed- Weak Demographics Link: The
+Academic): Data collection via method approach explains why analysis found that age, gender,
+a specialized platform for recruiters value efficiency while and experience had no
+scientific research. fearing the lack of human significant impact, suggesting
+4.Hierarchical Regression judgment. these standard moderators may
+Analysis: Statistical analysis Variable Isolation: Hierarchical not apply in this specific
+using three blocks of variables regression isolates the unique context.
+to test predictors. effect of variables.
+10
+
+--- TABLES ---
+Table 1:
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Recruiter’s perception of 1.Extended UTAUT Framework: Holistic Prediction: The Limited Generalizability: The artificial intelligence (AI)-based Adapted the Unified Theory of extended UTAUT model study relies on specific tools in recruitment [6] Acceptance and Use of effectively identifies performance variables, potentially excluding Technology by adding expectancy as the strongest factors like trust, security, or frequency of use and education. predictor of behavioral intention. legal issues (GDPR). 2.Mixed Methods Approach: Data Quality: Using Prolific Self-Report Bias: Survey data Combined quantitative survey Academic ensures high reflects perception rather than data with qualitative coding of transparency and internal objective system performance open-ended responses. reliability of psychometric scales. or actual usage logs. 3.Web-based Survey (Prolific Nuanced Insight: The mixed- Weak Demographics Link: The Academic): Data collection via method approach explains why analysis found that age, gender, a specialized platform for recruiters value efficiency while and experience had no scientific research. fearing the lack of human significant impact, suggesting 4.Hierarchical Regression judgment. these standard moderators may Analysis: Statistical analysis Variable Isolation: Hierarchical not apply in this specific using three blocks of variables regression isolates the unique context. to test predictors. effect of variables.
+
+
+============================================================
+PAGE 11
+============================================================
+Literature Survey
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Evolution of Applicant Tracking 1.Comparative Analytical Semantic Precision: Data Dependency:
+Systems: From Databases to Method: Synthesized model Transformer models (BERT) Effectiveness relies heavily on
+Intelligent Platforms [7] architectures and platform capture skill equivalence and the quality of talent corpora
+patterns from peer-reviewed synonyms better than keyword used to tune the encoders.
+literature. filters. Complexity: Implementing
+2.Embedding-Based Ranking Reduced Workload: Intelligent continuous bias monitoring
+(BERT/S-BERT): Uses dense triage compresses screening and modular inference graphs
+vector similarity and time, directly addressing high increases technical overhead
+transformer encoders for cost-per-hire and time-to-fill compared to static filters.
+semantic matching. bottlenecks. Historical Bias Risk: If not
+3.Human-in-the-Loop Re- Bias Mitigation: Human-in- carefully managed, the system
+ranking: Integrates recruiter the-Loop and governance may imprint historical
+feedback signals into the matrices make trade-offs inequities found in training
+ranking pipeline.. inspectable and prevent "black data onto new rankings.
+4.Governance/Risk-Control box" decision-making.
+Matrix: Framework for bias Scalability: Event-driven
+audits, drift detection, and architectures allow systems to
+explainability. handle applicant spikes without
+latency degradation.
+11
+
+--- TABLES ---
+Table 1:
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Evolution of Applicant Tracking 1.Comparative Analytical Semantic Precision: Data Dependency: Systems: From Databases to Method: Synthesized model Transformer models (BERT) Effectiveness relies heavily on Intelligent Platforms [7] architectures and platform capture skill equivalence and the quality of talent corpora patterns from peer-reviewed synonyms better than keyword used to tune the encoders. literature. filters. Complexity: Implementing 2.Embedding-Based Ranking Reduced Workload: Intelligent continuous bias monitoring (BERT/S-BERT): Uses dense triage compresses screening and modular inference graphs vector similarity and time, directly addressing high increases technical overhead transformer encoders for cost-per-hire and time-to-fill compared to static filters. semantic matching. bottlenecks. Historical Bias Risk: If not 3.Human-in-the-Loop Re- Bias Mitigation: Human-in- carefully managed, the system ranking: Integrates recruiter the-Loop and governance may imprint historical feedback signals into the matrices make trade-offs inequities found in training ranking pipeline.. inspectable and prevent "black data onto new rankings. 4.Governance/Risk-Control box" decision-making. Matrix: Framework for bias Scalability: Event-driven audits, drift detection, and architectures allow systems to explainability. handle applicant spikes without latency degradation.
+
+
+============================================================
+PAGE 12
+============================================================
+Literature Survey
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Smart Hiring Redefined: An 1.J2EE Three-Tier Architecture: Maintainability: The layered Architectural Coupling: In
+Intelligent Recruitment Structured into presentation, architecture ensures high some implementations, the
+Management Platform [8] business logic, and data service cohesion and low coupling, service layer directly
+layers. making future modifications manipulated request objects,
+2.MVC (Model-View-Controller) easier. reducing true separation of
+Pattern: Separates business User-Centric Validation: Black concerns.
+logic from user interface and box testing simulates real-world Performance Limits: The
+data access. user behavior to ensure workflows current design may struggle
+3.Role-Based Access Control (like resume submission) with high concurrency
+(RBAC): Manages permissions function as expected. processing and lacks
+for students, enterprises, and Data Integrity: Database asynchronous processing for
+administrators. normalization (foreign keys) heavy loads.
+4.Black Box Testing: Validates ensures consistent relationships Mobile Limitations: The
+functionality against between colleges, majors, and system currently lacks mobile
+requirements without students. device adaptation, which
+inspecting internal code paths. restricts accessibility for
+students.
+12
+
+--- TABLES ---
+Table 1:
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Smart Hiring Redefined: An 1.J2EE Three-Tier Architecture: Maintainability: The layered Architectural Coupling: In Intelligent Recruitment Structured into presentation, architecture ensures high some implementations, the Management Platform [8] business logic, and data service cohesion and low coupling, service layer directly layers. making future modifications manipulated request objects, 2.MVC (Model-View-Controller) easier. reducing true separation of Pattern: Separates business User-Centric Validation: Black concerns. logic from user interface and box testing simulates real-world Performance Limits: The data access. user behavior to ensure workflows current design may struggle 3.Role-Based Access Control (like resume submission) with high concurrency (RBAC): Manages permissions function as expected. processing and lacks for students, enterprises, and Data Integrity: Database asynchronous processing for administrators. normalization (foreign keys) heavy loads. 4.Black Box Testing: Validates ensures consistent relationships Mobile Limitations: The functionality against between colleges, majors, and system currently lacks mobile requirements without students. device adaptation, which inspecting internal code paths. restricts accessibility for students.
+
+
+============================================================
+PAGE 13
+============================================================
+Literature Survey
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Enhancing recruitment 1.Natural Language Processing Structured Data Extraction: Computational Cost: The KNN
+efficiency: An advanced (NLP): Uses TF-IDF and NLP effectively converts algorithm became
+Applicant Tracking System tokenization for text parsing unstructured resume text into computationally inefficient
+(ATS) [9] and cleaning. structured formats for analysis. when processing large datasets.
+2.K-Nearest Neighbors (KNN): Pattern Recognition: The Infrastructure Overhead:
+Algorithm used for classifying system handles complex While scalable, cloud
+resumes based on skill relationships and patterns in infrastructure entails
+proficiency and experience. data without assuming management overhead and
+3.Agile Development underlying distributions. potential cost implications.
+Methodology: Utilizes Rapid Adaptation: Agile Integration Complexity:
+Scrum/Kanban for iterative methodology enables the team Merging the ATS with existing
+development and deployment. to quickly incorporate feedback infrastructures presents
+4.Cloud-Based Deployment: and release features obstacles regarding data
+Architecture designed for incrementally. transfer and compatibility.
+scalability via cloud computing
+resources.
+13
+
+--- TABLES ---
+Table 1:
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Enhancing recruitment 1.Natural Language Processing Structured Data Extraction: Computational Cost: The KNN efficiency: An advanced (NLP): Uses TF-IDF and NLP effectively converts algorithm became Applicant Tracking System tokenization for text parsing unstructured resume text into computationally inefficient (ATS) [9] and cleaning. structured formats for analysis. when processing large datasets. 2.K-Nearest Neighbors (KNN): Pattern Recognition: The Infrastructure Overhead: Algorithm used for classifying system handles complex While scalable, cloud resumes based on skill relationships and patterns in infrastructure entails proficiency and experience. data without assuming management overhead and 3.Agile Development underlying distributions. potential cost implications. Methodology: Utilizes Rapid Adaptation: Agile Integration Complexity: Scrum/Kanban for iterative methodology enables the team Merging the ATS with existing development and deployment. to quickly incorporate feedback infrastructures presents 4.Cloud-Based Deployment: and release features obstacles regarding data Architecture designed for incrementally. transfer and compatibility. scalability via cloud computing resources.
+
+
+============================================================
+PAGE 14
+============================================================
+Literature Survey
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+A Multi-Module Applicant 1.Modular Architecture: System End-to-End Management: Generalizability Limits: Early
+Tracking System: From Job divided into independent Covers the entire lifecycle from iterations or specific algorithm
+Posting To Employee Hiring, Employee Management, job posting to performance choices may lack
+Performance Monitoring [10] and Performance modules. analytics, bridging the gap generalizability across different
+2.MERN Stack Implementation: between ATS and HRMS. industries.
+Uses MongoDB, Express, React, Extensibility: The modular External Factors: Data-centric
+and Node.js for development. design allows specific performance modules may
+3.Rule-Based & ML Scoring: components (like performance overlook external, qualitative
+Combines machine learning tracking) to be updated without factors influencing employee
+with rule-based logic for affecting others. performance.
+candidate ranking. Efficiency: Users reported a Dependency on Feedback: The
+4.Agile/Iterative Development: greater than 60% reduction in development relies heavily on
+employed sprint cycles with manual effort due to test user feedback, which might
+continuous user feedback. automation features. bias the system toward specific
+user preferences.
+14
+
+--- TABLES ---
+Table 1:
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+A Multi-Module Applicant 1.Modular Architecture: System End-to-End Management: Generalizability Limits: Early Tracking System: From Job divided into independent Covers the entire lifecycle from iterations or specific algorithm Posting To Employee Hiring, Employee Management, job posting to performance choices may lack Performance Monitoring [10] and Performance modules. analytics, bridging the gap generalizability across different 2.MERN Stack Implementation: between ATS and HRMS. industries. Uses MongoDB, Express, React, Extensibility: The modular External Factors: Data-centric and Node.js for development. design allows specific performance modules may 3.Rule-Based & ML Scoring: components (like performance overlook external, qualitative Combines machine learning tracking) to be updated without factors influencing employee with rule-based logic for affecting others. performance. candidate ranking. Efficiency: Users reported a Dependency on Feedback: The 4.Agile/Iterative Development: greater than 60% reduction in development relies heavily on employed sprint cycles with manual effort due to test user feedback, which might continuous user feedback. automation features. bias the system toward specific user preferences.
+
+
+============================================================
+PAGE 15
+============================================================
+Literature Survey
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Enhancing Talent Search 1.Fine-Grained JD Encoding: JD Encoding: Captures implicit Data Dependency: Relies on
+Ranking with Role-Aware Uses LLMs with Chain-of- signals and fine-grained sufficient historical interaction
+Expert Mixtures and LLM- Thought (CoT) prompting to preferences often missed by data, limiting effectiveness in
+based Fine-Grained Job extract implicit preferences,. keyword matching. cold-start scenarios.
+Descriptions [11] 2. Gated Cross Network (GCN): Role-Aware MMoE: Adapts Temporal Limitations: Does
+Models interactions between JD ranking strategies to the not explicitly account for
+and resume embeddings. behavioral heterogeneity of temporal dynamics in recruiter
+3.Role-Aware MMoE: Multi-gate different recruiter roles. behavior or job market trends.
+Mixture-of-Experts network MTL: Mitigates behavioral Complexity: Increasing the
+with role-specific gating noise from subjective number of experts beyond
+4.Multi-Task Learning (MTL): judgments and improves three resulted in decreased
+Jointly predicts CTR, CVR, and robustness of predictions,. performance due to overfitting.
+resume relevance using a Impact: Demonstrated
+shared expert architecture. significant gains in CVR
+5.Online A/B Testing: Evaluated (5.97%) and Click-Through
+using Google's standard Conversion Rate (17.29%),.
+protocol.
+15
+
+--- TABLES ---
+Table 1:
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Enhancing Talent Search 1.Fine-Grained JD Encoding: JD Encoding: Captures implicit Data Dependency: Relies on Ranking with Role-Aware Uses LLMs with Chain-of- signals and fine-grained sufficient historical interaction Expert Mixtures and LLM- Thought (CoT) prompting to preferences often missed by data, limiting effectiveness in based Fine-Grained Job extract implicit preferences,. keyword matching. cold-start scenarios. Descriptions [11] 2. Gated Cross Network (GCN): Role-Aware MMoE: Adapts Temporal Limitations: Does Models interactions between JD ranking strategies to the not explicitly account for and resume embeddings. behavioral heterogeneity of temporal dynamics in recruiter 3.Role-Aware MMoE: Multi-gate different recruiter roles. behavior or job market trends. Mixture-of-Experts network MTL: Mitigates behavioral Complexity: Increasing the with role-specific gating noise from subjective number of experts beyond 4.Multi-Task Learning (MTL): judgments and improves three resulted in decreased Jointly predicts CTR, CVR, and robustness of predictions,. performance due to overfitting. resume relevance using a Impact: Demonstrated shared expert architecture. significant gains in CVR 5.Online A/B Testing: Evaluated (5.97%) and Click-Through using Google's standard Conversion Rate (17.29%),. protocol.
+
+
+============================================================
+PAGE 16
+============================================================
+Literature Survey
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Fairness-Aware Ranking in 1.Bias Quantification Measures: DetGreedy: Simple to DetGreedy: Not guaranteed to
+Search & Recommendation Skew@k, MinSkew, MaxSkew, implement, high utility be feasible when the number of
+Systems with Application to and NDKL maintenance, and efficient for attribute values is $\ge$ 4.
+LinkedIn Talent Search [12] 2.DetGreedy Algorithm: Score attributes with low cardinality. NDKL: Cannot differentiate
+maximizing greedy mitigation DetConstSort: Theoretically between bias of equal extent in
+for re-ranking,. proven to be feasible for opposite directions and is hard
+3.DetCons Algorithm: Greedy satisfying fairness constraints,. to interpret.
+conservative mitigation Framework: Achieves fairness Skew@k: Defined for single
+focusing on minimum criteria like equality of attributes and depends on the
+representation requirements,. opportunity and demographic choice of $k$.
+4.DetRelaxed Algorithm: A parity without statistically
+relaxed variant of DetCons significant loss in business
+using integrality constraints. metrics,,.
+5.DetConstSort Algorithm:
+Interval constrained sorting for
+feasible mitigation.
+16
+
+--- TABLES ---
+Table 1:
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Fairness-Aware Ranking in 1.Bias Quantification Measures: DetGreedy: Simple to DetGreedy: Not guaranteed to Search & Recommendation Skew@k, MinSkew, MaxSkew, implement, high utility be feasible when the number of Systems with Application to and NDKL maintenance, and efficient for attribute values is $\ge$ 4. LinkedIn Talent Search [12] 2.DetGreedy Algorithm: Score attributes with low cardinality. NDKL: Cannot differentiate maximizing greedy mitigation DetConstSort: Theoretically between bias of equal extent in for re-ranking,. proven to be feasible for opposite directions and is hard 3.DetCons Algorithm: Greedy satisfying fairness constraints,. to interpret. conservative mitigation Framework: Achieves fairness Skew@k: Defined for single focusing on minimum criteria like equality of attributes and depends on the representation requirements,. opportunity and demographic choice of $k$. 4.DetRelaxed Algorithm: A parity without statistically relaxed variant of DetCons significant loss in business using integrality constraints. metrics,,. 5.DetConstSort Algorithm: Interval constrained sorting for feasible mitigation.
+
+
+============================================================
+PAGE 17
+============================================================
+Literature Survey
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+AI-Driven Decision-Making 1.Modular Multi-Agent Efficiency: Reduces screening Bias Inheritance: Inherits
+System for Hiring Process [13] Pipeline: Sequential agents for time per qualified candidate biases present in the recruiters'
+ingestion, context construction, from 3.33 hours (expert judgments used as ground truth
+verification, and scoring. human) to 1.70 hours. • for evaluation. •
+2.Public Data Verification: Explainability: Produces Ethical/Privacy Concerns:
+Agents use MCP tools to traceable component-level Public data scraping raises
+reports rather than just a black- issues regarding privacy,
+scrape and verify data from
+box score. consent, and potential bias. •
+platforms like LinkedIn and
+Cost: Significantly lower Cost Dependency: Operational
+GitHub.
+estimated processing cost costs are tied to third-party API
+3.Entity Linking
+($2.29) compared to human pricing (OpenAI).
+(NER+ED+NEL): Extracts and
+recruiters (~$50-$95).
+normalizes technologies/skills
+Risk Management: Explicitly
+from heterogeneous inputs.
+penalizes risks (e.g., date
+4.Scoring Formula: Combines
+inconsistencies, toxic content)
+technical fit, culture fit, and
+in the final score.
+normalized risk penalties..
+17
+
+--- TABLES ---
+Table 1:
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+AI-Driven Decision-Making 1.Modular Multi-Agent Efficiency: Reduces screening Bias Inheritance: Inherits System for Hiring Process [13] Pipeline: Sequential agents for time per qualified candidate biases present in the recruiters' ingestion, context construction, from 3.33 hours (expert judgments used as ground truth verification, and scoring. human) to 1.70 hours. • for evaluation. • 2.Public Data Verification: Explainability: Produces Ethical/Privacy Concerns: Agents use MCP tools to traceable component-level Public data scraping raises reports rather than just a black- issues regarding privacy, scrape and verify data from box score. consent, and potential bias. • platforms like LinkedIn and Cost: Significantly lower Cost Dependency: Operational GitHub. estimated processing cost costs are tied to third-party API 3.Entity Linking ($2.29) compared to human pricing (OpenAI). (NER+ED+NEL): Extracts and recruiters (~$50-$95). normalizes technologies/skills Risk Management: Explicitly from heterogeneous inputs. penalizes risks (e.g., date 4.Scoring Formula: Combines inconsistencies, toxic content) technical fit, culture fit, and in the final score. normalized risk penalties..
+
+
+============================================================
+PAGE 18
+============================================================
+Literature Survey
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Optimizing Job Matching 1.Preprocessing Pipeline: SVM Performance: Support KNN Performance: KNN
+Through Automated Resume Remove URLs, hashtags, Vector Machine achieved the demonstrated the lowest
+Screening with NLP and highest accuracy (1.0 training, accuracy among the tested
+mentions, and punctuation.
+Machine Learning [14] ~0.99 testing). models.
+2.Text Normalization:
+TF-IDF: Effectively highlights Stemming Limitations:
+Tokenization, Stemming, and
+important terms relative to the Stemming is less accurate than
+Lemmatization.
+corpus, filtering out common lemmatization as it simply
+3.TF-IDF Vectorization:
+but irrelevant words. chops word ends rather than
+Converts cleaned text into
+Efficiency: Automates the using a dictionary.
+numerical vectors based on
+burdensome manual sorting Complexity: Requires
+term importance.
+process, allowing HR to focus extensive preprocessing
+4.Machine Learning
+on interviews. (cleaning, tokenizing) before
+Classification: Compare
+the model can process data.
+KNN, Random Forest, SVM,
+and Logistic Regression.
+5.One-vs-Rest Classification:
+Adapted Logistic Regression for
+multi-class categorization.
+18
+
+--- TABLES ---
+Table 1:
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Optimizing Job Matching 1.Preprocessing Pipeline: SVM Performance: Support KNN Performance: KNN Through Automated Resume Remove URLs, hashtags, Vector Machine achieved the demonstrated the lowest Screening with NLP and highest accuracy (1.0 training, accuracy among the tested mentions, and punctuation. Machine Learning [14] ~0.99 testing). models. 2.Text Normalization: TF-IDF: Effectively highlights Stemming Limitations: Tokenization, Stemming, and important terms relative to the Stemming is less accurate than Lemmatization. corpus, filtering out common lemmatization as it simply 3.TF-IDF Vectorization: but irrelevant words. chops word ends rather than Converts cleaned text into Efficiency: Automates the using a dictionary. numerical vectors based on burdensome manual sorting Complexity: Requires term importance. process, allowing HR to focus extensive preprocessing 4.Machine Learning on interviews. (cleaning, tokenizing) before Classification: Compare the model can process data. KNN, Random Forest, SVM, and Logistic Regression. 5.One-vs-Rest Classification: Adapted Logistic Regression for multi-class categorization.
+
+
+============================================================
+PAGE 19
+============================================================
+Literature Survey
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+ResumAI: Revolutionizing 1.Named Entity Recognition Linear SVC Accuracy: The Computation: BERT is
+Automated Resume Analysis (NER): Uses SpaCy to extract Linear Support Vector computationally complex
+and Recommendation with names and specific entities,. Classifier achieved a high compared to simpler methods
+Multi-Model Intelligence [15] 2.Resume Parsing: Converts accuracy of 98.63%. • like TF-IDF.
+files with pdfminer Contextual Analysis: BERT Naive Bayes Performance:
+embeddings capture contextual Multinomial Naive Bayes
+/doc2text and extracts
+relationships between words, showed significantly lower
+contacts via regex/URLs.
+providing rich representations. accuracy (73.97%) compared to
+3.Similarity Computation:
+Automation: Eliminates SVC.
+Ranks using cosine similarity
+manual crawling by extracting Dependency: Requires
+on BERT and TF-IDF
+structured data from vectorization of textual data
+embeddings.
+unstructured formats before any ML processing can
+4.Classification Models:
+(PDF/DOCX),. occur.
+Comparison of Multinomial
+Naive Bayes, Linear SVC, and
+k-NN classifiers,.
+19
+
+--- TABLES ---
+Table 1:
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+ResumAI: Revolutionizing 1.Named Entity Recognition Linear SVC Accuracy: The Computation: BERT is Automated Resume Analysis (NER): Uses SpaCy to extract Linear Support Vector computationally complex and Recommendation with names and specific entities,. Classifier achieved a high compared to simpler methods Multi-Model Intelligence [15] 2.Resume Parsing: Converts accuracy of 98.63%. • like TF-IDF. files with pdfminer Contextual Analysis: BERT Naive Bayes Performance: embeddings capture contextual Multinomial Naive Bayes /doc2text and extracts relationships between words, showed significantly lower contacts via regex/URLs. providing rich representations. accuracy (73.97%) compared to 3.Similarity Computation: Automation: Eliminates SVC. Ranks using cosine similarity manual crawling by extracting Dependency: Requires on BERT and TF-IDF structured data from vectorization of textual data embeddings. unstructured formats before any ML processing can 4.Classification Models: (PDF/DOCX),. occur. Comparison of Multinomial Naive Bayes, Linear SVC, and k-NN classifiers,.
+
+
+============================================================
+PAGE 20
+============================================================
+Literature Survey
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Predicting Skill Shortages in 1.Data Integration: Linked job Granular Insight: RCA reveals Inertia Bias: Auto-regressive
+Labour Markets: A Machine ads with labour statistics using specialised/emerging skills that features dominate predictions,
+Learning Approach [16] frequency counts miss making the model poor at
+ANZSCO taxonomy.
+High Performance: XGBoost predicting changes or "flips" in
+2.RCA Metric: Identified
+handles missing data well and shortage status,.
+emerging skills via normalized
+achieved up to 83% Macro-F1 Data Representativeness:
+importance.
+scores,. Online job ads over-represent
+3.XGBoost Classification:
+Scalability: Uses standard white-collar roles and miss
+Predicted skill shortage status.
+labour demand/supply data informal/traditional hiring
+4.Lagged Features: Captured
+available in most advanced sectors.
+temporal trends using past
+economies, making it replicable. Class Imbalance: Shortage
+data.
+Interpretability: Feature events are rare, requiring
+importance confirms economic synthetic oversampling which
+theories can lead to overfitting,.
+20
+
+--- TABLES ---
+Table 1:
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Predicting Skill Shortages in 1.Data Integration: Linked job Granular Insight: RCA reveals Inertia Bias: Auto-regressive Labour Markets: A Machine ads with labour statistics using specialised/emerging skills that features dominate predictions, Learning Approach [16] frequency counts miss making the model poor at ANZSCO taxonomy. High Performance: XGBoost predicting changes or "flips" in 2.RCA Metric: Identified handles missing data well and shortage status,. emerging skills via normalized achieved up to 83% Macro-F1 Data Representativeness: importance. scores,. Online job ads over-represent 3.XGBoost Classification: Scalability: Uses standard white-collar roles and miss Predicted skill shortage status. labour demand/supply data informal/traditional hiring 4.Lagged Features: Captured available in most advanced sectors. temporal trends using past economies, making it replicable. Class Imbalance: Shortage data. Interpretability: Feature events are rare, requiring importance confirms economic synthetic oversampling which theories can lead to overfitting,.
+
+
+============================================================
+PAGE 21
+============================================================
+Literature Survey
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+A Comprehensive Survey of 1.Taxonomy Creation: Semantic Depth: BERT/GNN Data Hunger: Requires large,
+Artificial Intelligence Categorised AI use cases in HR capture rich contextual labeled HR datasets.
+Techniques for Talent Analytics
+and labour markets. meaning beyond keywords. Bias Risk: Can amplify
+[17]
+2.Parsing: NLP/OCR extract Objectivity: ONA reduces bias historical gender or racial
+structured resume and job versus manual evaluations. biases.
+data. Efficiency: Automates resume Low Interpretability: Black-
+3.Person–Job Fit: Deep models screening and benchmarking box models limit
+match candidates to roles. at scale. explainability.
+4.ONA: Graph models analyse Dynamic Modelling: Tracks Privacy Concerns: ONA raises
+employee networks. evolving skills using time- ethical and employee privacy
+5.Forecasting: Time-series series models. issues.
+models predict skill demand
+trends.
+21
+
+--- TABLES ---
+Table 1:
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+A Comprehensive Survey of 1.Taxonomy Creation: Semantic Depth: BERT/GNN Data Hunger: Requires large, Artificial Intelligence Categorised AI use cases in HR capture rich contextual labeled HR datasets. Techniques for Talent Analytics and labour markets. meaning beyond keywords. Bias Risk: Can amplify [17] 2.Parsing: NLP/OCR extract Objectivity: ONA reduces bias historical gender or racial structured resume and job versus manual evaluations. biases. data. Efficiency: Automates resume Low Interpretability: Black- 3.Person–Job Fit: Deep models screening and benchmarking box models limit match candidates to roles. at scale. explainability. 4.ONA: Graph models analyse Dynamic Modelling: Tracks Privacy Concerns: ONA raises employee networks. evolving skills using time- ethical and employee privacy 5.Forecasting: Time-series series models. issues. models predict skill demand trends.
+
+
+============================================================
+PAGE 22
+============================================================
+Literature Survey
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Tec-Habilidad: Skill 1.Zero-shot Extraction: Used Language Gap: Addresses lack LLM Limitations: Zero-shot
+Classification for Bridging GPT-3.5-Turbo to extract skills of non-English (Spanish) skill LLMs performed significantly
+Education and Employment [18] worse (0.40-0.48 accuracy)
+without training data. datasets.
+compared to fine-tuned BERT
+2.KSAO Mapping: Grouped Definition Boost: Adding
+models (0.85+),.
+skills into Knowledge, Skills, definitions significantly
+Soft Skill Nuance: LLMs
+Abilities, and Other. improved accuracy.
+struggled to identify implicit
+3.Definition Augmentation: Automation Potential: Fine-
+soft skills, achieving only 52%
+Added skill definitions to tuned Transformers
+overlap with human labels.
+improve context. outperformed human
+Class Confusion: Models
+4.Zero-shot Classification: agreement.
+struggled to distinguish
+Evaluated LLMs for skill
+between "Skill" and "Knowledge"
+classification tasks.
+due to conceptual overlap,.
+22
+
+--- TABLES ---
+Table 1:
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Tec-Habilidad: Skill 1.Zero-shot Extraction: Used Language Gap: Addresses lack LLM Limitations: Zero-shot Classification for Bridging GPT-3.5-Turbo to extract skills of non-English (Spanish) skill LLMs performed significantly Education and Employment [18] worse (0.40-0.48 accuracy) without training data. datasets. compared to fine-tuned BERT 2.KSAO Mapping: Grouped Definition Boost: Adding models (0.85+),. skills into Knowledge, Skills, definitions significantly Soft Skill Nuance: LLMs Abilities, and Other. improved accuracy. struggled to identify implicit 3.Definition Augmentation: Automation Potential: Fine- soft skills, achieving only 52% Added skill definitions to tuned Transformers overlap with human labels. improve context. outperformed human Class Confusion: Models 4.Zero-shot Classification: agreement. struggled to distinguish Evaluated LLMs for skill between "Skill" and "Knowledge" classification tasks. due to conceptual overlap,.
+
+
+============================================================
+PAGE 23
+============================================================
+Literature Survey
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Real-Time AI-Based Skill Gap 1.Feature Encoding: Generated Integrity Assurance: Prevents • Complexity: Managing weights
+Analysis and Adaptive Career NLP embeddings for candidates impersonation via facial for similarity scoring (experience
+Guidance [19] and jobs. recognition. vs. certs vs. skills) introduces
+2.Similarity Scoring: Weighted Personalisation: Recommends complexity in tuning the matching
+cosine similarity on skills and targeted projects and courses. algorithm.
+experience. Holistic Matching: Weighs • Dependency: Relies heavily on
+3.Generative Matching: Used verified and inferred skills. external APIs (Gemini, News API),
+Gemini Flash 1.5 for semantic Dynamic Updates: Auto- creating potential points of failure
+matching. updates profiles after tests. or cost scaling issues.
+4.Skill Gap Detection: Classified • Input Quality: Profile accuracy
+missing skills as critical or depends on comprehensive user
+recommended. input; poor data entry degrades
+5.Market Intelligence: Integrated matching quality.
+real-time labour trend data.
+23
+
+--- TABLES ---
+Table 1:
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+
+Real-Time AI-Based Skill Gap 1.Feature Encoding: Generated Integrity Assurance: Prevents • Complexity: Managing weights Analysis and Adaptive Career NLP embeddings for candidates impersonation via facial for similarity scoring (experience Guidance [19] and jobs. recognition. vs. certs vs. skills) introduces 2.Similarity Scoring: Weighted Personalisation: Recommends complexity in tuning the matching cosine similarity on skills and targeted projects and courses. algorithm. experience. Holistic Matching: Weighs • Dependency: Relies heavily on 3.Generative Matching: Used verified and inferred skills. external APIs (Gemini, News API), Gemini Flash 1.5 for semantic Dynamic Updates: Auto- creating potential points of failure matching. updates profiles after tests. or cost scaling issues. 4.Skill Gap Detection: Classified • Input Quality: Profile accuracy missing skills as critical or depends on comprehensive user recommended. input; poor data entry degrades 5.Market Intelligence: Integrated matching quality. real-time labour trend data.
+
+
+
+============================================================
+PAGE 24
+============================================================
+Literature Survey
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+Using Graph Algorithms for 1.Knowledge Graph: Integrated • Standardisation: Integrating • Data Sensitivity: Graph
+Skills Gap Analysis [20] employee data with O*NET in O*NET data provides a connectivity is highly sensitive to
+transferable, standardised the chosen similarity cutoff
+Neo4j.
+ontology for skills across the threshold (e.g., 0.5), which
+2.PageRank: Identified important
+organisation. requires business domain tuning.
+skills and tasks globally and per
+• Hidden Connections: Identifies • Interpretation Difficulty: Large
+role.
+employees with similar skills who communities detected by Louvain
+3.Node Similarity: Linked
+aren't formally connected, aiding can be generic and hard to
+employees using Jaccard
+internal mobility/recruiting. interpret without deep domain
+similarity.
+• Network Stability: Triangle knowledge.
+4.Community Detection: Used
+count metrics help identify fragile • Cold Start: Requires a densely
+Louvain to find functional
+teams or isolated employees connected network; sparse data
+groups.
+needing better integration. prevents effective community
+5.Triangle Count: Measured
+• Targeted Prioritisation: detection or similarity scoring.
+network cohesion and stability.
+Personalised PageRank helps HR
+prioritise which skills are most
+critical when hiring for roles.
+24
+
+--- TABLES ---
+Table 1:
+PAPER TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+
+Using Graph Algorithms for 1.Knowledge Graph: Integrated • Standardisation: Integrating • Data Sensitivity: Graph Skills Gap Analysis [20] employee data with O*NET in O*NET data provides a connectivity is highly sensitive to transferable, standardised the chosen similarity cutoff Neo4j. ontology for skills across the threshold (e.g., 0.5), which 2.PageRank: Identified important organisation. requires business domain tuning. skills and tasks globally and per • Hidden Connections: Identifies • Interpretation Difficulty: Large role. employees with similar skills who communities detected by Louvain 3.Node Similarity: Linked aren't formally connected, aiding can be generic and hard to employees using Jaccard internal mobility/recruiting. interpret without deep domain similarity. • Network Stability: Triangle knowledge. 4.Community Detection: Used count metrics help identify fragile • Cold Start: Requires a densely Louvain to find functional teams or isolated employees connected network; sparse data groups. needing better integration. prevents effective community 5.Triangle Count: Measured • Targeted Prioritisation: detection or similarity scoring. network cohesion and stability. Personalised PageRank helps HR prioritise which skills are most
+critical when hiring for roles.
+
+
+============================================================
+PAGE 25
+============================================================
+Block Diagram
+25
+
+============================================================
+PAGE 26
+============================================================
+Implementation
+Frontend Backend AI and Data Processing
+1 2 3
+React 18 with Vite
+Node.js with Express.js
+Natural.js for NLP and TF-IDF
+React Router DOM
+JavaScript (ES6 Modules)
+PDF resume parsing using pdf-parse
+TailwindCSS with Autoprefixer
+RESTful API architecture
+Cosine similarity for matching
+Lucide-React (UI icons)
+JWT authentication and bcrypt.js
+Rule-based candidate ranking
+Recharts (data visualization)
+Multer for resume file uploads
+Break-aware round-robin scheduling
+Axios (API communication)
+algorithm
+26
+
+============================================================
+PAGE 27
+============================================================
+Implementation
+Database External Integrations Development Tools
+1 2 3
+PostgreSQL relational database
+Adzuna API and Jooble API
+Git for version control
+Normalized schema design
+Notification service
+npm for package management
+Core entities: Users, Jobs, Applications,
+Vite and Nodemon for development
+Resumes, Interviews, Companies
+dotenv for environment management
+27
+
+============================================================
+PAGE 28
+============================================================
+System Architecture
+HireX follows a layered, modular architecture to ensure scalability
+and maintainability.
+Users access the system through a unified frontend interface.
+The frontend communicates with backend services using secure
+APIs.
+Backend services manage authentication, job aggregation,
+applications, and scheduling.
+An AI layer performs resume parsing, matching, ranking, and
+shortlisting.
+A centralized database stores all recruitment-related data.
+External systems provide job listings and notification support.
+28
+
+============================================================
+PAGE 29
+============================================================
+Result
+29
+
+============================================================
+PAGE 30
+============================================================
+Result
+30
+
+============================================================
+PAGE 31
+============================================================
+Future Work
+Enhance AI models using advanced machine learning and deep learning
+techniques for improved matching accuracy.
+Implement full ATS automation to support end-to-end recruitment
+workflows.
+Integrate advanced talent analytics for predictive hiring insights and
+performance tracking.
+Improve bias detection and mitigation mechanisms to ensure fair
+recruitment decisions.
+Expand notification and communication features with full email and
+calendar integrations.
+Support large-scale deployment with improved scalability and
+performance optimization.
+31
+
+============================================================
+PAGE 32
+============================================================
+Conclusion
+HireX presents an AI-powered recruitment platform that automates
+and streamlines the hiring process.
+The system integrates resume analysis, intelligent matching,
+candidate ranking, and interview scheduling.
+A modular and scalable architecture enables efficient data
+management and system extensibility.
+AI-driven decision support improves hiring accuracy, fairness, and
+efficiency.
+The platform demonstrates strong potential for real-world
+deployment in modern recruitment environments.
+32
+
+============================================================
+PAGE 33
+============================================================
+References
+[1] Wang, Ziyang, et al. "Person-job fit estimation from candidate profile and related recruitment history with co-attention neural
+networks." Neurocomputing 501 (2022): 14-24.
+[2] Gangoda, Nikethani, et al. "Resume ranker: Ai-based skill analysis and skill matching system." 2024 Sixth International Conference
+on Intelligent Computing in Data Sciences (ICDS). IEEE, 2024.
+[3] Singla, Priti, et al. "Streamlining Talent Acquisition: A Machine Learning Approach to Automated Resume Screening." 2024
+Second International Conference on Advanced Computing & Communication Technologies (ICACCTech). IEEE, 2024.
+[4] Dhanalakshmi, R. V., et al. "AI-Powered Resume Screening System Using NLP and Machine Learning." 2025 3rd International
+Conference on Inventive Computing and Informatics (ICICI). IEEE, 2025.
+[5] Pradeepa, R., et al. "Intelligent Resume Evaluation Tool Based on Machine Learning for Analysis And Career Advancement." 2024
+International Conference on Emerging Research in Computational Science (ICERCS). IEEE, 2024.
+[6] Horodyski, Piotr. "Recruiter's perception of artificial intelligence (AI)-based tools in recruitment." Computers in Human Behavior
+Reports 10 (2023): 100298.
+[7] Dražeta, Lazar. "Applicant Tracking System: A Powerful Recruiters’ Tool." Sinteza 2024-International Scientific Conference on
+Information Technology, Computer Science, and Data Science. Singidunum University, 2024.
+[8] Wu, Fangzhe, Dongyang Lyu, and Xiaoqi Li. "Smart Hiring Redefined: An Intelligent Recruitment Management Platform." arXiv
+preprint arXiv:2510.04437 (2025).
+33
+
+============================================================
+PAGE 34
+============================================================
+References
+[9] Chavan, P. R., et al. "Enhancing recruitment efficiency: An advanced applicant tracking system (ATS)." Industrial Management
+Advances 2.1 (2024): 6373-6373.
+[10] Ruzza, Giuseppe, et al. "A multi-module fixed inclinometer for continuous monitoring of landslides: Design, development, and
+laboratory testing." Sensors 20.11 (2020): 3318.
+[11] Geyik, Sahin Cem, Stuart Ambler, and Krishnaram Kenthapadi. "Fairness-aware ranking in search & recommendation systems
+with application to linkedin talent search." Proceedings of the 25th acm sigkdd international conference on knowledge discovery &
+data mining. 2019.
+[12] Li, Jihang, et al. "Enhancing Talent Search Ranking with Role-Aware Expert Mixtures and LLM-based Fine-Grained Job
+Descriptions." Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing: Industry Track. 2025.
+[13] Filatova, Vira, Andrii Zelenchuk, and Dmytro Filatov. "AI-Driven Decision-Making System for Hiring Process." arXiv preprint
+arXiv:2512.20652 (2025).
+[14] Surya, CH Sai, et al. "Optimizing Job Matching Through Automated Resume Screening with NLP and Machine Learning." 2024
+IEEE International Conference on Intelligent Signal Processing and Effective Communication Technologies (INSPECT). IEEE, 2024.
+[15] Jacob, Prisly Mary, et al. "ResumAI: Revolutionizing automated resume analysis and recommendation with multi-model
+intelligence." 2023 Global Conference on Information Technologies and Communications (GCITC). IEEE, 2023.
+34
+
+============================================================
+PAGE 35
+============================================================
+References
+Dawson, Nikolas, et al. "Predicting skill shortages in labor markets: A machine learning approach." 2020 IEEE International
+[16]
+Conference on Big Data (Big Data). IEEE, 2020.
+Qin, Chuan, et al. "A comprehensive survey of artificial intelligence techniques for talent analytics." Proceedings of the IEEE
+[17]
+(2025).
+Butt, Sabur, Hector G. Ceballos, and Diana P. Madera-Espíndola. "Tec-Habilidad: Skill Classification for Bridging Education and
+[18]
+Employment." Mexican International Conference on Artificial Intelligence. Cham: Springer Nature Switzerland, 2025.
+Sengupta, Sharmila, et al. "Real-Time AI-Based Skill Gap Analysis and Adaptive Career Guidance Using a Generative AI
+[19]
+Framework for the Modern Job Market." 2025 5th Asian Conference on Innovation in Technology (ASIANCON). IEEE, 2025.
+Choi, Jay, et al. "Using graph algorithms for skills gap analysis." 2021 systems and information engineering design symposium
+[20]
+(sieds). IEEE, 2021.
+35

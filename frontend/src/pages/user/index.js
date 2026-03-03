@@ -11,4 +11,5 @@ export { default as TestResultPage } from './TestResultPage';
 export { default as CandidateCodingDashboard } from './CandidateCodingDashboard';
 export { default as CodingTestAttempt } from './CodingTestAttempt';
 export { default as CodingResultPage } from './CodingResultPage';
+export { default as RecommendedJobs } from './RecommendedJobs';
 

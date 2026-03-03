@@ -143,7 +143,7 @@ router.post('/impersonate/:userId', auth, requireAdmin, async (req, res) => {
 
         const user = rows[0];
 
-        // Generate impersonation token (shorter expiry for safety or same as default)
+        // Generate impersonation token
         const token = jwt.sign(
             {
                 userId: user.id,
@@ -153,7 +153,7 @@ router.post('/impersonate/:userId', auth, requireAdmin, async (req, res) => {
                 adminId: adminId
             },
             process.env.JWT_SECRET,
-            { expiresIn: '2h' } // Limited duration for impersonation
+            { expiresIn: '2h' }
         );
 
         console.log(`[Admin] Admin ${adminId} impersonating user ${targetUserId}`);

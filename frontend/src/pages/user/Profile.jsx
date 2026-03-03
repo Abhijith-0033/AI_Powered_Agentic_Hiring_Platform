@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '../../components/layout';
-import { Button } from '../../components/ui';
+import { Button, LoadingSpinner } from '../../components/ui';
 import { getUserProfile, updateUserProfile, updateFresherStatus, getProfileResume, uploadResume, getProfileImage, uploadProfileImage } from '../../api/users';
 
 // Profile Components
@@ -334,7 +334,7 @@ const Profile = () => {
     if (loading) {
         return (
             <DashboardLayout type="user" title="Profile">
-                <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div></div>
+                <LoadingSpinner size="lg" color="text-primary-600" className="py-20" />
             </DashboardLayout>
         );
     }

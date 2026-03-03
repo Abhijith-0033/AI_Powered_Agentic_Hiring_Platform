@@ -5,6 +5,7 @@ import codingService from '../../services/codingService';
 import MonacoCodeEditor from '../../components/coding/MonacoCodeEditor';
 import SubmissionCodeModal from '../../components/coding/SubmissionCodeModal';
 import axios from '../../api/axios';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 const CodingTestsPage = () => {
     const [activeTab, setActiveTab] = useState('list'); // list | create | edit | results
@@ -289,9 +290,7 @@ const CodingTestsPage = () => {
             </div>
 
             {loading ? (
-                <div className="flex items-center justify-center py-20">
-                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-violet-600"></div>
-                </div>
+                <LoadingSpinner size="lg" color="text-violet-600" className="py-20" />
             ) : tests.length === 0 ? (
                 <div className="bg-white rounded-xl border border-neutral-200 p-12 text-center">
                     <div className="w-16 h-16 bg-neutral-50 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -628,9 +627,7 @@ const CodingTestsPage = () => {
             </div>
 
             {loadingResults ? (
-                <div className="flex items-center justify-center py-20">
-                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-violet-600"></div>
-                </div>
+                <LoadingSpinner size="lg" color="text-violet-600" className="py-20" />
             ) : results.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-neutral-200 p-12 text-center shadow-sm">
                     <Users className="w-12 h-12 text-neutral-200 mx-auto mb-4" />

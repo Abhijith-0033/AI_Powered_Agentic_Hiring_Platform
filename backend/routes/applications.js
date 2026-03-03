@@ -502,7 +502,13 @@ router.get('/recruiter/interview-candidates', auth, roleGuard('recruiter'), asyn
  * Auth: Recruiter only (owner of the job)
  */
 router.get('/recruiter/applications/:id/resume', auth, roleGuard('recruiter'), async (req, res) => {
-    const client = await pool.connect();
+    let client;
+    try {
+        client = await pool.connect();
+    } catch (connErr) {
+        console.error('DB connection error in resume route:', connErr);
+        return res.status(503).json({ success: false, message: 'Database connection unavailable, please retry.' });
+    }
     try {
         const userId = req.user.userId;
         const applicationId = req.params.id;
@@ -546,9 +552,11 @@ router.get('/recruiter/applications/:id/resume', auth, roleGuard('recruiter'), a
 
     } catch (error) {
         console.error('Error fetching resume:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
+        if (!res.headersSent) {
+            res.status(500).json({ success: false, message: 'Server error' });
+        }
     } finally {
-        client.release();
+        if (client) client.release();
     }
 });
 
@@ -587,22 +595,50 @@ router.get('/recruiter/applications/:id/profile-snapshot', auth, roleGuard('recr
         const { rows: snapshotRows } = await pool.query(snapshotQuery, [applicationId]);
 
         if (snapshotRows.length > 0) {
-            // Return snapshot
-            return res.json({
-                success: true,
-                data: {
-                    snapshot: snapshotRows[0].profile_snapshot,
-                    is_snapshot: true,
-                    snapshot_date: snapshotRows[0].created_at
+            let snapshot = snapshotRows[0].profile_snapshot;
+            const snapshotDate = snapshotRows[0].created_at;
+
+            // FIX: If snapshot is incomplete (missing name/email), skip it and use live data
+            const hasValidPersonalInfo = snapshot?.personal_info?.name || snapshot?.personal_info?.email;
+            if (!hasValidPersonalInfo) {
+                console.log(`[Snapshot] Snapshot for app ${applicationId} has incomplete personal_info. Falling back to live data.`);
+                // Fall through to live data fetch below
+            } else {
+                // FIX: If snapshot photo is a blob URL (broken), try to fetch current live photo
+                if (snapshot.profile_image_url && snapshot.profile_image_url.startsWith('blob:')) {
+                    console.log(`[Snapshot] Found broken blob URL in snapshot for app ${applicationId}. Fetching live photo.`);
+                    try {
+                        const imgRes = await pool.query(
+                            'SELECT image_data, image_type FROM job_seeker_profile_image WHERE job_seeker_id = $1',
+                            [candidate_id]
+                        );
+                        if (imgRes.rows.length > 0) {
+                            const { image_data, image_type } = imgRes.rows[0];
+                            snapshot.profile_image_url = `data:${image_type || 'image/png'};base64,${image_data.toString('base64')}`;
+                        } else {
+                            snapshot.profile_image_url = null;
+                        }
+                    } catch (imgErr) {
+                        console.error('[Snapshot] Error fetching live photo for broken snapshot:', imgErr);
+                    }
                 }
-            });
+
+                return res.json({
+                    success: true,
+                    data: {
+                        snapshot: snapshot,
+                        is_snapshot: true,
+                        snapshot_date: snapshotDate
+                    }
+                });
+            }
         }
 
         // 3. Fallback: Fetch live candidate data
         const liveQuery = `
             SELECT 
-                c.name, c.email, c.phone, c.location, c.linkedin, c.github,
-                c.about, c.job_title as title, c.skills, c.experience_years
+                c.id, c.name, c.email, c.phone_number as phone, c.location, c.linkedin_url as linkedin, c.github_url as github,
+                c.profile_description as about, c.job_title as title, c.skills, c.experience_years
             FROM candidates c
             WHERE c.id = $1
         `;
@@ -619,13 +655,21 @@ router.get('/recruiter/applications/:id/profile-snapshot', auth, roleGuard('recr
         const expQuery = 'SELECT * FROM candidate_experience WHERE candidate_id = $1';
         const achQuery = 'SELECT * FROM candidate_achievements WHERE candidate_id = $1';
         const projQuery = 'SELECT * FROM candidate_projects WHERE candidate_id = $1';
+        const imgQuery = 'SELECT image_data, image_type FROM job_seeker_profile_image WHERE job_seeker_id = $1';
 
-        const [eduRes, expRes, achRes, projRes] = await Promise.all([
+        const [eduRes, expRes, achRes, projRes, imgRes] = await Promise.all([
             pool.query(eduQuery, [candidate_id]),
             pool.query(expQuery, [candidate_id]),
             pool.query(achQuery, [candidate_id]),
-            pool.query(projQuery, [candidate_id])
+            pool.query(projQuery, [candidate_id]),
+            pool.query(imgQuery, [candidate_id])
         ]);
+
+        let profileImageUrl = null;
+        if (imgRes.rows.length > 0) {
+            const { image_data, image_type } = imgRes.rows[0];
+            profileImageUrl = `data:${image_type || 'image/png'};base64,${image_data.toString('base64')}`;
+        }
 
         const liveSnapshot = {
             personal_info: {
@@ -638,6 +682,7 @@ router.get('/recruiter/applications/:id/profile-snapshot', auth, roleGuard('recr
                 about: liveData.about,
                 title: liveData.title
             },
+            profile_image_url: profileImageUrl,
             skills: liveData.skills ? (typeof liveData.skills === 'string' ? liveData.skills.split(',') : liveData.skills) : [],
             education: eduRes.rows,
             experience: expRes.rows,

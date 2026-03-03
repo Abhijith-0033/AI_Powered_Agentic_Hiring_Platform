@@ -2,89 +2,124 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const pdf = require('pdf-parse');
 const natural = require('natural');
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 // Tokenizer and TF-IDF setup
 const tokenizer = new natural.WordTokenizer();
 const TfIdf = natural.TfIdf;
 
+// Gemini AI Setup
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+// For 1.5-flash the model string should just be "gemini-1.5-flash"
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+const SKILL_ALIASES = {
+    "js": "javascript",
+    "ts": "typescript",
+    "node": "nodejs",
+    "node.js": "nodejs",
+    "react.js": "react",
+    "ml": "machine learning",
+    "ai": "artificial intelligence",
+    "postgres": "postgresql",
+    "k8s": "kubernetes",
+    "aws": "amazon web services",
+    "gcp": "google cloud platform",
+    "css3": "css",
+    "html5": "html",
+    "py": "python"
+};
+
+const DEGREE_HIERARCHY = {
+    'phd': 4, 'doctorate': 4,
+    'masters': 3, 'msc': 3, 'mba': 3, 'meng': 3,
+    'bachelors': 2, 'bsc': 2, 'beng': 2, 'btech': 2, 'degree': 2,
+    'diploma': 1, 'associate': 1, 'certificate': 1,
+};
+
+const SENIORITY_LEVELS = {
+    junior: ['junior', 'entry level', 'entry-level', 'graduate', 'intern', '0-2 years'],
+    mid: ['mid level', 'mid-level', 'intermediate', '2-5 years', '3+ years'],
+    senior: ['senior', 'lead', 'principal', '5+ years', '7+ years'],
+    executive: ['head of', 'director', 'vp', 'chief', 'cto', 'ceo'],
+};
+
 /**
- * Extract text from a base64 encoded resume file (PDF/Text)
- * @param {string} base64Data - Base64 string of the file
- * @param {string} mimeType - MIME type of the file
- * @returns {Promise<string>} Extracted text
+ * Normalize skills using aliases
+ */
+export const normalizeSkills = (text) => {
+    if (!text || typeof text !== 'string') return '';
+    let normalized = ` ${text.toLowerCase()} `; // Add padding for boundary matches
+
+    // Sort aliases by length descending to match "node.js" before "js"
+    const sortedAliases = Object.keys(SKILL_ALIASES).sort((a, b) => b.length - a.length);
+
+    for (const alias of sortedAliases) {
+        const canonical = SKILL_ALIASES[alias];
+        // Custom boundary: start of string, space, punctuation, or end of string
+        // We avoid \b because it doesn't handle dots well
+        const escapedAlias = alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(?<=[\\s,./;|^])${escapedAlias}(?=[\\s,./;|$])`, 'gi');
+        normalized = normalized.replace(regex, canonical);
+    }
+    return normalized.trim();
+};
+
+/**
+ * Extract text from a base64 encoded resume file
  */
 export const parseResume = async (base64Data, mimeType = 'application/pdf') => {
     try {
         const buffer = Buffer.from(base64Data, 'base64');
-
-        // Ensure mimeType is a string safe for checking
         const safeMime = (mimeType || 'application/pdf').toLowerCase();
 
         if (safeMime.includes('pdf')) {
-            const data = await pdf(buffer);
-            return data.text;
+            try {
+                const data = await pdf(buffer);
+                return data.text;
+            } catch (pdfErr) {
+                console.warn(`[AI Shortlist] Warning: Failed to parse PDF structure. Falling back to raw string. Err: ${pdfErr.message}`);
+                return buffer.toString('utf-8');
+            }
         } else {
-            // Fallback for plain text or assume text-readable
             return buffer.toString('utf-8');
         }
     } catch (error) {
         console.error('Error parsing resume:', error);
-        return ''; // Return empty string on failure to avoid crashing the batch
+        return '';
     }
 };
 
 /**
- * Preprocess text: Lowercase, remove stopwords, remove punctuation
- * @param {string} text - Raw text
- * @returns {string} Cleaned text
+ * Preprocess text
  */
 export const preprocessText = (text) => {
     if (!text || typeof text !== 'string') return '';
-
-    // 1. Lowercase
-    let clean = text.toLowerCase();
-
-    // 2. Remove punctuation/special chars
+    let clean = normalizeSkills(text);
     clean = clean.replace(/[^a-z0-9\s]/g, '');
-
-    // 3. Tokenize
     const tokens = tokenizer.tokenize(clean);
-
-    // 4. Remove stopwords
     const stopwords = natural.stopwords;
     const filtered = tokens.filter(token => !stopwords.includes(token));
-
     return filtered.join(' ');
 };
 
 /**
- * Calculate Cosine Similarity between two text documents (Job Description & Resume)
- * using TF-IDF vectors.
- * 
- * Note: 'natural' TfIdf class doesn't directly give cosine similarity of two arbitrary docs easily 
- * in a stateless way without building a corpus. We will build a mini-corpus of 2 documents 
- * [JobDesc, Resume] and compute similarity.
- * 
- * @param {string} jobDescription 
- * @param {string} resumeText 
- * @returns {number} Score (0-100)
+ * TF-IDF Cosine Similarity
  */
 export const computeMatchScore = (jobDescription, resumeText) => {
     if (!jobDescription || !resumeText) return 0;
 
     const tfidf = new TfIdf();
+    tfidf.addDocument(preprocessText(jobDescription));
+    tfidf.addDocument(preprocessText(resumeText));
 
-    // Add documents
-    tfidf.addDocument(preprocessText(jobDescription)); // Doc 0
-    tfidf.addDocument(preprocessText(resumeText));     // Doc 1
-
-    // We implementing a simple Cosine Similarity manually using the TF-IDF terms
-    // Get all terms from both documents
     const terms = new Set();
     tfidf.listTerms(0).forEach(item => terms.add(item.term));
     tfidf.listTerms(1).forEach(item => terms.add(item.term));
 
-    // Create vectors
     const vec1 = [];
     const vec2 = [];
 
@@ -93,7 +128,6 @@ export const computeMatchScore = (jobDescription, resumeText) => {
         vec2.push(tfidf.tfidf(term, 1));
     });
 
-    // Compute Cosine Similarity = (A . B) / (||A|| * ||B||)
     let dotProduct = 0;
     let mag1 = 0;
     let mag2 = 0;
@@ -105,204 +139,212 @@ export const computeMatchScore = (jobDescription, resumeText) => {
     }
 
     if (mag1 === 0 || mag2 === 0) return 0;
-
     const similarity = dotProduct / (Math.sqrt(mag1) * Math.sqrt(mag2));
-
-    // Convert to percentage integer (0-100)
     return Math.round(similarity * 100);
 };
 
 /**
- * Generate a human-readable explanation for the match score
- * @param {object} jobData - { required_skills_text, required_education_text }
- * @param {object} candidateData - { skills_array, degree, institution, resumeText }
- * @param {number} score
- * @returns {object} { matchedSkills, missingSkills, educationMatch, summary, score }
+ * Dimension Scorers
  */
-const generateExplanation = (jobData, candidateData, score) => {
-    // Skill Matching: Compare job's required_skills (text) vs candidate's skills (array)
-    const jobSkillsRaw = (jobData.required_skills_text || '').toLowerCase();
-    const candidateSkills = (candidateData.skills_array || []).map(s => s.toLowerCase());
-    const candidateResumeText = (candidateData.resumeText || '').toLowerCase();
+const calculateSkillScore = (requiredSkillsText, candidateSkills, resumeText) => {
+    if (!requiredSkillsText) return 80; // Neutral if none specified
+    const jobSkills = requiredSkillsText.split(/[,;|\/]/).map(s => normalizeSkills(s.trim())).filter(s => s.length > 1);
+    const normalizedResume = normalizeSkills(resumeText);
+    const normalizedCandidateSkills = (candidateSkills || []).map(s => normalizeSkills(s));
 
-    // Parse job skills (assume comma or common delimiter separated)
-    const jobSkillsList = jobSkillsRaw.split(/[,;|\/]/).map(s => s.trim()).filter(s => s.length > 1);
-
-    const matchedSkills = [];
-    const missingSkills = [];
-
-    jobSkillsList.forEach(jobSkill => {
-        // Check if skill is in candidate's skills array OR mentioned in resume text
-        const inSkillsArray = candidateSkills.some(cs => cs.includes(jobSkill) || jobSkill.includes(cs));
-        const inResumeText = candidateResumeText.includes(jobSkill);
-
-        if (inSkillsArray || inResumeText) {
-            matchedSkills.push(jobSkill);
-        } else {
-            missingSkills.push(jobSkill);
-        }
+    let matched = 0;
+    jobSkills.forEach(skill => {
+        const inProfile = normalizedCandidateSkills.some(s => s.includes(skill) || skill.includes(s));
+        const inResume = normalizedResume.includes(skill);
+        if (inProfile) matched += 1.0;
+        else if (inResume) matched += 0.6;
     });
 
-    // Education Matching: Check if required_education is mentioned in candidate's degree/institution/resume
-    const requiredEdu = (jobData.required_education_text || '').toLowerCase();
-    const candidateDegree = (candidateData.degree || '').toLowerCase();
-    const candidateInstitution = (candidateData.institution || '').toLowerCase();
+    return jobSkills.length > 0 ? (matched / jobSkills.length) * 100 : 0;
+};
 
-    let educationMatch = 'Not specified';
-    if (requiredEdu) {
-        const eduInDegree = candidateDegree.includes(requiredEdu) || requiredEdu.includes(candidateDegree);
-        const eduInResume = candidateResumeText.includes(requiredEdu);
-        const eduInInstitution = candidateInstitution.includes(requiredEdu);
-
-        if (eduInDegree || eduInResume || eduInInstitution) {
-            educationMatch = '✔ Requirement likely met';
-        } else if (candidateDegree) {
-            educationMatch = '⚠ Partial (degree present, but may not match)';
-        } else {
-            educationMatch = '✖ Required qualification not found';
+const extractYearsOfExperience = (text) => {
+    const patterns = [
+        /(\d+)\+?\s*years?\s*(of\s*)?(experience|exp)/gi,
+        /experience[:\s]+(\d+)\+?\s*years?/gi,
+    ];
+    let maxYears = 0;
+    for (const pattern of patterns) {
+        const matches = [...text.matchAll(pattern)];
+        for (const m of matches) {
+            maxYears = Math.max(maxYears, parseInt(m[1] || m[4]));
         }
     }
+    return maxYears;
+};
 
-    // Reasoning Text: Dynamic summary
-    const totalSkills = jobSkillsList.length;
-    const matchedCount = matchedSkills.length;
-    let summary = '';
+const calculateExperienceScore = (jobDescription, resumeText) => {
+    const jobYearsMatch = jobDescription.match(/(\d+)\+?\s*years?\s*(of\s*)?(experience|exp)/i);
+    const requiredYears = jobYearsMatch ? parseInt(jobYearsMatch[1]) : 0;
+    const candidateYears = extractYearsOfExperience(resumeText);
 
-    if (totalSkills > 0) {
-        summary += `• ${matchedCount} of ${totalSkills} required skills detected.\n`;
-    } else {
-        summary += '• No specific skills specified in job requirements.\n';
+    if (requiredYears === 0) return 80;
+    if (candidateYears >= requiredYears) return 100;
+    if (candidateYears >= requiredYears * 0.7) return 70;
+    return Math.max(0, (candidateYears / requiredYears) * 100);
+};
+
+const getSeniorityLevel = (text) => {
+    const lower = text.toLowerCase();
+    for (const [level, keywords] of Object.entries(SENIORITY_LEVELS)) {
+        if (keywords.some(k => lower.includes(k))) return level;
     }
+    return 'mid';
+};
 
-    if (missingSkills.length > 0) {
-        summary += `• Missing: ${missingSkills.slice(0, 3).join(', ')}${missingSkills.length > 3 ? '...' : ''}\n`;
+const calculateSeniorityScore = (jobText, resumeText) => {
+    const jobLevel = getSeniorityLevel(jobText);
+    const candidateLevel = getSeniorityLevel(resumeText);
+    const levels = ['junior', 'mid', 'senior', 'executive'];
+    const diff = Math.abs(levels.indexOf(jobLevel) - levels.indexOf(candidateLevel));
+    return diff === 0 ? 100 : diff === 1 ? 60 : 20;
+};
+
+const getEducationLevel = (text) => {
+    const lower = text.toLowerCase();
+    for (const [degree, level] of Object.entries(DEGREE_HIERARCHY)) {
+        if (lower.includes(degree)) return level;
     }
+    return 0;
+};
 
-    if (score < 40) {
-        summary += '• Low overall keyword overlap with job description.\n';
-    } else if (score < 70) {
-        summary += '• Moderate overlap with job requirements.\n';
-    } else {
-        summary += '• Strong alignment with job context.\n';
+const calculateEducationScore = (requiredEdu, candidateEdu, resumeText) => {
+    const required = getEducationLevel(requiredEdu || '');
+    const candidate = Math.max(
+        getEducationLevel(candidateEdu || ''),
+        getEducationLevel(resumeText || '')
+    );
+    if (required === 0) return 80;
+    if (candidate >= required) return 100;
+    if (candidate === required - 1) return 65;
+    return 30;
+};
+
+/**
+ * Gemini AI Narrative Generator
+ */
+const generateAiNarrative = async (jobTitle, score, breakdown) => {
+    try {
+        if (!process.env.GEMINI_API_KEY) return "AI key not configured.";
+
+        const prompt = `As an elite AI recruitment engine, provide a 2-sentence summary of why this candidate scored ${score}% for the role of ${jobTitle}. 
+        Breakdown: Skills ${Math.round(breakdown.skillScore)}%, Exp ${Math.round(breakdown.experienceScore)}%, Seniority ${Math.round(breakdown.seniorityScore)}%, Education ${Math.round(breakdown.educationScore)}%. 
+        Be professional and concise.`;
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        return response.text().trim();
+    } catch (error) {
+        console.error("Gemini Error:", error);
+        return "Manual scoring indicates a mix of experience and skill alignment.";
     }
-
-    return {
-        score,
-        matchedSkills: matchedSkills.slice(0, 10),
-        missingSkills: missingSkills.slice(0, 10),
-        educationMatch,
-        summary: summary.trim()
-    };
 };
 
 /**
  * Main Orchestration Function
- * @param {string} jobDescription - Full text of job context (description + required skills/education text)
- * @param {Array<{application_id: number, resume_data: string, resume_name: string, skills?: string[], degree?: string, institution?: string}>} applications 
- * @param {object} jobMetadata - { required_skills, required_education } for structured explanation
- * @returns {Promise<Array<{application_id: number, match_score: number, explanation: object}>>}
  */
-export const rankCandidates = async (jobDescription, applications, jobMetadata = {}) => {
+export const rankCandidates = async (jobContext, applications, jobMetadata = {}) => {
     const results = [];
-
-    console.log(`[AI Shortlist] Starting ranking for ${applications.length} candidates. Job Desc Length: ${jobDescription ? jobDescription.length : 'N/A'}`);
-
-    if (!jobDescription || typeof jobDescription !== 'string' || jobDescription.trim().length === 0) {
-        console.warn('[AI Shortlist] Invalid job description. Returning 0 scores.');
-        return applications.map(app => ({ application_id: app.application_id, match_score: 0 }));
-    }
+    const { required_skills, required_education, job_title } = jobMetadata;
 
     for (const app of applications) {
-        let score = 0;
+        let finalScore = 0;
+        let breakdown = { skillScore: 0, experienceScore: 0, seniorityScore: 0, educationScore: 0, tfidfScore: 0 };
 
         try {
-            // 1. Parse Resume
-            let base64Data = app.resume_data;
-
-            // Ensure data is string
-            if (base64Data && typeof base64Data === 'string') {
-                if (base64Data.includes('base64,')) {
-                    base64Data = base64Data.split('base64,')[1];
-                }
-
-                const resumeText = await parseResume(base64Data, app.resume_name);
-
-                // Context Construction Rule:
-                // FINAL_RESUME_TEXT = Extracted Resume Skills + Extracted Resume Education + Relevant Project Descriptions
-                // We use the full text as fallback for "Relevant Project Descriptions" since we can't easily segment without new models.
-                // However, we prepend structured data to give it higher weight/priority in TF-IDF (term frequency).
-
-                const candidateContextParts = [];
-
-                if (app.skills && Array.isArray(app.skills) && app.skills.length > 0) {
-                    candidateContextParts.push(`Skills: ${app.skills.join(', ')}`);
-                }
-
-                if (app.degree || app.institution) {
-                    const eduParts = [app.degree, app.institution].filter(Boolean);
-                    candidateContextParts.push(`Education: ${eduParts.join(' from ')}`);
-                }
-
-                // Add resume text (serving as project descriptions/experience)
-                if (resumeText) {
-                    candidateContextParts.push(resumeText);
-                }
-
-                const candidateContext = candidateContextParts.join('\n\n');
-
-                // 2. Compute Score
-                if (candidateContext && typeof candidateContext === 'string') {
-                    // Normalize score strictly as requested: 0.0-1.0 float -> 0-100 integer
-                    const rawSimilarity = computeMatchScore(jobDescription, candidateContext) / 100; // Convert back to float 0-1 if computeMatchScore returns 0-100, or adjust computeMatchScore to return 0-1.
-
-                    // Actually, looking at computeMatchScore (Line 112), it returns Math.round(similarity * 100).
-                    // So 'score' is already 0-100.
-                    // The user wants: const matchScore = Math.round(rawScore * 100); where rawScore is 0-1.
-
-                    // Let's modify computeMatchScore to return 0-1 float, OR adjust here.
-                    // Constraint: "Modify only the Auto Shortlist scoring output".
-                    // If I touch computeMatchScore, I change the service function contract.
-                    // But I am editing this file.
-
-                    // Let's assume computeMatchScore returns 0-100 (as per line 112 in original file).
-                    // We will trust computeMatchScore for now but ensure we don't zero it out.
-
-                    score = computeMatchScore(jobDescription, candidateContext);
-
-                    // LOGGING as requested (simulating raw 0-1 by dividing)
-                    console.log({
-                        rawSimilarity: score / 100,
-                        normalizedScore: score
-                    });
-
-                } else {
-                    // Empty context is naturally 0
-                }
-            } else {
-                console.warn(`[AI Shortlist] App ID ${app.application_id}: No valid resume data string available.`);
+            let resumeText = '';
+            if (app.resume_data) {
+                resumeText = await parseResume(app.resume_data, app.resume_name);
             }
 
-            // Safety check for NaN
-            if (isNaN(score)) score = 0;
+            // 1. Individual Dimension Scores
+            breakdown.skillScore = calculateSkillScore(required_skills, app.skills, resumeText);
+            breakdown.experienceScore = calculateExperienceScore(jobContext, resumeText);
+            breakdown.educationScore = calculateEducationScore(required_education, app.degree, resumeText);
+            breakdown.seniorityScore = calculateSeniorityScore(jobContext, resumeText);
+
+            // 2. TF-IDF with Skill Boosting
+            const boostedJobDoc = `${jobContext} ${(required_skills || '').repeat(3)}`;
+            breakdown.tfidfScore = computeMatchScore(boostedJobDoc, resumeText);
+
+            // 3. Composite Weighted Score
+            finalScore = Math.round(
+                breakdown.skillScore * 0.40 +
+                breakdown.experienceScore * 0.20 +
+                breakdown.seniorityScore * 0.15 +
+                breakdown.educationScore * 0.10 +
+                breakdown.tfidfScore * 0.15
+            );
+
+            // 4. Generate Narrative (Gemini AI)
+            const aiNarrative = await generateAiNarrative(job_title || "this role", finalScore, breakdown);
+
+            // 5. Generate Sectioned Explanation (Manual for UI)
+            //
+            // ROOT-CAUSE FIX:
+            // Previously matchedSkills only checked resumeText. If PDF parsing failed
+            // (InvalidPDFException), resumeText was empty  making every skill appear
+            // "missing" even when the candidate had them in their profile.
+            //
+            // Now we check THREE sources in priority order:
+            //   1. Candidate skills array from their profile (most reliable)
+            //   2. Resume PDF text (secondary – may be empty if PDF failed)
+            //   3. Degree / institution field (for educational skills)
+
+            const jobSkillsList = (required_skills || '')
+                .split(/[,;|\/]/)
+                .map(s => normalizeSkills(s.trim()))
+                .filter(s => s.length > 1);
+
+            // Normalised candidate skill pool (profile array + resume text + education)
+            const profileSkillsNorm = (app.skills || []).map(s => normalizeSkills(s));
+            const resumeTextNorm = normalizeSkills(resumeText);
+            const eduTextNorm = normalizeSkills(`${app.degree || ''} ${app.institution || ''}`);
+
+            const matchedSkills = [];
+            const missingSkills = [];
+
+            for (const jobSkill of jobSkillsList) {
+                // Check profile skills array first (highest confidence)
+                const inProfile = profileSkillsNorm.some(
+                    cs => cs.includes(jobSkill) || jobSkill.includes(cs)
+                );
+                // Then resume text
+                const inResume = resumeTextNorm.includes(jobSkill);
+                // Then education fields
+                const inEdu = eduTextNorm.includes(jobSkill);
+
+                if (inProfile || inResume || inEdu) {
+                    matchedSkills.push(jobSkill);
+                } else {
+                    missingSkills.push(jobSkill);
+                }
+            }
+
+            results.push({
+                application_id: app.application_id,
+                match_score: finalScore,
+                explanation: {
+                    score: finalScore,
+                    breakdown,
+                    aiNarrative,
+                    matchedSkills: matchedSkills.slice(0, 10),
+                    missingSkills: missingSkills.slice(0, 10),
+                    educationMatch: breakdown.educationScore >= 70 ? '✔ Requirement met' : '✖ Requirement gaps',
+                    summary: `Overall score of ${finalScore}% based on weighted multi-dimensional analysis.`
+                }
+            });
 
         } catch (err) {
-            console.error(`[AI Shortlist] Error processing App ID ${app.application_id}:`, err);
-            score = 0; // Fallback to 0
+            console.error(`Error ranking App ID ${app.application_id}:`, err);
+            results.push({ application_id: app.application_id, match_score: 0 });
         }
-
-        results.push({
-            application_id: app.application_id,
-            match_score: score,
-            explanation: generateExplanation(
-                { required_skills_text: jobMetadata.required_skills, required_education_text: jobMetadata.required_education },
-                { skills_array: app.skills, degree: app.degree, institution: app.institution, resumeText: candidateContext },
-                score
-            )
-        });
     }
 
-    // Sort by score DESC
-    results.sort((a, b) => b.match_score - a.match_score);
-
-    return results;
+    return results.sort((a, b) => b.match_score - a.match_score);
 };

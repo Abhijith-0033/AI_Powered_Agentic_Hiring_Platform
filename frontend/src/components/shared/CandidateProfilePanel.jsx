@@ -82,7 +82,7 @@ const CandidateProfilePanel = ({ applicationId, isOpen, onClose, candidateName =
                 <div className="sticky top-0 z-10 bg-white border-b border-neutral-200 p-4 flex justify-between items-center">
                     <div>
                         <h2 className="text-lg font-bold text-neutral-900">{info.name || candidateName}</h2>
-                        <p className="text-sm text-neutral-500">{info.title || 'Candidate Profile'}</p>
+                        <p className="text-sm text-neutral-500">{info.title || info.job_title || 'Candidate Profile'}</p>
                     </div>
                     <button onClick={onClose} className="text-neutral-500 hover:text-neutral-900 transition-colors">
                         <X className="w-6 h-6" />

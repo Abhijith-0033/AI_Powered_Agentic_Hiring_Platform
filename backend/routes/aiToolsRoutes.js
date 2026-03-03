@@ -129,6 +129,7 @@ router.post('/shortlist/:jobId', auth, roleGuard('recruiter'), async (req, res) 
         const jobQuery = `
             SELECT 
                 jp.job_description,
+                jp.job_title,
                 jp.required_skills,
                 jp.required_education
             FROM job_postings jp
@@ -141,7 +142,7 @@ router.post('/shortlist/:jobId', auth, roleGuard('recruiter'), async (req, res) 
             return res.status(403).json({ success: false, message: 'Access denied or job not found' });
         }
 
-        const { job_description, required_skills, required_education } = jobResult.rows[0];
+        const { job_description, job_title, required_skills, required_education } = jobResult.rows[0];
 
         // Concatenate job criteria
         const jobContext = [
@@ -162,7 +163,9 @@ router.post('/shortlist/:jobId', auth, roleGuard('recruiter'), async (req, res) 
                 COALESCE(ja.resume_name, cr.resume_name, 'Resume.pdf') as resume_name,
                 c.skills,
                 c.degree,
-                c.institution
+                c.institution,
+                c.name,
+                c.email
             FROM job_applications ja
             JOIN candidates c ON ja.candidate_id = c.id
             LEFT JOIN candidate_resumes cr ON ja.resume_id = cr.id
@@ -190,7 +193,7 @@ router.post('/shortlist/:jobId', auth, roleGuard('recruiter'), async (req, res) 
         // 3. Run AI Logic (Service Layer)
         // This might take time, but for <100 resumes it's acceptable to likely await.
         // For larger scale, we'd use a job queue, but strict requirements denote simpler implementation.
-        const jobMetadata = { required_skills, required_education };
+        const jobMetadata = { required_skills, required_education, job_title };
         const results = await rankCandidates(jobContext, applications, jobMetadata);
 
         // 4. Update Database safely
@@ -210,10 +213,25 @@ router.post('/shortlist/:jobId', auth, roleGuard('recruiter'), async (req, res) 
 
         console.log(`[AI Trigger] Completed. Updates: ${results.length}`);
 
+        // Merge results back into full applications array so UI has all data
+        const enhancedApplications = applications.map(app => {
+            const result = results.find(r => r.application_id === app.application_id);
+            return {
+                application_id: app.application_id,
+                candidate_name: app.name,
+                candidate_email: app.email,
+                resume_name: app.resume_name,
+                has_resume: !!(app.resume_data || app.file_url || app.resume_pdf),
+                match_score: result ? result.match_score : 0,
+                shortlisted_by_ai: true,
+                explanation: result ? result.explanation : null
+            };
+        }).sort((a, b) => b.match_score - a.match_score);
+
         res.json({
             success: true,
             message: `Successfully ranked ${results.length} candidates`,
-            data: results
+            data: enhancedApplications
         });
 
     } catch (error) {

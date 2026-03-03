@@ -80,6 +80,40 @@ const syncPrimaryData = async (client, candidateId) => {
     ]);
 };
 
+// Helper to sanitize date strings for PostgreSQL DATE type
+const validateDate = (dateStr) => {
+    if (!dateStr) return null;
+    const clean = String(dateStr).trim().toLowerCase();
+    if (clean === 'present' || clean === 'current' || clean === 'now' || clean === '') return null;
+
+    // If it's just a year (e.g. "2022")
+    if (/^\d{4}$/.test(clean)) {
+        return `${clean}-01-01`;
+    }
+
+    // Try to parse standard formats
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) {
+        return d.toISOString().split('T')[0];
+    }
+
+    // Fallback if AI provides something like "May 2022"
+    const yearMatch = clean.match(/\b(19|20)\d{2}\b/);
+    if (yearMatch) {
+        return `${yearMatch[0]}-01-01`;
+    }
+
+    return null;
+};
+
+// Helper for integer years
+const validateYear = (dateStr) => {
+    if (!dateStr) return null;
+    const clean = String(dateStr).trim();
+    const yearMatch = clean.match(/\b(19|20)\d{2}\b/);
+    return yearMatch ? parseInt(yearMatch[0]) : null;
+};
+
 // POST /api/candidates/parse-resume
 // Upload resume and extract structured data (with optional auto-save)
 router.post('/parse-resume', auth, upload.single('resume'), async (req, res) => {
@@ -144,21 +178,94 @@ router.post('/parse-resume', auth, upload.single('resume'), async (req, res) => 
                 extractedData.personal_info.location,
                 extractedData.personal_info.github_url,
                 extractedData.personal_info.linkedin_url,
-                extractedData.personal_info.skills,
+                extractedData.skills || extractedData.personal_info.skills || [], // Fix: Use top-level skills
                 extractedData.personal_info.profile_description,
                 extractedData.personal_info.portfolio_url,
                 req.file.buffer.toString('base64'),
-                extractedData.education[0]?.degree || null,
-                extractedData.education[0]?.school || null,
-                extractedData.education[0]?.endDate || null,
-                extractedData.experience[0]?.title || null,
-                extractedData.experience[0]?.company || null
+                extractedData.education?.[0]?.degree || null,
+                extractedData.education?.[0]?.school || null,
+                validateYear(extractedData.education?.[0]?.endDate), // Fix: Send integer year
+                extractedData.experience?.[0]?.title || null,
+                extractedData.experience?.[0]?.company || null
             ]);
 
-            // Unified schema: Education and Experience are now stored directly in 'candidates' table.
-            // Multiple entries are not supported in this simplified unified schema.
+            // Sync Education
+            if (extractedData.education && extractedData.education.length > 0) {
+                await client.query('DELETE FROM candidate_education WHERE candidate_id = $1', [candidateId]);
+                for (const e of extractedData.education) {
+                    await client.query(`
+                        INSERT INTO candidate_education (candidate_id, institution, degree, field_of_study, start_date, end_date, grade_or_cgpa)
+                        VALUES ($1, $2, $3, $4, $5, $6, $7)
+                    `, [
+                        candidateId,
+                        e.school,
+                        e.degree,
+                        e.fieldOfStudy,
+                        validateDate(e.startDate),
+                        validateDate(e.endDate),
+                        e.grade
+                    ]);
+                }
+            }
 
-            // Sync primary data
+            // Sync Experience
+            if (extractedData.experience && extractedData.experience.length > 0) {
+                await client.query('DELETE FROM candidate_experience WHERE candidate_id = $1', [candidateId]);
+                for (const e of extractedData.experience) {
+                    await client.query(`
+                        INSERT INTO candidate_experience (candidate_id, company_name, job_title, location, start_date, end_date, is_current, description)
+                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                    `, [
+                        candidateId,
+                        e.company,
+                        e.title,
+                        e.location,
+                        validateDate(e.startDate),
+                        validateDate(e.endDate),
+                        e.current || false,
+                        e.description
+                    ]);
+                }
+            }
+
+            // Sync Projects
+            if (extractedData.projects && extractedData.projects.length > 0) {
+                await client.query('DELETE FROM candidate_projects WHERE candidate_id = $1', [candidateId]);
+                for (const p of extractedData.projects) {
+                    await client.query(`
+                        INSERT INTO candidate_projects (candidate_id, project_title, project_description, technologies_used, project_link, start_date, end_date)
+                        VALUES ($1, $2, $3, $4, $5, $6, $7)
+                    `, [
+                        candidateId,
+                        p.title,
+                        p.description,
+                        p.technologies,
+                        p.link,
+                        validateDate(p.startDate),
+                        validateDate(p.endDate)
+                    ]);
+                }
+            }
+
+            // Sync Achievements
+            if (extractedData.achievements && extractedData.achievements.length > 0) {
+                await client.query('DELETE FROM candidate_achievements WHERE candidate_id = $1', [candidateId]);
+                for (const a of extractedData.achievements) {
+                    await client.query(`
+                        INSERT INTO candidate_achievements (candidate_id, title, issuer, date, description)
+                        VALUES ($1, $2, $3, $4, $5)
+                    `, [
+                        candidateId,
+                        a.title,
+                        a.issuer,
+                        validateDate(a.date),
+                        a.description
+                    ]);
+                }
+            }
+
+            // Unified schema: Education and Experience are also stored directly in 'candidates' table.
+            // Sync primary data summary
             await syncPrimaryData(client, candidateId);
 
             await client.query('COMMIT');

@@ -3,6 +3,7 @@ import { Clock, Calendar, Building2, FileText, CheckCircle, AlertCircle, Award, 
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../../components/layout';
 import { getMyTests } from '../../services/testService';
+import { LoadingSpinner } from '../../components/ui';
 
 const MyTestsPage = () => {
     const [data, setData] = useState({ upcoming: [], ongoing: [], completed: [] });
@@ -152,9 +153,7 @@ const MyTestsPage = () => {
                 </div>
 
                 {loading ? (
-                    <div className="flex items-center justify-center py-20">
-                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-violet-600"></div>
-                    </div>
+                    <LoadingSpinner size="lg" color="text-violet-600" className="py-20" />
                 ) : (
                     <>
                         {/* Section Tabs */}

@@ -1,0 +1,628 @@
+
+============================================================
+PAGE 1
+============================================================
+NATURAL LANGUAGE QUERYING IN
+RELATIONAL AND SCHEMA-LESS DATABASES
+A MAJOR PROJECT REPORT
+by
+ANTONY DOMINIC S (VJC21AD013)
+JEEVAN SEN JOSEPH (VJC21AD035)
+JOHANN ABY VANNILAM (VJC21AD038)
+SANAL JOSE (VJC21AD052)
+in partial fulfillment for the award of the degree of
+BACHELOR OF TECHNOLOGY
+in
+ARTIFICIAL INTELLIGENCE AND DATA SCIENCE
+APJ ABDUL KALAM TECHNOLOGICAL UNIVERSITY
+DEPARTMENT OF ARTIFICIAL INTELLIGENCE & DATA SCIENCE
+VISWAJYOTHI COLLEGE OF ENGINEERING AND TECHNOLOGY,
+VAZHAKULAM
+APRIL 2025
+
+============================================================
+PAGE 2
+============================================================
+NATURAL LANGUAGE QUERYING IN
+RELATIONAL AND SCHEMA-LESS DATABASES
+MAJOR PROJECT REPORT
+by
+ANTONY DOMINIC S (VJC21AD013)
+JEEVAN SEN JOSEPH (VJC21AD035)
+JOHANN ABY VANNILAM (VJC21AD038)
+SANAL JOSE (VJC21AD052)
+in partial fulfillment for the award of the degree of
+BACHELOR OF TECHNOLOGY
+in
+ARTIFICIAL INTELLIGENCE AND DATA SCIENCE
+APJ ABDUL KALAM TECHNOLOGICAL UNIVERSITY
+Under the guidance of
+MRS. FEMY JOHN
+ASSISTANT PROFESSOR
+DEPT OF ARTIFICIAL INTELLIGENCE AND DATA SCIENCE, VJCET
+DEPARTMENT OF ARTIFICIAL INTELLIGENCE & DATA SCIENCE
+VISWAJYOTHI COLLEGE OF ENGINEERING AND TECHNOLOGY,
+VAZHAKULAM
+APRIL 2025
+
+============================================================
+PAGE 3
+============================================================
+VISWAJYOTHI COLLEGE OF ENGINEERING AND TECHNOLOGY,
+VAZHAKULAM
+DEPARTMENT OF ARTIFICIAL INTELLIGENCE AND DATA SCIENCE
+BONAFIDE CERTIFICATE
+This is to certify that the major project report entitled ‘NATURAL LANGUAGE
+QUERYING IN RELATIONAL AND SCHEMA-LESS DATABASES’ is a
+bonafide record of the project presented by ANTONY DOMINIC S (VJC21AD013),
+JEEVAN SEN JOSEPH (VJC21AD035), JOHANN ABY VANNILAM
+(VJC21AD038), SANAL JOSE (VJC21AD052), in partial fulfillment of the
+requirements for the award of the Degree of Bachelor of Technology in Artificial
+Intelligence and Data Science of APJ Abdul Kalam Technological University.
+Internal Supervisor External Supervisor
+Project Coordinator Head of the Department
+
+============================================================
+PAGE 4
+============================================================
+VISWAJYOTHI COLLEGE OF ENGINEERING AND TECHNOLOGY,
+VAZHAKULAM
+DEPARTMENT OF ARTIFICIAL INTELLIGENCE AND DATA SCIENCE
+Vision
+Moulding professionals catering to research, innovation, and entrepreneurial
+developments for global digitalization.
+Mission
+1. To inculcate research culture for design and innovative development towards a
+better world.
+2. To guide and mould the students to become globally competent professionals with
+ethical values.
+3. To generate innovative ideas, and disseminate it through quality publications.
+Program Educational Objectives
+Our Graduates
+1. Shall apply their skill-based knowledge attained during undergraduate education
+to adapt with the recent technological advancements and acquire a promising
+career.
+2. Shall possess critical thinking, professional skills and strong work ethics, to
+solve real world problems required to cater the needs of industry and to serve
+the society.
+3. Shall learn, apply and adapt to grow with the industrial needs thereby becoming
+a successful innovator in the challenging technological world.
+4. Shall have the competency to seek higher professional degrees, certifications
+and to do quality research work as an individual or as a team.
+
+============================================================
+PAGE 5
+============================================================
+Program Outcomes
+1. Engineering knowledge: Apply the knowledge of mathematics, science,
+engineering fundamentals, and an engineering specialization to the solution
+of complex engineering problems.
+2. Problem analysis: Identify, formulate, review research literature, and
+analyze complex engineering problems reaching substantiated conclusions
+using first principles of mathematics, natural sciences, and engineering
+sciences.
+3. Design / development of solutions: Design solutions for complex
+engineering problems and design system components or processes that meet
+the specified needs with appropriate consideration for the public health and
+safety, and the cultural, societal, and environmental considerations.
+4. Conduct investigations of complex problems: Use research-based
+knowledge and research methods including design of experiments, analysis
+and interpretation of data, and synthesis of the information to provide valid
+conclusions.
+5. Modern tool usage: Create, select, and apply appropriate techniques,
+resources, and modern engineering and IT tools including prediction and
+modelling to complex engineering activities with an understanding of the
+limitations.
+6. The engineer and society: Apply reasoning informed by the contextual
+knowledge to assess societal, health, safety, legal and cultural issues and the
+consequent responsibilities relevant to the professional engineering practice.
+7. Environment and sustainability: Understand the impact of the professional
+engineering solutions in societal and environmental contexts, and
+demonstrate the knowledge of, and need for sustainable development.
+8. Ethics: Apply ethical principles and commit to professional ethics and
+responsibilities and norms of the engineering practice.
+
+============================================================
+PAGE 6
+============================================================
+9. Individual and team work: Function effectively as an individual, and as a
+member or leader in diverse teams, and in multidisciplinary settings.
+10. Communication: Communicate effectively on complex engineering
+activities with the engineering community and with society at large, such as,
+being able to comprehend and write effective reports and design
+documentation, make effective presentations, and give and receive clear
+instructions.
+11. Project management and finance: Demonstrate knowledge and
+understanding of the engineering and management principles and apply
+these to one’s own work, as a member and leader in a team, to manage
+projects and in multidisciplinary environments.
+12. Life-long learning: Recognize the need for, and have the preparation and
+ability to engage in independent and life-long learning in the broadest
+context of technological change.
+Program Specific Outcomes
+1. Able to apply the computational knowledge of data science, machine learning
+and deep learning to analyse, design and model novel applications.
+2. Ability to become an entrepreneur which provides engineering solutions for
+industrial and societal problems.
+3. Up-skilling in advanced data science, machine learning and deep learning
+technologies.
+
+============================================================
+PAGE 7
+============================================================
+ACKNOWLEDGEMENT
+First and foremost, we thank God Almighty for his divine grace and
+blessings all throughout the project, without which the project would not
+have reached its completion successfully. It is our privilege to render our
+sincere gratitude to Msgr. Dr. Pius Malekandathil, our most beloved
+Manager, Rev. Dr. Paul Parathazham, our Director, and our Principal,
+Dr. K.K. Rajan, for providing us the opportunity to do this major project
+during the final year (2024-25) of our B. Tech degree course. We are
+deeply thankful to our Head of the Department, Dr. Anita Brigit Mathew
+for her support and encouragement. We would like to express our sincere
+gratitude and heartfelt thanks to our Major Project Guide and Major Project
+co-ordinator, Mrs. Femy John, Assistant Professor, Department of
+Artificial Intelligence and Data Science, for her motivation, assistance and
+help for the project. We express our deepest and sincere gratitude to Mr.
+Nithin A.R., Senior Software Engineer, IBS Software, for his expert
+guidance, dedicated efforts, persistent motivation and constant support, all
+throughout the project. We also thank all the faculty members of the
+Department, including lab faculty for their support and encouragement.
+Finally, we also thank all our friends and family for their valuable feedback
+from time to time as well as their help and motivation.
+
+============================================================
+PAGE 8
+============================================================
+DECLARATION
+We undersigned hereby declare that the project report NATURAL
+LANGUAGE QUERYING IN RELATIONAL AND SCHEMA-LESS
+DATABASES, submitted for partial fulfillment of the requirements for the
+award of the Degree of Bachelor of Technology of the APJ Abdul Kalam
+Technological University is a bonafide work done by us under the
+supervision of Mrs. Femy John, Assistant Professor, Department of
+Artificial Intelligence and Data Science. This submission represents ideas
+in our own words and where ideas or words of others have been included,
+we have adequately and accurately cited and referenced the original
+sources. We also declare that we have adhered to the ethics of academic
+honesty and integrity and have not misrepresented or fabricated any data or
+idea or fact or source in our submission. We understand that any violation
+of the above will be a cause for disciplinary action by the institute and/or
+the University and can also evoke penal action from the sources which
+have thus not been properly cited or formed the basis for the award of any
+degree, diploma, or similar title of any other University.
+Place: Vazhakulam Antony Dominic S
+Date: Jeevan Sen Joseph
+Johann Aby Vannilam
+Sanal Jose
+
+============================================================
+PAGE 9
+============================================================
+ABSTRACT
+This project introduces a plug-and-play framework that enables developers
+to seamlessly convert natural language into database queries, whether for
+structured (SQL) or unstructured (NoSQL) data. Using NLP and Large
+Language Models (LLMs), the system intelligently generates precise SQL
+queries for relational databases and dynamic NoSQL queries for schema-
+less databases like MongoDB. By leveraging advanced prompting
+techniques such as chain of thought and prompt chaining, it ensures
+accuracy and adaptability across different database types. The framework
+simplifies database interactions by providing a unified, intuitive interface,
+reducing complexity for developers working with diverse data
+architectures. Initially focused on the travel industry, particularly airport
+marketplaces, the solution is designed for easy integration into various
+applications and industries. With its ability to streamline database
+operations and enhance developer productivity, this framework represents a
+significant step toward making natural language querying a standard
+feature in modern data-driven applications.
+
+============================================================
+PAGE 10
+============================================================
+CONTENTS
+LIST OF FIGURES i
+LIST OF TABLES ii
+LIST OF ABBREVIATIONS iii
+CHAPTER 1 INTRODUCTION 1
+1.1 MOTIVATION 2
+1.2 OBJECTIVE 2
+1.3 SCOPE 2
+CHAPTER 2 LITERATURE SURVEY 3
+CHAPTER 3 PROPOSED WORK 10
+3.1 PROCESS OVERVIEW 10
+3.2 FLOW DIAGRAM 11
+3.2.1 Login/Register 12
+3.2.2 Select DB 12
+3.2.3 Get User Input 13
+3.2.4 API Call 13
+3.2.5 Execute Query 13
+CHAPTER 4 IMPLEMENTATION 14
+4.1 ARCHITECTURE 14
+4.2 FRONT END 15
+4.2.1 REACT 15
+4.3 BACKEND 17
+4.3.1 DJANGO 17
+4.4 DATABASE 20
+4.4.1 POSTGRESQL 20
+4.4.2 MONGODB 20
+CHAPTER 5 RESULTS 21
+
+============================================================
+PAGE 11
+============================================================
+5.1 DATASETS 21
+5.1.1 CATEGORIES TABLE 21
+5.1.2 PRODUCTS TABLE 22
+5.1.3 CUSTOMERS TABLE 22
+5.1.4 ORDERS TABLE 23
+5.1.5 FAQ TABLE 23
+5.2 DATABASES 24
+5.2.1 POSTGRESQL DATABASE 24
+5.2.2 MONGODB DATABASE 24
+5.3 FRONT ENT PAGES 25
+5.3.1 User Registration 25
+5.3.2 User login 26
+5.3.3 Database Selection page 26
+5.3.4 SQL Generation page 27
+5.3.5 SQL Execution 28
+5.3.6 NoSQL Generation 29
+5.3.7 NoSQL Execution 29
+CHAPTER 6 CONCLUSION AND FUTURE WORKS 31
+REFERENCES 28
+
+============================================================
+PAGE 12
+============================================================
+LIST OF FIGURES
+Fig 3.1 Flow Diagram……….……………………………………...11
+Fig 4.1 System Architecture………………………………...……...14
+Fig 5.1 Database in PostgreSQL………………………………........24
+Fig 5.2 MongoDB Database...…………………………………...…25
+Fig 5.3 User Registration…………………………………………...25
+Fig 5.4 User Login…………………………………………...……..26
+Fig5.5 Database selection………………………..…………….…..27
+Fig 5.6 SQL Generation……………………………..………..…….27
+Fig 5.7 SQL Execution ………………………………..…………...28
+Fig 5.8 NoSQL Generation…………………………..…………….29
+Fig 5.9 NoSQL Execution…………………………..……………...30
+i
+
+============================================================
+PAGE 13
+============================================================
+LIST OF TABLES
+Table 2.1 Literature Survey……………………………………………………3
+Table 5.1 Categories………………………………………………………….21
+Table 5.2 Products……………………………………………………………22
+Table 5.3 Customers………………………………………………………….22
+Table 5.4 Orders……………………………………………………………...23
+Table 5.5 FAQ………………………………………………………………..23
+ii
+
+============================================================
+PAGE 14
+============================================================
+LIST OF ABBREVIATIONS
+SQL Structured Query Language
+NoSQL Not Only SQL
+NLP Natural language Processing
+LLM Large Language Models
+AI Artificial Intelligence
+RDBMS Relational Database Management System
+GPT Generative Pre-trained Transformers
+API Application Programming Interface
+UI/UX User Interface/User Experience
+HTTP Hyper Text Transfer Protocol
+URL Uniform Resource Locator
+SPA Single Page Application
+REST Representational State Transfer Application
+DRF Django REST Framework
+JSON JavaScript Object Notation
+CRUD Create Read Update Delete
+iii
+
+============================================================
+PAGE 15
+============================================================
+Natural Language Querying in Relational and Schema-less Databases
+CHAPTER 1
+INTRODUCTION
+In today’s data-centric world, facilitating seamless and intuitive interaction with databases is
+critical. The complexity and technical nature of traditional query languages like SQL can create
+barriers, limiting database accessibility to those with specialized skills. For non-technical users,
+especially in environments that demand fast access to complex information, this can hinder
+productivity and data-driven decision-making. However, recent advancements in Natural
+Language Processing (NLP) and Large Language Models (LLMs) offer a revolutionary
+solution: natural language querying. This approach enables users to interact with databases
+using everyday language, breaking down technical barriers and democratizing access to
+valuable data insights.
+This project, titled "Natural Language Querying in Relational and Schema-Less Databases,"
+aims to develop a versatile framework that allows users to "talk to their data." The framework
+will accept natural language input from users, process it through advanced NLP techniques, and
+convert it into structured queries for relational databases like PostgreSQL or flexible
+expressions for schema-less systems such as MongoDB. By bridging natural language and
+database query languages, this framework empowers users to retrieve data seamlessly, without
+needing technical expertise in SQL or familiarity with specific database schemas.
+At the heart of this solution is an intelligent system that combines NLP, LLMs, and advanced
+prompting techniques. These components work together to interpret user intent accurately,
+ensuring that even complex or multi-part questions are understood and processed correctly. The
+framework’s flexible design allows it to support structured relational databases alongside
+schema-less environments, making it applicable across a broad spectrum of data storage needs.
+Furthermore, the system has been designed as a plug-and-play solution, allowing developers to
+integrate natural language querying capabilities into their applications with ease.
+While the project’s initial application focuses on the travel industry—specifically airport
+marketplaces—where the need for instant, accessible data is essential, its adaptable architecture
+makes it suitable for various industries. By offering an intuitive way to interact with data, this
+Dept. of Artificial Intelligence and Data Science, VJCET Page 1
+
+============================================================
+PAGE 16
+============================================================
+Natural Language Querying in Relational and Schema-less Databases
+framework can enhance productivity, streamline operations, and support decision-making
+across sectors.
+Thus, this project represents an innovative approach to database querying by transforming
+natural language into actionable queries for both structured and unstructured data systems. It
+advances the vision of "talking to your data," enabling users to access, analyze and interact with
+information easily and intuitively, regardless of their technical background.
+1.1 MOTIVATION
+The growing need for user-friendly interaction with database systems is driving the
+development of solutions that allow both technical and non-technical users to query data using
+natural language. Complex databases often require expertise in SQL or NoSQL, making data
+retrieval challenging for many users. A framework that translates natural language inputs into
+accurate database commands would enable users across various skill levels to access
+information effortlessly. This simplification not only enhances accessibility but also aids in
+better decision-making by allowing users to interact with data more intuitively. Additionally,
+training agents to process natural language queries directly, instead of traditional database
+queries, can reduce operational costs and improve efficiency, making such a framework a
+valuable asset for businesses.
+1.2 OBJECTIVE
+The objective of this project is to develop a versatile, AI-powered framework that enables users
+to interact with relational and schema-less databases through natural language. By translating
+conversational queries into accurate database commands, the framework aims to make data
+access intuitive, bridging the gap between technical and non-technical users. This solution
+seeks to improve data accessibility, enhance productivity, and democratize data-driven
+decision-making across various industries and application with minimal configuration.
+1.3 SCOPE
+The scope of this project includes designing and implementing a framework that supports
+natural language querying across both relational and schema-less databases. It will leverage
+NLP and LLMs to process and interpret user queries, generating precise SQL and NoSQL
+commands for data retrieval. Initially focused on use cases within the airline marketplace
+industry, the framework is adaptable to various sectors, providing a versatile, plug-and-play
+solution to simplify data interactions for users of all technical levels.
+Dept. of Artificial Intelligence and Data Science, VJCET Page 2
+
+============================================================
+PAGE 17
+============================================================
+Natural Language Querying in Relational and Schema-less Databases
+CHAPTER 2
+LITERATURE SURVEY
+SL
+TITLE METHODOLOGY ADVANTAGES DISADVANTAGES
+NO
+1. Seq2SQL: Seq2SQL converts NLP High accuracy for Requires large training
+Generating questions into SQL complex queries data
+Structured queries using a
+Modular approach Limited performance
+Queries from reinforcement learning-
+simplifies query on highly complex
+Natural Language based approach. Model
+structure database schemas
+Using is divided into modules
+Reinforcement that select SQL
+Learning operations, columns,
+and conditions.
+2. SQLNet: SQLNet uses sequence- Avoids complexities Struggles with very
+Generating to-sequence learning of reinforcement complex or nested
+Structured without reinforcement learning queries
+Queries from learning. It introduces a
+Faster training Less adaptable to
+Natural Language sketch-based approach
+dynamic schema
+Without to predict SQL queries,
+High accuracy on
+Reinforcement focusing on the
+simple queries
+Learning structure.
+3. TypeSQL: TypeSQL enhances Type-aware approach May struggle with
+Knowledge-based SQL generation by reduces errors highly ambiguous
+Type-Aware incorporating a type queries
+Effective in handling
+Neural Text-to- system and external
+database-specific Requires additional
+SQL Generation knowledge (table
+keywords and external knowledge
+schemas) to handle
+Dept. of Artificial Intelligence and Data Science, VJCET Page 3
+
+--- TABLES ---
+Table 1:
+SL NO | TITLE | METHODOLOGY | ADVANTAGES | DISADVANTAGES
+1. | Seq2SQL: Generating Structured Queries from Natural Language Using Reinforcement Learning | Seq2SQL converts NLP questions into SQL queries using a reinforcement learning- based approach. Model is divided into modules that select SQL operations, columns, and conditions. | High accuracy for complex queries Modular approach simplifies query structure | Requires large training data Limited performance on highly complex database schemas
+2. | SQLNet: Generating Structured Queries from Natural Language Without Reinforcement Learning | SQLNet uses sequence- to-sequence learning without reinforcement learning. It introduces a sketch-based approach to predict SQL queries, focusing on the structure. | Avoids complexities of reinforcement learning Faster training High accuracy on simple queries | Struggles with very complex or nested queries Less adaptable to dynamic schema
+3. | TypeSQL: Knowledge-based Type-Aware Neural Text-to- SQL Generation | TypeSQL enhances SQL generation by incorporating a type system and external knowledge (table schemas) to handle | Type-aware approach reduces errors Effective in handling database-specific keywords and | May struggle with highly ambiguous queries Requires additional external knowledge
+
+
+============================================================
+PAGE 18
+============================================================
+Natural Language Querying in Relational and Schema-less Databases
+ambiguities in natural column types (e.g., schemas)
+language queries. This
+approach improves the
+handling of database-
+specific attributes.
+4. Towards Complex This paper introduces Better generalization May struggle with
+Text-to-SQL in an Intermediate across domains very specific domain-
+Cross-Domain Representation (IR) specific queries
+Handles complex
+Database with approach, breaking
+queries with multiple More training steps
+Intermediate down complex natural
+conditions required
+Representation language queries for
+cross-domain databases,
+simplifying the query
+generation process.
+5. UnifiedSKG: UnifiedSKG is a Unified approach High resource
+Unifying framework that unifies across various tasks requirements
+Structured multiple structured
+Effective for cross- Complex to
+Knowledge knowledge grounding
+domain applications implement due to
+Grounding with tasks (e.g., text-to-SQL
+multi-task learning
+Text-to-SQL parsing), leveraging
+Parsing data from various
+sources and
+representations.
+6. Context-based Context-based Reduces required Focuses on basic
+Ontology
+Ontology Modelling domain knowledge operations, lacks
+Modelling for
+(COM-DB) to convert complex functions
+Database:
+Speedy database
+Enabling database schemas into
+management process Relies on semantic
+ChatGPT for
+natural language for
+Semantic schema for ChatGPT
+easier interaction with
+Enhances privacy
+Database
+to understand
+Management ChatGPT. protection
+Dept. of Artificial Intelligence and Data Science, VJCET Page 4
+
+--- TABLES ---
+Table 1:
+ |  | ambiguities in natural language queries. This approach improves the handling of database- specific attributes. | column types | (e.g., schemas)
+4. | Towards Complex Text-to-SQL in Cross-Domain Database with Intermediate Representation | This paper introduces an Intermediate Representation (IR) approach, breaking down complex natural language queries for cross-domain databases, simplifying the query generation process. | Better generalization across domains Handles complex queries with multiple conditions | May struggle with very specific domain- specific queries More training steps required
+5. | UnifiedSKG: Unifying Structured Knowledge Grounding with Text-to-SQL Parsing | UnifiedSKG is a framework that unifies multiple structured knowledge grounding tasks (e.g., text-to-SQL parsing), leveraging data from various sources and representations. | Unified approach across various tasks Effective for cross- domain applications | High resource requirements Complex to implement due to multi-task learning
+6. | Context-based Ontology Modelling for Database: Enabling ChatGPT for Semantic Database Management | Context-based Ontology Modelling (COM-DB) to convert database schemas into natural language for easier interaction with ChatGPT. | Reduces required domain knowledge Speedy database management process Enhances privacy protection | Focuses on basic operations, lacks complex functions Relies on semantic schema for ChatGPT to understand
+
+
+============================================================
+PAGE 19
+============================================================
+Natural Language Querying in Relational and Schema-less Databases
+7. C3: Zero-shot C3 uses clear Achieves high Struggles with
+Text-to-SQL with prompting, calibration accuracy (82.3%) in complex queries
+ChatGPT with hints, and SQL query
+Requires consistent
+consistency outputs to generation
+refinement and
+enable zero-shot Text-
+Does not require calibration
+to-SQL querying using
+fine-tuning
+ChatGPT.
+Efficient with fewer
+tokens
+8. A Feasibility Investigates ChatGPT- Saves time for May generate too easy
+Study on 3.5 for generating SQL educators or overly difficult
+Automated SQL exercises using prompt questions
+Can generate varying
+Exercise engineering.
+exercises based on Inconsistent quality
+Generation with
+different database and feasibility for
+ChatGPT-3.5
+schemas and mock complex questions
+data
+9. Natural Language Reviews the evolution Highlights research Current systems are
+Data Interfaces: of natural language directions not widely adopted
+From Keyword interfaces for databases
+Explores the gaps in Most approaches fail
+Search to and discusses the future
+current systems for with complex, real-
+ChatGPT, are we of text-to-SQL systems.
+conversational data world databases
+there yet?
+querying
+10. Is ChatGPT a Proposes a framework Effective in Prone to hallucination
+Good Geospatial for ChatGPT to handle geospatial data errors
+Data Analyst? geospatial SQL queries querying
+Struggles with
+Exploring the using a combination of
+Demonstrates complex or unseen
+Integration of training data and
+success in tasks like datasets and tasks
+Natural Language
+Dept. of Artificial Intelligence and Data Science, VJCET Page 5
+
+--- TABLES ---
+Table 1:
+7. | C3: Zero-shot Text-to-SQL with ChatGPT | C3 uses clear prompting, calibration with hints, and consistency outputs to enable zero-shot Text- to-SQL querying using ChatGPT. | Achieves high accuracy (82.3%) in SQL query generation Does not require fine-tuning Efficient with fewer tokens | Struggles with complex queries Requires consistent refinement and calibration
+8. | A Feasibility Study on Automated SQL Exercise Generation with ChatGPT-3.5 | Investigates ChatGPT- 3.5 for generating SQL exercises using prompt engineering. | Saves time for educators Can generate varying exercises based on different database schemas and mock data | May generate too easy or overly difficult questions Inconsistent quality and feasibility for complex questions
+9. | Natural Language Data Interfaces: From Keyword Search to ChatGPT, are we there yet? | Reviews the evolution of natural language interfaces for databases and discusses the future of text-to-SQL systems. | Highlights research directions Explores the gaps in current systems for conversational data querying | Current systems are not widely adopted Most approaches fail with complex, real- world databases
+10. | Is ChatGPT a Good Geospatial Data Analyst? Exploring the Integration of Natural Language | Proposes a framework for ChatGPT to handle geospatial SQL queries using a combination of training data and | Effective in geospatial data querying Demonstrates success in tasks like | Prone to hallucination errors Struggles with complex or unseen datasets and tasks
+
+
+============================================================
+PAGE 20
+============================================================
+Natural Language Querying in Relational and Schema-less Databases
+into Structured schema input. spatial joins
+Query Language
+within a Spatial
+Database
+11. An Interpretation Uses LSTM-RNN Highly efficient for Struggles with
+handling sequences
+of Long Short- model combined with complex polynomial
+Term Memory ADAM optimizer for Computational relationships if not
+Recurrent Neural gradient descent, efficiency enough training data is
+Network for approximating roots of provided.
+Low memory needs
+Approximating polynomials by
+Adaptive learning Risk of Overfitting in
+Roots of connecting polynomial
+rates based on
+small datasets.
+Polynomials coefficients to weights. gradient history.
+12. Robust Natural Systematic overview of Provides a Limited by the
+comprehensive existing literature's
+Language NLP robustness
+taxonomy of NLP focus on specific
+Processing: research, focusing on
+robustness aspects rather than a
+Recent Advances, adversarial attacks and unified framework
+Identifies gaps in
+Challenges, and defences
+current research May not cover all
+Future Directions
+recent advancements
+Offers insights into
+in NLP robustness
+various techniques
+comprehensively
+and metrics used in
+NLP robustness
+13. Building a Utilizes hierarchical Handles complex Current methods may
+commands with struggle with very
+Natural Language semantic parsing
+multiple operations. long commands.
+Query and algorithms and directed
+Control Interface edge-tagged graph Integrates with Requires robust
+popular IoT training data for
+for IoT Platforms structures for command
+platforms like optimal performance.
+parsing.
+AliCloud.
+Limited to specific
+Enhances user IoT platforms in initial
+interaction through implementation.
+natural language
+processing.
+Dept. of Artificial Intelligence and Data Science, VJCET Page 6
+
+--- TABLES ---
+Table 1:
+ | into Structured Query Language within a Spatial Database | schema input. | spatial joins | 
+11. | An Interpretation of Long Short- Term Memory Recurrent Neural Network for Approximating Roots of Polynomials | Uses LSTM-RNN model combined with ADAM optimizer for gradient descent, approximating roots of polynomials by connecting polynomial coefficients to weights. | Highly efficient for handling sequences Computational efficiency Low memory needs Adaptive learning rates based on gradient history. | Struggles with complex polynomial relationships if not enough training data is provided. Risk of Overfitting in small datasets.
+12. | Robust Natural Language Processing: Recent Advances, Challenges, and Future Directions | Systematic overview of NLP robustness research, focusing on adversarial attacks and defences | Provides a comprehensive taxonomy of NLP robustness Identifies gaps in current research Offers insights into various techniques and metrics used in NLP robustness | Limited by the existing literature's focus on specific aspects rather than a unified framework May not cover all recent advancements in NLP robustness comprehensively
+13. | Building a Natural Language Query and Control Interface for IoT Platforms | Utilizes hierarchical semantic parsing algorithms and directed edge-tagged graph structures for command parsing. | Handles complex commands with multiple operations. Integrates with popular IoT platforms like AliCloud. Enhances user interaction through natural language processing. | Current methods may struggle with very long commands. Requires robust training data for optimal performance. Limited to specific IoT platforms in initial implementation.
+

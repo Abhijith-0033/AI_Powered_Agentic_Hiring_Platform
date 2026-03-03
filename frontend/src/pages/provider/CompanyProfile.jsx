@@ -1,7 +1,7 @@
 import { Building2, Camera, Globe, MapPin, Linkedin, Twitter } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { DashboardLayout } from '../../components/layout';
-import { Button, Input, Textarea } from '../../components/ui';
+import { Button, Input, Textarea, LoadingSpinner } from '../../components/ui';
 import Card, { CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card';
 import api from '../../api/axios';
 import { useAuth } from '../../contexts/AuthContext';
@@ -134,9 +134,7 @@ const CompanyProfile = () => {
     if (loading) {
         return (
             <DashboardLayout type="provider">
-                <div className="flex justify-center items-center h-64">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-                </div>
+                <LoadingSpinner size="md" color="text-primary-600" className="h-64" />
             </DashboardLayout>
         );
     }

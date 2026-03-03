@@ -31,6 +31,7 @@ const JobApplyModal = ({ job, isOpen, onClose }) => {
     const [profile, setProfile] = useState(null); // Backend Snapshot Structure (for View)
     const [profileState, setProfileState] = useState(null); // Frontend Flattened Structure (for Edit)
     const [profileImageUrl, setProfileImageUrl] = useState(null);
+    const [profileImageBase64, setProfileImageBase64] = useState(null);
 
     // Editing State
     const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -125,6 +126,13 @@ const JobApplyModal = ({ job, isOpen, onClose }) => {
             if (blob && blob.size > 0) {
                 const url = URL.createObjectURL(blob);
                 setProfileImageUrl(url);
+
+                // Convert blob to base64 for snapshot
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onloadend = () => {
+                    setProfileImageBase64(reader.result);
+                };
             }
         } catch (err) { }
     };
@@ -167,9 +175,11 @@ const JobApplyModal = ({ job, isOpen, onClose }) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
             reader.onloadend = async () => {
-                const base64data = reader.result.split(',')[1];
+                const fullBase64 = reader.result;
+                const base64data = fullBase64.split(',')[1];
                 await uploadProfileImage({ image_data: base64data, image_type: file.type });
                 setProfileImageUrl(URL.createObjectURL(file));
+                setProfileImageBase64(fullBase64);
                 await fetchProfile(); // Update profile data to reflect image url if backend returns it
             };
         } catch (error) {
@@ -224,11 +234,20 @@ const JobApplyModal = ({ job, isOpen, onClose }) => {
     const buildProfileSnapshot = () => {
         const selectedResumeData = resumes.find(r => r.id === selectedResume);
         return {
-            personal_info: profile?.personal_info || {},
-            profile_image_url: profileImageUrl || null,
+            personal_info: {
+                name: profile?.personal_info?.name || '',
+                email: profile?.personal_info?.email || '',
+                phone: profile?.personal_info?.phone_number || profile?.personal_info?.phone || '',
+                location: profile?.personal_info?.location || '',
+                linkedin: profile?.personal_info?.linkedin_url || profile?.personal_info?.linkedin || '',
+                github: profile?.personal_info?.github_url || profile?.personal_info?.github || '',
+                about: profile?.personal_info?.profile_description || profile?.personal_info?.about || '',
+                title: profile?.personal_info?.job_title || profile?.personal_info?.title || ''
+            },
+            profile_image_url: profileImageBase64 || null,
             education: profile?.education || [],
             experience: profile?.experience || [],
-            skills: profile?.personal_info?.skills || [], // Fix: Extract skills from personal_info
+            skills: profile?.personal_info?.skills || [],
             achievements: profile?.achievements || [],
             projects: profile?.projects || [],
             resume_name: selectedResumeData?.resume_name || '',

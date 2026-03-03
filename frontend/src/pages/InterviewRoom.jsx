@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import AgoraRTC from 'agora-rtc-sdk-ng';
 import { Mic, MicOff, Video, VideoOff, PhoneOff, Monitor } from 'lucide-react';
 import { joinInterview } from '../services/interviewService';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const InterviewRoom = () => {
     const { channelName } = useParams();
@@ -173,8 +174,8 @@ const InterviewRoom = () => {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-900">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-white mx-auto"></div>
-                    <p className="mt-6 text-white text-xl">Joining interview...</p>
+                    <LoadingSpinner size="xl" color="text-white" className="mb-6" />
+                    <p className="text-white text-xl">Joining interview...</p>
                 </div>
             </div>
         );

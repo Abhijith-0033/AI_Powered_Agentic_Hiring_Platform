@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Code, Clock, Calendar, ChevronRight, FileCode, Search, Award, AlertCircle, Info } from 'lucide-react';
 import { DashboardLayout } from '../../components/layout';
 import codingService from '../../services/codingService';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 const CandidateCodingDashboard = () => {
     const navigate = useNavigate();
@@ -122,10 +123,7 @@ const CandidateCodingDashboard = () => {
 
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-24 gap-4">
-                        <div className="relative">
-                            <div className="w-16 h-16 border-4 border-violet-100 rounded-full animate-spin"></div>
-                            <div className="absolute top-0 left-0 w-16 h-16 border-4 border-violet-600 rounded-full animate-spin [animation-duration:1.5s] border-t-transparent border-l-transparent"></div>
-                        </div>
+                        <LoadingSpinner size="xl" color="text-violet-600" />
                         <p className="text-neutral-500 font-bold animate-pulse uppercase tracking-widest text-xs">Syncing tests...</p>
                     </div>
                 ) : tests.length === 0 ? (

@@ -15,7 +15,7 @@ import profileImageRoutes from './routes/profileImage.js';
 import testRoutes from './routes/testRoutes.js';
 import codingRoutes from './routes/codingRoutes.js';
 import careerRoadmapRoutes from './routes/careerRoadmapRoutes.js';
-import adminRoutes from './routes/adminRoutes.js';
+import chatbotRoutes from './routes/chatbotRoutes.js';
 import pool from './config/db.js'; // Initialize PostgreSQL connection
 import dns from 'dns';
 
@@ -27,6 +27,17 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Prevent server from crashing on unhandled promise rejections (e.g. DB connection drops)
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('⚠️  Unhandled Rejection at:', promise, 'reason:', reason);
+    // Do NOT exit - let the server continue
+});
+
+process.on('uncaughtException', (err) => {
+    console.error('⚠️  Uncaught Exception:', err.message);
+    // Do NOT exit - let nodemon restart if needed
+});
 
 // ============================================================
 // MIDDLEWARE
@@ -88,9 +99,15 @@ app.use('/api/ai-tools', aiToolsRoutes);
 app.use('/api/interviews', interviewRoutes);
 app.use('/api/tests', testRoutes);
 app.use('/api/coding', codingRoutes);
+app.use('/api/career-roadmap', careerRoadmapRoutes);
 app.use('/api/ai/cover-letter', aiCoverLetterRoutes);
 import aiResumeRoutes from './routes/aiResumeRoutes.js';
 app.use('/api/ai/resume', aiResumeRoutes);
+import recommendedJobsRoutes from './routes/recommendedJobsRoutes.js';
+app.use('/api/ai/recommended-jobs', recommendedJobsRoutes);
+app.use('/api/chatbot', chatbotRoutes);
+
+import adminRoutes from './routes/adminRoutes.js';
 app.use('/api/admin', adminRoutes);
 
 // 404 handler

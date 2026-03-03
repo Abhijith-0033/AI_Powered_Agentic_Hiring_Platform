@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { DashboardLayout } from '../../components/layout';
 import { ApplicantCard, CandidateProfilePanel } from '../../components/shared';
 import ApplicantDetailsModal from '../../components/shared/ApplicantDetailsModal';
-import { Input, Select } from '../../components/ui';
+import { Input, Select, LoadingSpinner } from '../../components/ui';
 import Card, { CardContent } from '../../components/ui/Card';
 import { getAllRecruiterApplications, updateApplicationStatus } from '../../api/applications';
 
@@ -140,9 +140,7 @@ const ApplicantManagement = () => {
     if (loading) {
         return (
             <DashboardLayout type="provider" title="Applicants">
-                <div className="flex justify-center items-center h-64">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-                </div>
+                <LoadingSpinner size="md" color="text-primary-600" className="h-64" />
             </DashboardLayout>
         );
     }

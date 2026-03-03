@@ -27,6 +27,7 @@ import {
     CandidateCodingDashboard,
     CodingTestAttempt,
     CodingResultPage,
+    RecommendedJobs,
 } from '../pages/user';
 import { AdminDashboard, UserManagement } from '../pages/admin';
 import TestAttemptPage from '../pages/user/TestAttemptPage';
@@ -60,6 +61,7 @@ const AppRoutes = () => {
                     <Route path="jobs" element={<JobDiscovery />} />
                     <Route path="jobs-india" element={<JobsInIndia />} />
                     <Route path="ai-actions" element={<AIActions />} />
+                    <Route path="ai-actions/recommended-jobs" element={<RecommendedJobs />} />
                     <Route path="applications" element={<ApplicationTracker />} />
                     <Route path="interviews" element={<UserInterviewsPage />} />
                     <Route path="tests" element={<MyTestsPage />} />
@@ -77,8 +79,6 @@ const AppRoutes = () => {
                     <Route index element={<Navigate to="/admin/dashboard" replace />} />
                     <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="users" element={<UserManagement />} />
-                    <Route path="jobs" element={<AdminDashboard />} />
-                    <Route path="applications" element={<AdminDashboard />} />
                 </Route>
             </Route>
 

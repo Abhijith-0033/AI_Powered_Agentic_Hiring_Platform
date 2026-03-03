@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Clock, ChevronLeft, ChevronRight, AlertTriangle, Send, CheckCircle, AlertCircle, Eye } from 'lucide-react';
 import { getTestForAttempt, submitTest, saveTestProgress } from '../../services/testService';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 const TestAttemptPage = () => {
     const { id: testId } = useParams();
@@ -185,7 +186,7 @@ const TestAttemptPage = () => {
         return (
             <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600 mx-auto mb-4"></div>
+                    <LoadingSpinner size="lg" color="text-violet-600" className="mb-4" />
                     <p className="text-neutral-600 font-medium">Loading test...</p>
                 </div>
             </div>
@@ -290,10 +291,10 @@ const TestAttemptPage = () => {
                                     key={i}
                                     onClick={() => setCurrentQ(i)}
                                     className={`w-8 h-8 rounded-lg text-xs font-bold transition-colors ${i === currentQ
-                                            ? 'bg-violet-600 text-white'
-                                            : answers[q.id]?.trim()
-                                                ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
-                                                : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
+                                        ? 'bg-violet-600 text-white'
+                                        : answers[q.id]?.trim()
+                                            ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                                            : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
                                         }`}
                                 >
                                     {i + 1}
@@ -326,8 +327,8 @@ const TestAttemptPage = () => {
                                     {currentQ + 1}
                                 </span>
                                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${currentQuestion.question_type === 'objective'
-                                        ? 'bg-blue-100 text-blue-700'
-                                        : 'bg-amber-100 text-amber-700'
+                                    ? 'bg-blue-100 text-blue-700'
+                                    : 'bg-amber-100 text-amber-700'
                                     }`}>
                                     {currentQuestion.question_type === 'objective' ? 'Multiple Choice' : 'Descriptive'}
                                 </span>
@@ -344,13 +345,13 @@ const TestAttemptPage = () => {
                                         <label
                                             key={oIdx}
                                             className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${answers[currentQuestion.id] === option
-                                                    ? 'border-violet-500 bg-violet-50'
-                                                    : 'border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50'
+                                                ? 'border-violet-500 bg-violet-50'
+                                                : 'border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50'
                                                 }`}
                                         >
                                             <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${answers[currentQuestion.id] === option
-                                                    ? 'border-violet-500 bg-violet-500'
-                                                    : 'border-neutral-300'
+                                                ? 'border-violet-500 bg-violet-500'
+                                                : 'border-neutral-300'
                                                 }`}>
                                                 {answers[currentQuestion.id] === option && (
                                                     <div className="w-2 h-2 rounded-full bg-white"></div>

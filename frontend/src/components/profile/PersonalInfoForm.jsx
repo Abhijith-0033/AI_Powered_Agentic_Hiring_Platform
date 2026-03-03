@@ -1,5 +1,5 @@
 import { Camera, Github, Linkedin, Mail, MapPin, Phone, User } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, Input, Textarea, Toggle } from '../ui';
+import { Card, CardContent, CardHeader, CardTitle, Input, Textarea, Toggle, LoadingSpinner } from '../ui';
 
 const PersonalInfoForm = ({ profile, setProfile, profileImage, handleImageUpload, isUploadingImage }) => {
 
@@ -38,7 +38,7 @@ const PersonalInfoForm = ({ profile, setProfile, profileImage, handleImageUpload
                             </label>
                             {isUploadingImage && (
                                 <div className="absolute inset-0 bg-white/60 flex items-center justify-center rounded-xl">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                                    <LoadingSpinner size="sm" color="text-primary-600" />
                                 </div>
                             )}
                         </div>

@@ -15,6 +15,7 @@ const InterviewScheduler = () => {
     const [scheduling, setScheduling] = useState(false);
     const [message, setMessage] = useState(null);
     const [scheduledData, setScheduledData] = useState(null);
+    const [candidateCount, setCandidateCount] = useState(10);
 
     // Form state
     const [interviewDate, setInterviewDate] = useState('');
@@ -64,10 +65,10 @@ const InterviewScheduler = () => {
             try {
                 const response = await api.get(`/ai-tools/jobs/${selectedJob}/candidates`);
                 if (response.data.success) {
-                    // Filter only AI-ranked candidates and take top 10
+                    // Filter only AI-ranked candidates and take top X
                     const aiRanked = response.data.data
                         .filter(c => c.match_score !== null && c.shortlisted_by_ai)
-                        .slice(0, 10);
+                        .slice(0, candidateCount === 0 ? undefined : candidateCount);
 
                     setTopCandidates(aiRanked);
 
@@ -87,7 +88,7 @@ const InterviewScheduler = () => {
         };
 
         fetchTopCandidates();
-    }, [selectedJob]);
+    }, [selectedJob, candidateCount]);
 
     // Handle interview scheduling
     const handleScheduleInterviews = async (e) => {
@@ -125,7 +126,8 @@ const InterviewScheduler = () => {
                 meetingLink: mode === 'online' ? meetingLink : null,
                 interviewers,
                 breakDuration,
-                breakFrequency
+                breakFrequency,
+                candidateCount
             });
 
             if (response.data.success) {
@@ -190,7 +192,7 @@ const InterviewScheduler = () => {
                 <div>
                     <h1 className="text-3xl font-bold text-neutral-900 tracking-tight">Interview Scheduler</h1>
                     <p className="mt-2 text-lg text-neutral-500">
-                        Automatically schedule interviews for your top 10 AI-ranked candidates.
+                        Automatically schedule interviews for your top AI-ranked candidates.
                     </p>
                 </div>
             </div>
@@ -215,18 +217,37 @@ const InterviewScheduler = () => {
                     {loadingJobs ? (
                         <div className="animate-pulse h-10 bg-gray-100 rounded w-full sm:w-1/2"></div>
                     ) : (
-                        <select
-                            value={selectedJob}
-                            onChange={(e) => setSelectedJob(e.target.value)}
-                            className="block w-full sm:w-1/2 rounded-lg border-neutral-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-3 px-4"
-                        >
-                            <option value="">-- Select a Job --</option>
-                            {jobs.map((job) => (
-                                <option key={job.job_id} value={job.job_id}>
-                                    {job.job_title} ({job.applicant_count} applicants) - {job.location}
-                                </option>
-                            ))}
-                        </select>
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <select
+                                value={selectedJob}
+                                onChange={(e) => setSelectedJob(e.target.value)}
+                                className="block w-full sm:w-1/2 rounded-lg border-neutral-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-3 px-4"
+                            >
+                                <option value="">-- Select a Job --</option>
+                                {jobs.map((job) => (
+                                    <option key={job.job_id} value={job.job_id}>
+                                        {job.job_title} ({job.applicant_count} applicants) - {job.location}
+                                    </option>
+                                ))}
+                            </select>
+
+                            {selectedJob && (
+                                <div className="flex items-center gap-2">
+                                    <label className="text-sm font-medium text-neutral-700 whitespace-nowrap">Number of Candidates:</label>
+                                    <select
+                                        value={candidateCount}
+                                        onChange={(e) => setCandidateCount(Number(e.target.value))}
+                                        className="block rounded-lg border-neutral-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3"
+                                    >
+                                        <option value={5}>Top 5</option>
+                                        <option value={10}>Top 10</option>
+                                        <option value={15}>Top 15</option>
+                                        <option value={20}>Top 20</option>
+                                        <option value={0}>All Shortlisted</option>
+                                    </select>
+                                </div>
+                            )}
+                        </div>
                     )}
                 </CardContent>
             </Card>
@@ -237,7 +258,7 @@ const InterviewScheduler = () => {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Users className="w-5 h-5" />
-                            Top 10 AI-Ranked Candidates
+                            Top {candidateCount === 0 ? 'Shortlisted' : candidateCount} AI-Ranked Candidates
                         </CardTitle>
                         <CardDescription>
                             Interviews will be scheduled for these candidates in sequential time slots.

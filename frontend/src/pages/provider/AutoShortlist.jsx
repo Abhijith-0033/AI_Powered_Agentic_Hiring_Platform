@@ -292,10 +292,50 @@ const AutoShortlist = () => {
                                         <div className="mt-4 p-4 bg-neutral-50 rounded-lg border border-neutral-200 animate-in fade-in slide-in-from-top-2">
                                             <h4 className="font-semibold text-sm text-neutral-900 mb-3">Why {candidate.match_score}%?</h4>
 
-                                            {/* Reasoning Summary */}
-                                            <p className="text-sm text-neutral-700 whitespace-pre-line mb-4 bg-white p-3 rounded border border-neutral-100">
-                                                {candidate.explanation.summary}
-                                            </p>
+                                            {/* Gemini AI Narrative */}
+                                            {candidate.explanation.aiNarrative && (
+                                                <div className="mb-4 p-3 bg-indigo-50 border border-indigo-100 rounded-lg flex gap-3">
+                                                    <div className="text-xl">✨</div>
+                                                    <div>
+                                                        <p className="text-xs font-bold text-indigo-700 uppercase tracking-tight mb-1">AI Analysis</p>
+                                                        <p className="text-sm text-indigo-900 italic font-medium">"{candidate.explanation.aiNarrative}"</p>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Score Breakdown Bars */}
+                                            {candidate.explanation.breakdown && (
+                                                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6 pt-2">
+                                                    {[
+                                                        { label: 'Skills', score: candidate.explanation.breakdown.skillScore, weight: '40%', color: 'bg-emerald-500' },
+                                                        { label: 'Experience', score: candidate.explanation.breakdown.experienceScore, weight: '20%', color: 'bg-blue-500' },
+                                                        { label: 'Seniority', score: candidate.explanation.breakdown.seniorityScore, weight: '15%', color: 'bg-purple-500' },
+                                                        { label: 'Education', score: candidate.explanation.breakdown.educationScore, weight: '10%', color: 'bg-amber-500' },
+                                                        { label: 'Text Match', score: candidate.explanation.breakdown.tfidfScore, weight: '15%', color: 'bg-slate-500' },
+                                                    ].map((item, i) => (
+                                                        <div key={i} className="space-y-1">
+                                                            <div className="flex justify-between text-[10px] font-bold text-neutral-500 uppercase">
+                                                                <span>{item.label}</span>
+                                                                <span>{Math.round(item.score)}%</span>
+                                                            </div>
+                                                            <div className="h-1.5 w-full bg-neutral-200 rounded-full overflow-hidden">
+                                                                <div
+                                                                    className={`h-full ${item.color} rounded-full transition-all duration-500`}
+                                                                    style={{ width: `${item.score}%` }}
+                                                                ></div>
+                                                            </div>
+                                                            <p className="text-[9px] text-neutral-400 text-right">Weight: {item.weight}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {/* Reasoning Summary (Fallback/Secondary) */}
+                                            {!candidate.explanation.aiNarrative && (
+                                                <p className="text-sm text-neutral-700 whitespace-pre-line mb-4 bg-white p-3 rounded border border-neutral-100">
+                                                    {candidate.explanation.summary}
+                                                </p>
+                                            )}
 
                                             <div className="grid md:grid-cols-3 gap-4">
                                                 {/* Matched Skills */}

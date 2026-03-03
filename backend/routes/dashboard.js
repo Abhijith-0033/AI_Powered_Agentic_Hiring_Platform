@@ -32,13 +32,28 @@ router.get('/stats', auth, async (req, res) => {
         const candidate = candidateRes.rows[0];
 
         // Calculate Profile Completion
-        let completionScore = 0;
-        if (candidate.experience_years) completionScore += 20;
-        if (candidate.profile_description) completionScore += 20;
-        if (candidate.skills && candidate.skills.length > 0) completionScore += 20;
-        // Resume check (resume_url might be null if using blob, check blob table if needed, but keeping simple)
-        if (candidate.resume_url) completionScore += 20;
-        completionScore += 20; // Basic info
+        let completionScore = 20; // 20% Base score for basic info / account creation
+
+        if (candidate.profile_description && candidate.profile_description.trim().length > 0) {
+            completionScore += 20;
+        }
+
+        if (candidate.skills && candidate.skills.length > 0) {
+            completionScore += 20;
+        }
+
+        // Check if they have added education OR experience
+        const expCheck = await pool.query('SELECT 1 FROM candidate_experience WHERE candidate_id = $1 LIMIT 1', [candidate.id]);
+        const eduCheck = await pool.query('SELECT 1 FROM candidate_education WHERE candidate_id = $1 LIMIT 1', [candidate.id]);
+        if (expCheck.rows.length > 0 || eduCheck.rows.length > 0) {
+            completionScore += 20;
+        }
+
+        // Check if they have uploaded a resume
+        const resumeCheck = await pool.query('SELECT 1 FROM candidate_resumes WHERE candidate_id = $1 LIMIT 1', [candidate.id]);
+        if (resumeCheck.rows.length > 0 || candidate.resume_url) {
+            completionScore += 20;
+        }
 
         // Matches: Approximate "matches" by finding jobs that have at least one of the user's skills
         let matchesCount = 0;
@@ -96,11 +111,13 @@ router.get('/provider/stats', auth, async (req, res) => {
 
         let stats = {
             jobsPosted: 0,
-            applicants: 0, // Mocked as 0 for now as table missing
+            applicants: 0,
             shortlisted: 0,
             interviewed: 0
         };
         let recentJobs = [];
+        let jobsPostedData = [];
+        let applicationTrendData = [];
 
         if (company) {
             if (company.logo) {
@@ -113,13 +130,17 @@ router.get('/provider/stats', auth, async (req, res) => {
 
             // 2. Applicants count
             const appsCountQuery = `
-                SELECT COUNT(ja.id) 
+                SELECT COUNT(ja.id) as total,
+                       SUM(CASE WHEN ja.status IN ('shortlisted', 'shortlisted_for_test') THEN 1 ELSE 0 END) as shortlisted_count,
+                       SUM(CASE WHEN ja.status = 'interview' THEN 1 ELSE 0 END) as interviewed_count
                 FROM job_applications ja
                 JOIN job_postings jp ON ja.job_id = jp.job_id
                 WHERE jp.company_id = $1
             `;
             const appsCountRes = await pool.query(appsCountQuery, [company.id]);
-            stats.applicants = parseInt(appsCountRes.rows[0].count);
+            stats.applicants = parseInt(appsCountRes.rows[0].total) || 0;
+            stats.shortlisted = parseInt(appsCountRes.rows[0].shortlisted_count) || 0;
+            stats.interviewed = parseInt(appsCountRes.rows[0].interviewed_count) || 0;
 
             // 3. Recent Jobs
             const recentJobsQuery = `
@@ -132,6 +153,54 @@ router.get('/provider/stats', auth, async (req, res) => {
             `;
             const { rows: jobsRows } = await pool.query(recentJobsQuery, [company.id]);
             recentJobs = jobsRows;
+
+            // 4. Jobs Posted Data (Last 6 Months)
+            for (let i = 5; i >= 0; i--) {
+                const d = new Date();
+                d.setMonth(d.getMonth() - i);
+                jobsPostedData.push({
+                    name: d.toLocaleString('en-US', { month: 'short' }),
+                    jobs: 0,
+                    month: d.getMonth() + 1,
+                    year: d.getFullYear()
+                });
+            }
+
+            const jobsCountResByMonth = await pool.query(`
+                SELECT EXTRACT(MONTH FROM created_at) as month, EXTRACT(YEAR FROM created_at) as year, COUNT(*) as count 
+                FROM job_postings 
+                WHERE company_id = $1 AND created_at >= NOW() - INTERVAL '6 months'
+                GROUP BY EXTRACT(MONTH FROM created_at), EXTRACT(YEAR FROM created_at)
+            `, [company.id]);
+
+            jobsCountResByMonth.rows.forEach(row => {
+                const item = jobsPostedData.find(d => d.month === parseInt(row.month) && d.year === parseInt(row.year));
+                if (item) item.jobs = parseInt(row.count);
+            });
+
+            // 5. Application Trends Data (Last 7 Days)
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                applicationTrendData.push({
+                    name: d.toLocaleString('en-US', { weekday: 'short' }),
+                    apps: 0,
+                    dateStr: d.toISOString().split('T')[0]
+                });
+            }
+
+            const appsTrendRes = await pool.query(`
+                SELECT TO_CHAR(ja.applied_at, 'YYYY-MM-DD') as date_str, COUNT(*) as count
+                FROM job_applications ja
+                JOIN job_postings jp ON ja.job_id = jp.job_id
+                WHERE jp.company_id = $1 AND ja.applied_at >= NOW() - INTERVAL '7 days'
+                GROUP BY TO_CHAR(ja.applied_at, 'YYYY-MM-DD')
+            `, [company.id]);
+
+            appsTrendRes.rows.forEach(row => {
+                const item = applicationTrendData.find(d => d.dateStr === row.date_str);
+                if (item) item.apps = parseInt(row.count);
+            });
         }
 
         res.json({
@@ -139,7 +208,9 @@ router.get('/provider/stats', auth, async (req, res) => {
             company: company,
             user: { email: req.user.email },
             stats,
-            recentJobs
+            recentJobs,
+            jobsPostedData,
+            applicationTrendData
         });
 
     } catch (error) {

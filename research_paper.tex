@@ -3,6 +3,7 @@
 \usepackage{cite}
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{algorithmic}
+\usepackage{algorithm}
 \usepackage{graphicx}
 \usepackage{textcomp}
 \usepackage{xcolor}
@@ -11,287 +12,389 @@
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
 
-\title{AI-Powered Agentic Hiring Platform: A Multi-Agent System for Intelligent Recruitment and Job Matching}
+\title{AI-Powered Agentic Hiring Platform: A Multi-Agent System for Intelligent Recruitment, Explainable Job Matching, and Candidate Development}
 
 \author{
+\IEEEauthorblockN{Mrs.~Joby Anu Mathew}
+\IEEEauthorblockA{\textit{Assoc. Prof, Dept.\ of AI \& Data Science} \\
+\textit{Viswajyothi College of Engineering and}\\
+Technology Vazhakulam, India \\
+jobyanu@vjcet.org}
+
+\and
 \IEEEauthorblockN{Abhijith Binosh}
-\IEEEauthorblockA{
-\textit{Department of Artificial Intelligence and Data Science} \\
-\textit{Viswajyothi College of Engineering and Technology, Vazhakulam} \\
-Ernakulam, India \\
-abhijith22ra124@vjcet.org
-}
+\IEEEauthorblockA{\textit{Dept.\ of AI \& Data Science} \\
+\textit{Viswajyothi College of Engineering and }\\
+Technology Vazhakulam, India \\
+abhijith22ra124@vjcet.org}
+
 \and
 \IEEEauthorblockN{Jose Martin Binu}
-\IEEEauthorblockA{
-\textit{Department of Artificial Intelligence and Data Science} \\
-\textit{Viswajyothi College of Engineering and Technology, Vazhakulam} \\
-Ernakulam, India \\
-jose22ra239@vjcet.org
-}
+\IEEEauthorblockA{\textit{Dept.\ of AI \& Data Science} \\
+\textit{Viswajyothi College of Engineering and}\\
+Technology Vazhakulam, India \\
+jose22ra239@vjcet.org}
+
 \and
-\IEEEauthorblockN{R. Jayadev}
-\IEEEauthorblockA{
-\textit{Department of Artificial Intelligence and Data Science} \\
-\textit{Viswajyothi College of Engineering and Technology, Vazhakulam} \\
-Ernakulam, India \\
-jayadev22ra125@vjcet.org
-}
+
+\hspace{0.6cm}
+\IEEEauthorblockN{R.~Jayadev}
+\IEEEauthorblockA{\textit{Dept.\ of AI \& Data Science} \\
+\textit{Viswajyothi College of Engineering and}\\
+ Technology Vazhakulam, India \\
+jayadev22ra125@vjcet.org}
+
 \and
-\IEEEauthorblockN{Suryanarayanan N. J.}
-\IEEEauthorblockA{
-\textit{Department of Artificial Intelligence and Data Science} \\
-\textit{Viswajyothi College of Engineering and Technology, Vazhakulam} \\
-Ernakulam, India \\
-surya22ra129@vjcet.org
-}
+\IEEEauthorblockN{Suryanarayanan N.~J.}
+\IEEEauthorblockA{\textit{Dept.\ of AI \& Data Science} \\
+\textit{Viswajyothi College of Engineering and}\\
+ Technology Vazhakulam, India \\
+surya22ra129@vjcet.org}
 }
 
 \maketitle
 
+% ─────────────────────────────────────────────────────────────
 \begin{abstract}
-The recruitment industry faces significant challenges in efficiently matching candidates with job opportunities due to manual screening processes, high volumes of applications, and subjective evaluation criteria. This paper presents an AI-Powered Agentic Hiring Platform that leverages multi-agent systems, natural language processing, and intelligent scheduling algorithms to automate and optimize the recruitment workflow. The proposed system integrates multiple specialized AI agents including an Auto-Shortlist Agent for candidate evaluation, an Interview Scheduler Agent utilizing break-aware round-robin algorithms, and a Job Aggregation Agent that consolidates opportunities from multiple external APIs. Experimental results demonstrate a 78\% improvement in candidate matching accuracy, 65\% reduction in interview scheduling time, and enhanced recruiter productivity through automated workflow management. The platform successfully processed over 1,000 job applications with an average match score accuracy of 0.82, significantly outperforming traditional keyword-based systems.
+The recruitment industry faces significant challenges in efficiently matching candidates with job opportunities due to high application volumes, subjective evaluation criteria, and fragmented tooling. This paper presents an AI-Powered Agentic Hiring Platform that integrates a multi-agent architecture, hybrid AI/NLP-based candidate shortlisting, automated interview scheduling, and a suite of candidate development tools. The system's novel contributions include: (1)~a hybrid shortlisting agent combining TF-IDF cosine similarity with Google Gemini~AI for explainable match scoring; (2)~a break-aware round-robin scheduling algorithm with Fisher-Yates randomisation guaranteeing $\Delta_{\text{load}}\!\leq\!1$; (3)~a remote coding assessment module backed by the Piston API; (4)~a Gemini-powered resume optimiser with hallucination guard and PDF export; (5)~a career roadmap generator using Groq Llama~3.3-70B; (6)~a profile-driven job recommender aggregating from Adzuna and Jooble; and (7)~a zero-cost FAQ chatbot using Qdrant vector search with no LLM inference at query time. Implemented with Node.js~18, React~18, and PostgreSQL~14, the platform delivers a production-ready recruitment ecosystem bridging the gap between candidate preparation and employer evaluation.
 \end{abstract}
 
 \begin{IEEEkeywords}
-artificial intelligence, multi-agent systems, recruitment automation, job matching, intelligent scheduling, natural language processing, machine learning
+multi-agent systems, recruitment automation, TF-IDF, cosine similarity, explainable AI, interview scheduling, coding assessment, career roadmap, large language models, job recommendation
 \end{IEEEkeywords}
 
+% ─────────────────────────────────────────────────────────────
 \section{Introduction}
+% ─────────────────────────────────────────────────────────────
 
-The modern recruitment landscape is characterized by exponentially growing application volumes, diverse skill requirements, and the critical need for efficient candidate-job matching. Traditional hiring processes rely heavily on manual resume screening, which is time-consuming, prone to human bias, and often results in qualified candidates being overlooked. Studies indicate that recruiters spend an average of 23 hours screening resumes for a single hire \cite{b1}, while approximately 75\% of qualified candidates are filtered out by inadequate screening systems \cite{b2}.
+Modern recruitment is characterised by exponentially growing application volumes and increasingly complex skill requirements. Studies indicate that recruiters spend an average of 23 hours screening resumes for a single hire~\cite{b1}, while approximately 75\% of qualified candidates are eliminated by inadequate automated screening systems~\cite{b2}. Most commercial Applicant Tracking Systems (ATS) rely on keyword matching that fails to capture semantic nuance and provide no transparent explanation to either recruiter or candidate~\cite{b3}.
 
-Recent advances in artificial intelligence and multi-agent systems present opportunities to revolutionize recruitment processes. Machine learning algorithms can analyze vast amounts of candidate data, identify patterns in successful hires, and provide objective evaluations based on skill matching and experience analysis \cite{b3}. However, most existing recruitment platforms employ simple keyword matching or basic scoring mechanisms that fail to capture the nuanced requirements of modern job roles.
+Beyond screening, the hiring lifecycle suffers from siloed tooling: interview scheduling is manual and error-prone, coding skills are evaluated on separate third-party platforms, and resume improvement and career-planning tools are entirely disconnected from the application process. This fragmentation creates friction for both job seekers, who must navigate multiple platforms, and for recruiters, who must reconcile outputs from disconnected systems.
 
-This paper introduces a comprehensive AI-Powered Agentic Hiring Platform that addresses these limitations through a multi-layered architecture incorporating specialized autonomous agents. The system's key innovations include:
+This paper introduces the \textbf{AI-Powered Agentic Hiring Platform}, a unified recruitment ecosystem that addresses all these gaps through a modular multi-agent architecture. Our key contributions are:
 
 \begin{itemize}
-\item An intelligent Auto-Shortlist Agent that performs semantic analysis of resumes and job descriptions, generating detailed match scores with human-readable explanations
-\item A break-aware Interview Scheduler Agent implementing fair distribution algorithms to optimize interviewer workload
-\item A Job Aggregation Agent that dynamically fetches and consolidates opportunities from multiple external APIs (Jooble and Adzuna)
-\item A bidirectional application status workflow enabling transparent communication between job seekers and employers
-\item Real-time analytics dashboards providing actionable insights for both candidates and recruiters
+\item A \textbf{hybrid shortlisting agent} that fuses TF-IDF vector similarity with Gemini~AI semantic reasoning, producing explainable skill-level match reports for every candidate.
+\item A \textbf{break-aware round-robin scheduler} guaranteeing fair interviewer load distribution ($\Delta_{\text{load}}\!\leq\!1$) with $O(|C|)$ time complexity.
+\item A \textbf{coding assessment module} supporting server-side execution in Python, C\texttt{++}, Java, and JavaScript~(Node.js) via the Piston API, enabling technical skill validation entirely within the platform.
+\item An \textbf{AI resume optimiser} powered by Gemini with deterministic scoring, a hallucination guard, and downloadable PDF output.
+\item An \textbf{AI career roadmap generator} driven by Groq Llama~3.3-70B and rendered as an interactive React-Flow metro-map.
+\item A \textbf{profile-driven job recommender} performing per-skill parallel queries against Adzuna and Jooble APIs with automatic deduplication.
 \end{itemize}
 
-The remainder of this paper is organized as follows. Section II reviews related work in recruitment automation and multi-agent systems. Section III presents the system architecture and design methodology. Section IV details the implementation of core AI agents and algorithms. Section V presents experimental results and performance analysis. Section VI discusses limitations and future work, and Section VII concludes the paper.
+The remainder of this paper is organised as follows. Section~II reviews related work. Section~III presents the system architecture. Section~IV details core algorithms and methodologies. Section~V discusses experimental characteristics. Section~VI addresses limitations, and Section~VII concludes.
 
+% ─────────────────────────────────────────────────────────────
 \section{Related Work}
+% ─────────────────────────────────────────────────────────────
 
 \subsection{Recruitment Automation Systems}
-
-Several commercial and academic systems have attempted to automate various aspects of the recruitment process. LinkedIn Recruiter \cite{b4} employs collaborative filtering to recommend candidates based on recruiter behavior patterns. However, it lacks transparent explanation mechanisms and relies heavily on user network effects rather than objective skill matching.
-
-Recent research by Chen et al. \cite{b5} proposed a deep learning-based resume screening system achieving 73\% accuracy in candidate classification. While promising, their approach treated resume analysis as a black-box classification problem without providing interpretable results to recruiters.
+Several commercial and academic systems have attempted to automate aspects of the recruitment process. LinkedIn Recruiter~\cite{b4} employs collaborative filtering to recommend candidates based on recruiter behaviour patterns; however, it lacks transparent explanation mechanisms and relies heavily on user network effects rather than objective skill matching. Research by Chen et al.~\cite{b5} proposed a deep learning-based resume screening system using convolutional neural networks, yet their approach treated resume analysis as a black-box classification problem without providing interpretable results to recruiters.
 
 \subsection{Multi-Agent Systems in HR}
+Multi-agent systems (MAS) have been explored for distributed problem-solving in various domains~\cite{b6}. In the recruitment context, Faliagka et al.~\cite{b7} developed a multi-criteria decision analysis framework for candidate ranking. However, their system required extensive manual configuration of criteria weights and lacked adaptive learning. Our work differs by implementing autonomous agents with specialised functions that collaborate through well-defined REST interfaces, enabling modular development and independent scaling without manual tuning.
 
-Multi-agent systems (MAS) have been explored for distributed problem-solving in various domains \cite{b6}. In the recruitment context, Faliagka et al. \cite{b7} developed a multi-criteria decision analysis framework for candidate ranking. However, their system required extensive manual configuration of weights and lacked adaptive learning capabilities.
+\subsection{Interview Scheduling Optimisation}
+Interview scheduling has been studied as a constraint satisfaction problem~\cite{b8}. Traditional approaches use genetic algorithms or simulated annealing to find optimal schedules, incurring high computational cost and offering no fairness guarantees. Our break-aware round-robin algorithm provides a provable near-perfect distribution guarantee while maintaining $O(|C|)$ computational complexity, a practical advantage for web-scale deployment.
 
-Our work differs by implementing autonomous agents with specialized functions that collaborate through well-defined interfaces, enabling modular development and scalability.
+\subsection{AI-Assisted Candidate Development}
+LLM-based resume enhancement~\cite{b9,b10} and career path generation have been explored in isolation. Natural language processing for structured resume parsing has been examined in~\cite{b11}, yet no prior work integrates ATS optimisation, interactive career roadmapping, and automated coding assessment within a single unified recruitment platform.
 
-\subsection{Interview Scheduling Optimization}
-
-Interview scheduling has been studied as a constraint satisfaction problem \cite{b8}. Traditional approaches use genetic algorithms or simulated annealing to find optimal schedules. Our break-aware round-robin algorithm provides fairness guarantees while maintaining computational efficiency with O(n) complexity for n interviews.
-
+% ─────────────────────────────────────────────────────────────
 \section{System Architecture}
+% ─────────────────────────────────────────────────────────────
 
-\subsection{Overall Architecture}
+\subsection{Three-Tier Design}
 
-The AI-Powered Agentic Hiring Platform employs a three-tier architecture comprising presentation, application logic, and data layers, as illustrated in Fig.~\ref{fig:architecture}.
+The platform follows a three-tier architecture comprising a Presentation Layer, an Application Layer, and a Data Layer, as illustrated in Fig.~\ref{fig:architecture}.
 
 \begin{figure}[htbp]
-\centerline{\includegraphics[width=\columnwidth]{architecture.png}}
-\caption{System architecture showing three-tier design with AI agent layer.}
+\centerline{\includegraphics[width=\columnwidth]{system_architecture.png}}
+\caption{Multi-agent system architecture showing three-tier design with six specialised AI agents, external API integrations, and the PostgreSQL data layer.}
 \label{fig:architecture}
 \end{figure}
 
-The presentation layer consists of React-based frontend modules serving distinct user roles: job seekers, recruiters, and system administrators. The application layer contains the AI/Logic Engine housing specialized agents, RESTful API services, and authentication middleware. The data layer integrates PostgreSQL for structured data storage and interfaces with external job APIs.
+The \textbf{Presentation Layer} consists of React~18 (Vite build tool) frontend modules with Tailwind CSS styling and React-Router~v6 navigation, serving distinct UIs for job seekers, recruiters, and administrators. The \textbf{Application Layer} houses six autonomous AI agents, RESTful API services built on Express.js, and JWT/bcrypt authentication middleware implementing role-based access control (RBAC). The \textbf{Data Layer} integrates PostgreSQL~14 (hosted on Neon cloud) with 30+ normalised tables and interfaces with four external services: Adzuna API, Jooble API, Groq API, and Google Gemini API.
 
 \subsection{Multi-Agent System Design}
 
-The platform implements four primary autonomous agents:
+Six specialised autonomous agents each handle a distinct domain:
 
-\textbf{Auto-Shortlist Agent:} Analyzes candidate profiles against job requirements using natural language processing and skill taxonomy matching. Generates a normalized match score $S_{\text{match}} \in [0,1]$ computed as:
-
-\begin{equation}
-S_{\text{match}} = \alpha S_{\text{skills}} + \beta S_{\text{edu}} + \gamma S_{\text{exp}} + \delta S_{\text{keywords}}
-\label{eq:match}
-\end{equation}
-
-where $S_{\text{skills}}$, $S_{\text{edu}}$, $S_{\text{exp}}$, and $S_{\text{keywords}}$ represent skill, education, experience, and keyword matching scores respectively, and $\alpha + \beta + \gamma + \delta = 1$.
-
-\textbf{Interview Scheduler Agent:} Implements a break-aware round-robin algorithm ensuring fair distribution of interview load across available interviewers while respecting mandatory break periods. The algorithm maintains a circular queue of interviewers and assigns interviews sequentially with break enforcement after every $k$ consecutive assignments.
-
-\textbf{Job Aggregation Agent:} Performs real-time aggregation from multiple external APIs, applying intelligent deduplication based on company name, job title similarity (using Levenshtein distance), and location normalization.
-
-\textbf{Application Status Agent:} Manages bidirectional workflow states enabling recruiters to update application statuses (shortlisted, rejected, interview scheduled) with automatic candidate notifications.
+\begin{enumerate}
+\item \textbf{Shortlist Agent:} Hybrid TF-IDF cosine similarity + Gemini~AI candidate ranking with explainability output.
+\item \textbf{Scheduler Agent:} Break-aware round-robin interview time-slot assignment using Fisher-Yates shuffling.
+\item \textbf{Aggregator Agent:} Parallel job consolidation from Adzuna, Jooble, and the internal database with deduplication.
+\item \textbf{Optimizer Agent:} Gemini-powered ATS resume enhancement with deterministic pre/post scoring and hallucination detection.
+\item \textbf{Roadmap Agent:} Groq Llama~3.3-70B career learning-path generation formatted as a React-Flow node graph.
+\item \textbf{Assessor Agent:} Piston-backed remote code execution and automated test-case evaluation in four languages.
+\item \textbf{Chatbot Agent:} Zero-cost semantic FAQ retrieval using Qdrant vector search — no LLM call at query time.
+\end{enumerate}
 
 \subsection{Database Schema}
 
-The system utilizes a normalized relational database schema with key entities including Users, Jobs, Applications, Interviews, and ExternalJobs. Foreign key constraints ensure referential integrity, while indexes on frequently queried fields optimize search performance.
+The PostgreSQL schema is partitioned into functional domains:
+\begin{itemize}
+\item \textit{User \& Auth:} \texttt{users}, \texttt{credentials} (Google OAuth supported).
+\item \textit{Candidate:} \texttt{candidates}, \texttt{candidate\_education}, \texttt{candidate\_resumes}.
+\item \textit{Job Management:} \texttt{job\_postings}, \texttt{job\_requirements}.
+\item \textit{Applications:} \texttt{job\_applications}, \texttt{job\_application\_answers}.
+\item \textit{Assessments:} \texttt{tests}, \texttt{test\_questions}, \texttt{test\_attempts}.
+\item \textit{AI Results:} \texttt{interviews}, \texttt{notifications}, \texttt{optimized\_resumes}.
+\end{itemize}
+Referential integrity is enforced via cascading foreign keys; soft deletion on job postings preserves application history.
 
-\section{Implementation}
+% ─────────────────────────────────────────────────────────────
+\section{Core Algorithms and Methodology}
+% ─────────────────────────────────────────────────────────────
 
-\subsection{Technology Stack}
+\subsection{Hybrid AI Candidate Shortlisting}
 
-The platform is implemented using Node.js (v18.x) with Express.js framework for backend services, React.js (v18.x) for frontend interfaces, and PostgreSQL (v14.x) for data persistence. AI agents are implemented as modular services with RESTful interfaces enabling independent scaling and maintenance.
+The Shortlist Agent implements a two-phase pipeline. In \textit{Phase~1}, TF-IDF vectorisation produces a deterministic, auditable numeric score. In \textit{Phase~2}, Gemini~1.5-Flash performs semantic reasoning to capture synonymy and contextual relevance missed by exact-term matching.
 
-\subsection{Auto-Shortlist Algorithm}
+\subsubsection{Text Normalisation and Skill Aliasing}
+Before vectorisation, a curated alias map resolves common abbreviations: \texttt{js}$\to$\texttt{javascript}, \texttt{node.js}$\to$\texttt{nodejs}, \texttt{k8s}$\to$\texttt{kubernetes}, \texttt{ml}$\to$\texttt{machine learning}, \texttt{postgres}$\to$\texttt{postgresql}, etc. Aliases are sorted by descending length to prevent partial matches. Text undergoes tokenisation, lowercasing, punctuation removal, and stopword filtering using the \texttt{natural} NLP library.
 
-Algorithm 1 presents the core auto-shortlist procedure. The algorithm extracts normalized skill sets from both job descriptions and candidate resumes, computes Jaccard similarity for skill matching, and generates detailed explanations for match scores.
+\subsubsection{TF-IDF Contextual Vectorisation}
+An enriched candidate context $D_c$ is constructed for each candidate:
+\begin{equation}
+D_c = S_{\text{skills}} \oplus E_{\text{education}} \oplus R_{\text{resume}}
+\end{equation}
+where $\oplus$ denotes concatenation. Structuring data this way front-loads important keywords, boosting their term frequency in the two-document corpus $\{D_j, D_c\}$ built from the job description $D_j$. The TF-IDF weight for term $t$ in document $d$ is:
+\begin{equation}
+w_{t,d} = \mathrm{tf}(t,d) \times \log\!\left(\frac{N}{\mathrm{df}(t)}\right), \quad N{=}2
+\end{equation}
 
-\begin{table}[htbp]
-\caption{Algorithm 1: Auto-Shortlist Candidate Evaluation}
-\begin{center}
-\begin{tabular}{l}
-\hline
-\textbf{Input:} Job description $J$, Candidate resume $C$ \\
-\textbf{Output:} Match score $S$, Explanation $E$ \\
-\hline
-1: Extract skill set $J_s$ from $J$ \\
-2: Extract skill set $C_s$ from $C$ \\
-3: Compute $S_{\text{skills}} = \frac{|J_s \cap C_s|}{|J_s|}$ \\
-4: Extract education level $J_e$ from $J$ \\
-5: Extract education level $C_e$ from $C$ \\
-6: Compute $S_{\text{edu}}$ based on degree equivalence \\
-7: Compute experience score $S_{\text{exp}}$ \\
-8: Perform keyword extraction and compute $S_{\text{keywords}}$ \\
-9: Calculate $S$ using Equation \eqref{eq:match} \\
-10: Generate explanation $E$ with matched/missing skills \\
-11: \textbf{return} $S$, $E$ \\
-\hline
-\end{tabular}
-\label{tab:algorithm}
-\end{center}
-\end{table}
+\subsubsection{Cosine Similarity Scoring}
+The final match score is derived from the cosine angle between job vector $\vec{V}_j$ and candidate vector $\vec{V}_c$:
+\begin{equation}
+S = \frac{\vec{V}_j \cdot \vec{V}_c}{\|\vec{V}_j\|\,\|\vec{V}_c\|} \times 100 \quad \in [0, 100]
+\end{equation}
+
+\subsubsection{Explainability and Degree Hierarchy}
+A degree hierarchy maps qualifications to ordinal levels (Certificate$=1$, Bachelor$=2$, Masters$=3$, PhD$=4$) to evaluate education compatibility. The agent returns per-candidate: matched skills list, missing skills list, education compatibility flag, seniority tier alignment, and a natural-language summary string (e.g., ``8 of 10 required skills matched. Missing: Docker, Kubernetes.'').
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\columnwidth]{shortlisting_flowchart.png}}
+\caption{AI-driven candidate shortlisting pipeline. Resumes undergo text normalisation and TF-IDF vectorisation followed by cosine similarity scoring. Gemini~AI adds semantic reasoning for a final explainable score with matched/missing skill breakdown.}
+\label{fig:shortlist}
+\end{figure}
 
 \subsection{Break-Aware Round-Robin Scheduling}
 
-The interview scheduling algorithm maintains interviewer state tracking assignment counts and break status. For each interview request, the algorithm selects the next available interviewer from the circular queue, assigns the interview, increments the assignment counter, and enforces a mandatory break period after $k$ assignments (configurable parameter, default $k=3$).
+The Scheduler Agent distributes $|C|$ candidates across $|I|$ interviewers in $O(|I|+|C|)$ time.
 
-Formally, for interviewer $i$ with assignment count $a_i$, a break is triggered when $a_i \equiv 0 \pmod{k}$. During breaks, the interviewer is temporarily removed from the active queue for a duration $\Delta t_{\text{break}}$.
+\begin{algorithm}[htbp]
+\caption{Break-Aware Round-Robin Scheduling}
+\label{alg:schedule}
+\begin{algorithmic}[1]
+\REQUIRE Candidates $C$, Interviewers $I$, start $t_0$, slot duration $d$, break freq $k$, break dur $B$
+\ENSURE Schedule $\mathcal{S}$
+\STATE $I \leftarrow \text{FisherYatesShuffle}(I)$
+\STATE $T[i]\!\leftarrow\!t_0$,\; $cnt[i]\!\leftarrow\!0$ \; $\forall\, i\!\in\! I$
+\FOR{$j = 0$ \TO $|C|-1$}
+  \STATE $idx \leftarrow j \bmod |I|$
+  \STATE $\mathcal{S}.\mathrm{add}\bigl(C[j],\;I[idx],\;T[idx],\;T[idx]+d\bigr)$
+  \STATE $T[idx] \mathrel{+}= d$;\quad $cnt[idx] \mathrel{+}= 1$
+  \IF{$cnt[idx] \bmod k = 0$ \AND $j < |C|-1$}
+    \STATE $T[idx] \mathrel{+}= B$ \COMMENT{insert mandatory break}
+  \ENDIF
+\ENDFOR
+\RETURN $\mathcal{S}$
+\end{algorithmic}
+\end{algorithm}
 
-\subsection{Job Aggregation and Deduplication}
+\textbf{Load Balance Guarantee.} The maximum interview-count difference between any two interviewers is bounded by:
+\begin{equation}
+\Delta_{\text{load}} = \left\lceil \frac{|C|}{|I|} \right\rceil - \left\lfloor \frac{|C|}{|I|} \right\rfloor \leq 1
+\end{equation}
 
-The job aggregation module issues parallel API requests to configured external sources with location-based and keyword filters. Response data undergoes normalization including date format standardization, salary range parsing, and location canonicalization.
-
-Deduplication employs a multi-criteria approach: jobs are considered duplicates if they share identical company names and job titles with Levenshtein distance $d < 0.3$, or if they have similar descriptions with cosine similarity $> 0.85$.
-
-\section{Experimental Results}
-
-\subsection{Experimental Setup}
-
-The platform was deployed on a cloud infrastructure with 4 vCPU cores, 8GB RAM, and PostgreSQL database with 50GB SSD storage. Testing involved a dataset of 1,247 real job applications across 83 job postings from diverse industries including technology, finance, and healthcare.
-
-\subsection{Auto-Shortlist Performance}
-
-Fig.~\ref{fig:match_accuracy} presents the distribution of match scores for 1,247 candidate-job pairs. The Auto-Shortlist Agent achieved an average match score of 0.82 with standard deviation of 0.14, indicating consistent performance across diverse job types.
+Fisher-Yates shuffling eliminates alphabetical bias in initial assignment order, ensuring that different recruiters are not systematically favoured across multiple scheduling runs.
 
 \begin{figure}[htbp]
-\centerline{\includegraphics[width=\columnwidth]{match_scores.png}}
-\caption{Distribution of candidate match scores across 1,247 applications.}
-\label{fig:match_accuracy}
+\centerline{\includegraphics[width=\columnwidth]{scheduling_algorithm.png}}
+\caption{Break-aware round-robin scheduling flowchart. Fisher-Yates shuffle randomises interviewer order; modulo arithmetic distributes candidates; automatic break insertion prevents evaluator fatigue. The algorithm guarantees $\Delta_{\text{load}} \leq 1$.}
+\label{fig:scheduling}
 \end{figure}
 
-Comparison with baseline keyword matching systems showed a 78\% improvement in precision-recall metrics. The AI agent correctly identified 89\% of qualified candidates compared to 51\% for simple keyword matching.
+\subsection{Coding Assessment Module}
 
-\subsection{Scheduling Efficiency}
+The Assessor Agent provides an end-to-end technical evaluation environment:
 
-The break-aware round-robin algorithm processed 342 interview scheduling requests across 15 interviewers over a two-week period. Results demonstrated fair load distribution with coefficient of variation 0.08, indicating balanced workload across all interviewers.
+\textbf{Recruiter Interface.} Recruiters create tests with multiple-choice and programming questions, attach hidden test cases with expected outputs, configure per-question time limits, and assign tests to specific job postings.
 
-Table~\ref{tab:scheduling} summarizes scheduling performance metrics.
+\textbf{Candidate Interface.} Candidates access an in-browser Monaco editor with syntax highlighting, receive real-time compilation feedback, and submit solutions before time expiry.
+
+\textbf{Execution Backend.} Source code is dispatched to the hosted Piston API (\texttt{emkc.org/api/v2/piston}) supporting Python\,3, C\texttt{++}, Java, and JavaScript~(Node.js). A concurrency limiter (max 3 parallel requests) and a 300\,ms inter-request delay respect Piston rate limits. Output normalisation (CRLF$\to$LF, trailing whitespace stripping, internal whitespace collapsing) ensures robust expected-vs-actual comparison:
+\begin{equation}
+\text{Score} = \left\lfloor \frac{P}{T} \times 100 \right\rfloor \%
+\end{equation}
+where $P$ = test cases passed and $T$ = total test cases.
+
+\subsection{AI Resume Optimiser}
+
+The Optimizer Agent processes PDF or DOCX uploads using \texttt{pdf-parse} and \texttt{mammoth} respectively. The optimisation pipeline is:
+\begin{enumerate}
+\item \textit{Deterministic baseline scoring}: keyword density, action-verb detection, and quantification analysis produce a pre-optimisation ATS score.
+\item \textit{Gemini enhancement}: a structured prompt (temperature 0.4) instructs Gemini~Flash to rewrite bullet points with strong action verbs, integrate missing keywords naturally, and improve quantification—without inventing companies, dates, or degrees.
+\item \textit{Hallucination guard}: the optimised output is discarded if new year tokens (not present in the original) appear, or if output length drops below 50\% of input length.
+\item \textit{Re-scoring and export}: post-optimisation ATS score is computed; delta is provided to the candidate; a downloadable PDF is generated and persisted to \texttt{optimized\_resumes}.
+\end{enumerate}
+
+\subsection{AI Career Roadmap Generator}
+
+The Roadmap Agent accepts a target skill and current proficiency level (Beginner / Intermediate / Advanced). It queries Groq Llama~3.3-70B-Versatile (temperature 0.3, JSON mode) for a structured learning graph with 6--10 milestone nodes, each containing curated resource links (Coursera, Udemy, official documentation) and estimated time-to-completion. The JSON output comprising \texttt{nodes} (id, label, resources, estimated\_time, position) and \texttt{edges} (source, target) is consumed directly by React-Flow to render an interactive metro-map diagram in the candidate dashboard.
+
+\subsection{Profile-Driven Job Recommender}
+
+The Recommender reads up to five skills and the candidate's job title from the \texttt{candidates} table, then issues \emph{per-skill} parallel API queries to Jooble and Adzuna. Results are merged and deduplicated by a composite key of normalised title + company, returning the top~30 unique listings with source attribution and matched-skill tags.
+
+\subsection{Zero-Cost FAQ Chatbot via Qdrant}
+
+The Chatbot Agent answers platform-related user queries without invoking any LLM at query time, eliminating per-token API costs and reducing latency to under 100\,ms.
+
+\textbf{Offline Indexing (one-time).} A corpus of 50 curated FAQ entries (question, answer, keywords) is encoded using the \texttt{all-MiniLM-L6-v2} Sentence Transformer model (384-dimensional vectors). These embeddings are bulk-uploaded to a Qdrant cloud collection (\texttt{faq\_collection}, hosted on GCP europe-west3) using cosine distance metric:
+\begin{equation}
+\text{sim}(q, d) = \frac{\vec{q}\cdot\vec{d}}{\|\vec{q}\|\,\|\vec{d}\|}
+\end{equation}
+All payloads (question, answer, category, keywords) are stored inline within each Qdrant point.
+
+\textbf{Online Retrieval (per query).} When a user submits a natural language query, the Node.js backend encodes it with the same MiniLM model and calls \texttt{qdrant\_client.query\_points()} with \texttt{top\_k=3}. The three highest-cosine-similarity FAQ matches are returned instantly. No generative model is called; the answer is the stored FAQ 	exttt{answer} field of the top-ranked result. This design guarantees deterministic, hallucination-free responses grounded entirely in curated platform documentation.
+
+The FAQ corpus spans 9 categories: Account Management, Job Applications, Job Posting, Search \& Filters, Profile Features, Notifications, Payments, Platform Features, and Troubleshooting.
+
+% ─────────────────────────────────────────────────────────────
+\section{System Implementation and Results}
+% ─────────────────────────────────────────────────────────────
+
+The platform is implemented using Node.js~18 and Express.js for the backend, React~18 (Vite + Tailwind CSS) for the frontend, and PostgreSQL~14 (Neon cloud) for data persistence. Authentication is handled via JWT + bcrypt with optional Google OAuth. AI capabilities are provided by Groq Llama~3.3-70B-Versatile (career roadmap), Google Gemini~1.5-Flash (shortlisting, resume optimisation, and resume parsing), and the Piston API for remote code execution. The \texttt{natural} Node.js NLP library handles TF-IDF vectorisation and tokenisation. Fig.~\ref{fig:dataflow} shows the complete data flow through the system.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\columnwidth]{data_flow_architecture.png}}
+\caption{Data flow architecture. Job seekers and recruiters interact through the React frontend; stateless AI agents process data and persist results to PostgreSQL; Adzuna, Jooble, Groq, and Gemini are integrated at the application layer.}
+\label{fig:dataflow}
+\end{figure}
+
+\subsection{AI Shortlisting Algorithm Properties}
 
 \begin{table}[htbp]
-\caption{Interview Scheduling Performance Metrics}
+\caption{AI Shortlisting Algorithm Characteristics}
+\label{tab:shortlist_props}
 \begin{center}
-\begin{tabular}{|l|c|}
+\begin{tabular}{|l|l|}
 \hline
-\textbf{Metric} & \textbf{Value} \\
+\textbf{Property} & \textbf{Value} \\
 \hline
-Total interviews scheduled & 342 \\
-Average interviews per interviewer & 22.8 \\
-Standard deviation & 1.82 \\
-Scheduling time reduction & 65\% \\
-Interviewer satisfaction score & 4.6/5.0 \\
+Vectorisation Library    & \texttt{natural} (Node.js NLP) \\
+AI Semantic Layer        & Google Gemini 1.5-Flash \\
+Score Range              & 0--100 integer \% \\
+Approx.\ Processing Time & $\sim$45\,ms per resume (TF-IDF phase) \\
+TF-IDF Corpus Size       & Dynamic (2 documents per candidate) \\
+Time Complexity          & $O(c \times n^2)$, $c$=candidates, $n$=terms \\
+Explainability Output    & Matched skills, missing skills, \\
+                         & education fit, seniority alignment \\
 \hline
 \end{tabular}
-\label{tab:scheduling}
 \end{center}
 \end{table}
 
-Compared to manual scheduling processes requiring an average of 23 minutes per interview, the automated system reduced scheduling time to 8 minutes, representing a 65\% efficiency gain.
+\subsection{Scheduling Algorithm Properties}
 
-\subsection{Job Aggregation Results}
+\begin{table}[htbp]
+\caption{Scheduling Algorithm Properties}
+\label{tab:sched_props}
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Property} & \textbf{Value} \\
+\hline
+Initial Order         & Fisher-Yates shuffle ($O(|I|)$) \\
+Assignment Strategy   & Round-robin: $idx = j \bmod |I|$ \\
+Load Guarantee        & $\Delta_{\text{load}} \leq 1$ \\
+Time Complexity       & $O(|I| + |C|) \approx O(|C|)$ \\
+Break Insertion       & Per-interviewer, configurable $k$ \\
+Determinism           & Guaranteed post-shuffle \\
+State Tracking        & Per-interviewer time + count \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
 
-The Job Aggregation Agent successfully fetched and deduplicated job listings from Jooble and Adzuna APIs. For a test query of "Software Engineer in Kochi", the system retrieved 847 raw listings, performed deduplication to yield 623 unique opportunities, representing a 26\% duplicate rate across sources.
+\subsection{Core API Endpoints}
 
-\subsection{System Scalability}
+Table~\ref{tab:api} maps each platform capability to its REST endpoint and responsible agent.
 
-Load testing with Apache JMeter demonstrated system capability to handle 500 concurrent users with average response time of 312ms for search operations and 187ms for application submissions. Database query optimization through indexed lookups maintained stable performance as data volume increased.
+\begin{table}[htbp]
+\caption{Core API Endpoints and Responsible Agents}
+\label{tab:api}
+\begin{center}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{|l|c|l|}
+\hline
+\textbf{Endpoint Path} & \textbf{Method} & \textbf{Agent} \\
+\hline
+\texttt{/ai-tools/shortlist/:jobId}       & POST & Shortlist \\
+\texttt{/interviews/auto-schedule/:jobId} & POST & Scheduler \\
+\texttt{/jobs/aggregated}                 & GET  & Aggregator \\
+\texttt{/ai-resume/optimize}              & POST & Optimizer \\
+\texttt{/career-roadmap/generate}         & POST & Roadmap \\
+\texttt{/coding/submit}                   & POST & Assessor \\
+\texttt{/recommended-jobs}                & GET  & Recommender \\
+\texttt{/chatbot/query}                   & POST & Chatbot (Qdrant) \\
+\hline
+\end{tabular}%
+}
+\end{center}
+\end{table}
 
-\begin{figure}[htbp]
-\centerline{\includegraphics[width=\columnwidth]{performance_results.png}}
-\caption{System response time under varying concurrent user loads.}
-\label{fig:performance}
-\end{figure}
-
+% ─────────────────────────────────────────────────────────────
 \section{Discussion}
+% ─────────────────────────────────────────────────────────────
 
-\subsection{Key Findings}
+\subsection{Explainability, Fairness, and Trust}
 
-The experimental evaluation validates the effectiveness of multi-agent architecture for recruitment automation. The Auto-Shortlist Agent's interpretable scoring mechanism addresses the black-box problem prevalent in many ML-based systems, enabling recruiters to understand and trust automated recommendations.
-
-The break-aware scheduling algorithm successfully prevented interviewer burnout while maintaining high scheduling efficiency. Feedback from pilot deployment indicated improved interviewer satisfaction compared to traditional manual scheduling.
+The TF-IDF cosine similarity layer provides full audit traceability—every term weight is inspectable—satisfying GDPR ``right to explanation'' requirements. The Gemini semantic layer adds depth without sacrificing transparency since TF-IDF scores remain the primary ranking signal. The Fisher-Yates shuffle prevents alphabetical bias in interviewer assignment, and the $\Delta_{\text{load}} \leq 1$ guarantee ensures equitable workload distribution. Configurable break parameters ($k$, $B$) allow administrators to enforce evaluator quality standards based on organisational norms. By consolidating resume optimisation, roadmapping, coding tests, and job recommendations into one authenticated ecosystem, candidates gain a continuous improvement loop and recruiters gain richer signal about candidate initiative.
 
 \subsection{Limitations and Future Work}
 
-Several limitations warrant future investigation:
-
 \begin{itemize}
-\item The current skill extraction relies on predefined taxonomies and may miss domain-specific or emerging skills
-\item Match score weights ($\alpha$, $\beta$, $\gamma$, $\delta$) are currently static; adaptive learning mechanisms could optimize these parameters based on hiring outcomes
-\item The system does not yet incorporate video interview analysis or soft skills assessment
-\item Integration with advanced NLP models such as BERT or GPT for semantic resume understanding could further improve matching accuracy
+\item TF-IDF does not capture deep synonymy; augmenting with Sentence-BERT embeddings would improve semantic recall.
+\item Piston API rate limits (1~req/200\,ms) constrain throughput; a self-hosted instance would remove this bottleneck.
+\item The hallucination guard uses heuristic rules; an NLI-based faithfulness check would be more robust.
+\item Future work includes transformer-based resume matching, reinforcement learning for adaptive weight tuning, video sentiment analysis, and multilingual resume support.
 \end{itemize}
 
-Future work will explore reinforcement learning for dynamic weight optimization, integration of behavioral assessment tools, and expansion to support multilingual resumes. Additionally, incorporating explainable AI techniques such as LIME or SHAP could enhance transparency in decision-making processes.
-
+% ─────────────────────────────────────────────────────────────
 \section{Conclusion}
+% ─────────────────────────────────────────────────────────────
 
-This paper presented a comprehensive AI-Powered Agentic Hiring Platform that successfully addresses key challenges in modern recruitment through intelligent automation. The multi-agent architecture enables modular development, scalability, and specialized functionality across candidate matching, interview scheduling, and job aggregation tasks.
-
-Experimental results demonstrate significant improvements over traditional systems: 78\% enhancement in candidate matching accuracy, 65\% reduction in scheduling time, and robust scalability supporting hundreds of concurrent users. The system's interpretable AI approach ensures transparency and builds trust with human recruiters while dramatically improving operational efficiency.
-
-The platform represents a significant step toward intelligent recruitment automation, balancing advanced AI capabilities with practical deployment considerations. As organizations continue facing talent acquisition challenges, such systems will become increasingly critical for competitive advantage in human capital management.
+This paper presented the AI-Powered Agentic Hiring Platform, a unified recruitment ecosystem addressing fragmentation across the hiring lifecycle through six autonomous agents. The hybrid TF-IDF + Gemini shortlisting pipeline delivers explainable candidate evaluation in $\sim$45\,ms per resume. The break-aware round-robin algorithm guarantees $\Delta_{\text{load}} \leq 1$ load balance in $O(|C|)$ time. Piston-backed coding assessment, Gemini resume optimisation, Groq Llama~3.3 career roadmapping, and profile-driven job recommendation complete an integrated candidate development loop—all within a single production-ready platform built on Node.js~18, React~18, and PostgreSQL~14.
 
 \section*{Acknowledgment}
 
-The authors thank the Department of Artificial Intelligence and Data Science at Viswajyothi College of Engineering and Technology for providing computational resources and support for this research. We also acknowledge the valuable feedback from industry partners during pilot deployment phases.
+The authors thank the Department of Artificial Intelligence and Data Science, Viswajyothi College of Engineering and Technology, for computational resources and research support.
 
+% ─────────────────────────────────────────────────────────────
 \begin{thebibliography}{00}
-\bibitem{b1} M. Johnson and R. Smith, ``Time analysis of modern recruitment processes: A quantitative study,'' \textit{Journal of Human Resource Management}, vol. 34, no. 2, pp. 145--163, 2024.
 
-\bibitem{b2} A. Williams, ``The candidate filtering paradox: How ATS systems eliminate qualified applicants,'' \textit{HR Technology Quarterly}, vol. 12, no. 4, pp. 78--92, 2023.
+\bibitem{b1} M. Johnson and R. Smith, ``Time analysis of modern recruitment processes: A quantitative study,'' \textit{Journal of Human Resource Management}, vol.~34, no.~2, pp.~145--163, 2024.
 
-\bibitem{b3} K. Zhang, L. Chen, and M. Wang, ``Machine learning applications in human resource management: A systematic review,'' \textit{IEEE Access}, vol. 11, pp. 45678--45702, 2023.
+\bibitem{b2} A. Williams, ``The candidate filtering paradox: How ATS systems eliminate qualified applicants,'' \textit{HR Technology Quarterly}, vol.~12, no.~4, pp.~78--92, 2023.
+
+\bibitem{b3} K. Zhang, L. Chen, and M. Wang, ``Machine learning applications in human resource management: A systematic review,'' \textit{IEEE Access}, vol.~11, pp.~45678--45702, 2023.
 
 \bibitem{b4} LinkedIn Corporation, ``LinkedIn Recruiter: Technical white paper on recommendation algorithms,'' Technical Report, LinkedIn Engineering, 2023.
 
-\bibitem{b5} Y. Chen, X. Liu, and J. Wang, ``Deep learning-based resume screening using convolutional neural networks,'' in \textit{Proc. IEEE Int. Conf. on Data Mining (ICDM)}, Beijing, China, 2023, pp. 234--243.
+\bibitem{b5} Y. Chen, X. Liu, and J. Wang, ``Deep learning-based resume screening using convolutional neural networks,'' in \textit{Proc.\ IEEE Int.\ Conf.\ on Data Mining (ICDM)}, Beijing, China, 2023, pp.~234--243.
 
-\bibitem{b6} M. Wooldridge, \textit{An Introduction to MultiAgent Systems}, 2nd ed. Chichester, UK: John Wiley \& Sons, 2009.
+\bibitem{b6} M. Wooldridge, \textit{An Introduction to MultiAgent Systems}, 2nd~ed. Chichester, UK: Wiley, 2009.
 
-\bibitem{b7} E. Faliagka, A. Tsakalidis, and G. Tzimas, ``An integrated e-recruitment system for automated personality mining and applicant ranking,'' \textit{Internet Research}, vol. 22, no. 5, pp. 551--568, 2012.
+\bibitem{b7} E. Faliagka, A. Tsakalidis, and G. Tzimas, ``An integrated e-recruitment system for automated personality mining and applicant ranking,'' \textit{Internet Research}, vol.~22, no.~5, pp.~551--568, 2012.
 
-\bibitem{b8} R. Kumar and S. Patel, ``Optimization techniques for interview scheduling: A comparative analysis,'' in \textit{Proc. Int. Conf. on Artificial Intelligence and Applications (ICAIA)}, Chennai, India, 2022, pp. 567--574.
+\bibitem{b8} R. Kumar and S. Patel, ``Optimization techniques for interview scheduling: A comparative analysis,'' in \textit{Proc.\ Int.\ Conf.\ on Artificial Intelligence and Applications (ICAIA)}, Chennai, India, 2022, pp.~567--574.
 
-\bibitem{b9} J. Devlin, M. Chang, K. Lee, and K. Toutanova, ``BERT: Pre-training of deep bidirectional transformers for language understanding,'' in \textit{Proc. NAACL-HLT}, Minneapolis, MN, USA, 2019, pp. 4171--4186.
+\bibitem{b9} J. Devlin, M. Chang, K. Lee, and K. Toutanova, ``BERT: Pre-training of deep bidirectional transformers for language understanding,'' in \textit{Proc.\ NAACL-HLT}, Minneapolis, MN, USA, 2019, pp.~4171--4186.
 
-\bibitem{b10} T. Brown et al., ``Language models are few-shot learners,'' in \textit{Advances in Neural Information Processing Systems (NeurIPS)}, vol. 33, 2020, pp. 1877--1901.
-
-\bibitem{b11} A. Singh and R. Gupta, ``Natural language processing for resume parsing: Challenges and solutions,'' \textit{Int. Journal of Computer Applications}, vol. 182, no. 15, pp. 37--43, 2024.
-
-\bibitem{b12} P. Anderson, ``The economics of recruitment: Cost analysis of traditional vs. AI-powered hiring,'' \textit{Business Analytics Review}, vol. 8, no. 3, pp. 112--128, 2023.
+\bibitem{b10} T. Brown et al., ``Language models are few-shot learners,'' in \textit{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~33, 2020, pp.~1877--1901.
 
 \end{thebibliography}
 
