@@ -68,9 +68,9 @@ router.post('/select', auth, roleGuard('recruiter'), async (req, res) => {
         const insertQuery = `
             INSERT INTO interviews (
                 job_id, application_id, candidate_id, recruiter_id,
-                channel_name, status, created_at, updated_at
+                channel_name, status, mode, created_at, updated_at
             )
-            VALUES ($1, $2, $3, $4, $5, 'pending', NOW(), NOW())
+            VALUES ($1, $2, $3, $4, $5, 'pending', 'online', NOW(), NOW())
             RETURNING id, channel_name, status
         `;
 
@@ -98,11 +98,12 @@ router.post('/select', auth, roleGuard('recruiter'), async (req, res) => {
 
     } catch (error) {
         await client.query('ROLLBACK');
-        console.error('Error selecting candidate for interview:', error);
+        console.error('Error selecting candidate for interview:', error.message, error.detail || '');
         res.status(500).json({
             success: false,
             message: 'Failed to select candidate for interview',
-            error: error.message
+            error: error.message,
+            detail: error.detail || null
         });
     } finally {
         client.release();
@@ -165,9 +166,9 @@ router.post('/create-and-schedule', auth, roleGuard('recruiter'), async (req, re
             const insertQuery = `
                 INSERT INTO interviews (
                     job_id, application_id, candidate_id, recruiter_id,
-                    channel_name, status, created_at, updated_at
+                    channel_name, status, mode, created_at, updated_at
                 )
-                VALUES ($1, $2, $3, $4, $5, 'pending', NOW(), NOW())
+                VALUES ($1, $2, $3, $4, $5, 'pending', 'online', NOW(), NOW())
                 RETURNING id
             `;
             const insertResult = await client.query(insertQuery, [
@@ -224,11 +225,13 @@ router.post('/create-and-schedule', auth, roleGuard('recruiter'), async (req, re
 
     } catch (error) {
         await client.query('ROLLBACK');
-        console.error('Error in create-and-schedule:', error);
+        console.error('Error in create-and-schedule:', error.message, error.detail || '', error.constraint || '');
         res.status(500).json({
             success: false,
             message: 'Failed to create and schedule interview',
-            error: error.message
+            error: error.message,
+            detail: error.detail || null,
+            constraint: error.constraint || null
         });
     } finally {
         client.release();
@@ -340,10 +343,10 @@ router.post('/auto-schedule', auth, roleGuard('recruiter'), async (req, res) => 
                 const insertQuery = `
                     INSERT INTO interviews (
                         job_id, application_id, candidate_id, recruiter_id,
-                        channel_name, status, interview_date, start_time, end_time,
+                        channel_name, status, mode, interview_date, start_time, end_time,
                         scheduled_at, meeting_link, created_at, updated_at
                     )
-                    VALUES ($1, $2, $3, $4, $5, 'scheduled', $6, $7, $8, $9, $10, NOW(), NOW())
+                    VALUES ($1, $2, $3, $4, $5, 'scheduled', 'online', $6, $7, $8, $9, $10, NOW(), NOW())
                     RETURNING id
                 `;
                 const insertRes = await client.query(insertQuery, [

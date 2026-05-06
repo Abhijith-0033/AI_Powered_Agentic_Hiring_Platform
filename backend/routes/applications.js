@@ -425,9 +425,9 @@ router.patch('/recruiter/applications/:id/status', auth, roleGuard('recruiter'),
                     const insertRes = await pool.query(`
                         INSERT INTO interviews (
                             job_id, application_id, candidate_id, recruiter_id,
-                            channel_name, status, created_at, updated_at
+                            channel_name, status, mode, created_at, updated_at
                         )
-                        VALUES ($1, $2, $3, $4, $5, 'pending', NOW(), NOW())
+                        VALUES ($1, $2, $3, $4, $5, 'pending', 'online', NOW(), NOW())
                         RETURNING id, channel_name, status
                     `, [job_id, appId, candidate_id, userId, channelName]);
 
