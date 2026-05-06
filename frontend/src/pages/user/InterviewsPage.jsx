@@ -22,24 +22,47 @@ const InterviewsPage = () => {
         }
     };
 
+    /**
+     * Parse a scheduled_at value from the DB correctly.
+     * The DB stores it as e.g. "2026-05-06T10:00:00+05:30" (WITH tz) or
+     * "2026-05-06 10:00" (WITHOUT tz). new Date() treats no-tz strings as
+     * UTC which causes a 5.5h offset in India. We detect and handle both.
+     */
+    const parseScheduledAt = (scheduledAt) => {
+        if (!scheduledAt) return null;
+        const s = String(scheduledAt);
+        // Already has timezone info (Z, +HH:MM, -HH:MM) — parse as-is
+        if (/[Z]$/.test(s) || /[+\-]\d{2}:\d{2}$/.test(s)) {
+            return new Date(s);
+        }
+        // No timezone — treat as LOCAL time (not UTC) by appending the local offset
+        // This avoids the UTC interpretation that breaks IST users
+        const localOffset = -new Date().getTimezoneOffset(); // minutes
+        const sign = localOffset >= 0 ? '+' : '-';
+        const absOffset = Math.abs(localOffset);
+        const hh = String(Math.floor(absOffset / 60)).padStart(2, '0');
+        const mm = String(absOffset % 60).padStart(2, '0');
+        return new Date(`${s.replace(' ', 'T')}${sign}${hh}:${mm}`);
+    };
+
     const handleJoinInterview = (channelName, scheduledAt) => {
-        // Check if interview is within allowed time (5 min before scheduled time)
-        const interviewTime = new Date(scheduledAt);
-        const now = new Date();
-        const timeDiff = (interviewTime - now) / (1000 * 60); // difference in minutes
-
-        // If status is scheduled, we allow joining even if time is a bit off, 
-        // assuming recruiter started it. But let's keep the logic sane.
-        // Actually, if recruiter click "Start Now", the time is updated to NOW.
-        // So the existing logic SHOULD work, but let's relax it slightly.
-
-        if (timeDiff > 10) { // Increased from 5 to 10 mins buffer
-            alert(`Interview starts in ${Math.round(timeDiff)} minutes. You can join 10 minutes before the scheduled time.`);
+        // If no scheduled time, allow joining (recruiter may have used Start Now)
+        if (!scheduledAt) {
+            window.location.href = `/interview/${channelName}`;
             return;
         }
 
-        if (timeDiff < -60) {
-            alert('This interview has ended.');
+        const interviewTime = parseScheduledAt(scheduledAt);
+        const now = new Date();
+        const timeDiff = (interviewTime - now) / (1000 * 60); // minutes
+
+        if (timeDiff > 30) {
+            alert(`Interview starts in ${Math.round(timeDiff)} minutes. You can join 30 minutes before the scheduled time.`);
+            return;
+        }
+
+        if (timeDiff < -180) {
+            alert('This interview session has ended (more than 3 hours ago).');
             return;
         }
 
@@ -78,11 +101,14 @@ const InterviewsPage = () => {
 
     const canJoinInterview = (scheduledAt, status) => {
         if (status !== 'scheduled') return false;
-        const interviewTime = new Date(scheduledAt);
+        // If no scheduled_at (e.g. Start Now flow or legacy record), allow joining
+        if (!scheduledAt) return true;
+        const interviewTime = parseScheduledAt(scheduledAt);
+        if (!interviewTime || isNaN(interviewTime.getTime())) return true; // unparseable → allow
         const now = new Date();
         const timeDiff = (interviewTime - now) / (1000 * 60);
-        // Relaxed constraint: can join 15 min before and up to 2 hours after
-        return timeDiff <= 15 && timeDiff >= -120;
+        // Allow joining 30 min before and up to 3 hours after scheduled time
+        return timeDiff <= 30 && timeDiff >= -180;
     };
 
     if (loading) {
